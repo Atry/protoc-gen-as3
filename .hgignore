@@ -1,1 +1,2 @@
 glob:*.class
+glob:.*

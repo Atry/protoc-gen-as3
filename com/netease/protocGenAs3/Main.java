@@ -171,6 +171,34 @@ public final class Main {
 			return false;
 		}
 	}
+	private static String getActionScript3WireType(
+			FieldDescriptorProto.Type type) {
+		switch (type) {
+		case TYPE_DOUBLE:
+		case TYPE_FIXED64:
+		case TYPE_SFIXED64:
+			return "FIXED_64_BIT";
+		case TYPE_FLOAT:
+		case TYPE_FIXED32:
+		case TYPE_SFIXED32:
+			return "FIXED_32_BIT";
+		case TYPE_INT32:
+		case TYPE_SINT32:
+		case TYPE_UINT32:
+		case TYPE_BOOL:
+		case TYPE_INT64:
+		case TYPE_UINT64:
+		case TYPE_SINT64:
+		case TYPE_ENUM:
+			return "VARINT";
+		case TYPE_STRING:
+		case TYPE_MESSAGE:
+		case TYPE_BYTES:
+			return "LENGTH_DELIMITED";
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
 	private static String getActionScript3Type(Scope<DescriptorProto> scope,
 			FieldDescriptorProto fdp) {
 		switch (fdp.getType()) {
@@ -290,7 +318,11 @@ public final class Main {
 	}
 	private static void writeMessage(Scope<DescriptorProto> scope,
 			StringBuilder content) {
-		content.append("\timport protobuf.*\n");
+		content.append("\timport com.netease.protobuf.*\n");
+		content.append("\timport flash.utils.IExternalizable\n");
+		content.append("\timport flash.utils.IDataOutput\n");
+		content.append("\timport flash.utils.IDataInput\n");
+		content.append("\timport flash.errors.IOError\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (mustImport(fdp.getType())) {
 				content.append("\timport ");
@@ -300,7 +332,7 @@ public final class Main {
 		}
 		content.append("\tpublic final class ");
 		content.append(scope.proto.getName());
-		content.append(" implements IMessage {\n");
+		content.append(" implements IExternalizable {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			assert(fdp.hasLabel());
 			switch (fdp.getLabel()) {
@@ -400,21 +432,27 @@ public final class Main {
 					content.append(" != null");
 				}
 				content.append(") {\n");
+				content.append("\t\t\t\tWriteUtils.writeTag(WireType.");
+				content.append(getActionScript3WireType(fdp.getType()));
+				content.append(", ");
+				content.append(Integer.toString(fdp.getNumber()));
+				content.append(")\n");
 				content.append("\t\t\t\tWriteUtils.write_");
 				content.append(fdp.getType().name());
 				content.append("(output, ");
-				content.append(Integer.toString(fdp.getNumber()));
-				content.append(", ");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append(")\n");
 				content.append("\t\t\t}\n");
 				break;
 			case LABEL_REQUIRED:
+				content.append("\t\t\tWriteUtils.writeTag(WireType.");
+				content.append(getActionScript3WireType(fdp.getType()));
+				content.append(", ");
+				content.append(Integer.toString(fdp.getNumber()));
+				content.append(")\n");
 				content.append("\t\t\tWriteUtils.write_");
 				content.append(fdp.getType().name());
 				content.append("(output, ");
-				content.append(Integer.toString(fdp.getNumber()));
-				content.append(", ");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append(")\n");
 				break;
@@ -430,13 +468,16 @@ public final class Main {
 					content.append(" in ");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(") {\n");
+					content.append("\t\t\t\tWriteUtils.writeTag(WireType.");
+					content.append(getActionScript3WireType(fdp.getType()));
+					content.append(", ");
+					content.append(Integer.toString(fdp.getNumber()));
+					content.append(")\n");
 					content.append("\t\t\t\tWriteUtils.write_");
 					content.append(fdp.getType().name());
 					content.append("(output, ");
-					content.append(Integer.toString(fdp.getNumber()));
-					content.append(", ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("Element)\n");
+					content.append(")\n");
 					content.append("\t\t\t}\n");
 				}
 				break;
@@ -455,7 +496,7 @@ public final class Main {
 			}
 		}
 		content.append("\t\t\twhile (input.bytesAvailable != 0) {\n");
-		content.append("\t\t\t\tconst tag:Tag = ReadUtils.readTag()\n");
+		content.append("\t\t\t\tvar tag:Tag = ReadUtils.readTag()\n");
 		content.append("\t\t\t\tswitch (tag.number) {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			content.append("\t\t\t\tcase ");

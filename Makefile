@@ -6,19 +6,21 @@
 # as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 include config.mk
 
-all: com/netease/protocGenAs3/Main.class
+all: classes
 
-com/netease/protocGenAs3/Main.class: \
-	com/netease/protocGenAs3/Main.java \
-	google/protobuf/compiler/Plugin.java \
+classes: compiler/com/netease/protocGenAs3/Main.java proto \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar
-	javac -Xlint:unchecked \
-	-classpath $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar:. \
-	com/netease/protocGenAs3/Main.java
+	-mkdir classes
+	javac -encoding UTF-8 -Xlint:unchecked -d classes \
+	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar" \
+	-sourcepath "proto$(PATH_SEPARATOR)compiler" \
+	compiler/com/netease/protocGenAs3/Main.java
 
-google/protobuf/compiler/Plugin.java: $(PROTOBUF_DIR)/src/$(PROTOC_EXE)
-	$(PROTOBUF_DIR)/src/protoc --proto_path=$(PROTOBUF_DIR)/src \
-	--java_out=. $(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto
+proto: $(PROTOBUF_DIR)/src/$(PROTOC_EXE)
+	-mkdir proto
+	"$(PROTOBUF_DIR)/src/$(PROTOC_EXE)" \
+	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=proto \
+	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
 
 $(PROTOBUF_DIR)/src/$(PROTOC_EXE): $(PROTOBUF_DIR)/Makefile
 	cd $(PROTOBUF_DIR) && make
@@ -30,7 +32,12 @@ $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar: $(PROTOBUF_DIR)/src
 	cd $(PROTOBUF_DIR)/java && mvn package
 
 plugin: all
-	java -classpath $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar:. \
+	java -ea \
+	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar$(PATH_SEPARATOR)classes" \
 	com.netease.protocGenAs3.Main
 
-.PHONY: plugin all
+clean:
+	rm -fr classes
+	rm -fr proto
+
+.PHONY: plugin all clean

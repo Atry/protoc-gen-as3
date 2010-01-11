@@ -58,9 +58,10 @@ public final class Main {
 				return null;
 			}
 		}
-		public Scope<?> findOrCreate(String path) {
+		private Scope<?> findOrCreate(String[] pathElements, int i) {
 			Scope<?> scope = this;
-			for (String name : path.split("\\.")) {
+			for (; i < pathElements.length; i++) {
+				String name = pathElements[i];
 				if (scope.children.containsKey(name)) {
 					scope = scope.children.get(name);
 				} else {
@@ -71,6 +72,14 @@ public final class Main {
 				}
 			}
 			return scope;
+		}
+		public Scope<?> findOrCreate(String path) {
+			String[] pathElements = path.split("\\.");
+			if (pathElements[0].equals("")) {
+				return getRoot().findOrCreate(pathElements, 1);
+			} else {
+				return findOrCreate(pathElements, 0);
+			}
 		}
 		private Scope(Scope<?> parent, Proto proto, boolean export,
 				String name) {
@@ -86,6 +95,8 @@ public final class Main {
 		}
 		public <ChildProto> Scope<ChildProto> addChild(
 				String name, ChildProto proto, boolean export) {
+			assert(name != null);
+			assert(!name.equals(""));
 			Scope<ChildProto> child =
 					new Scope<ChildProto>(this, proto, export, name);
 			if(children.containsKey(child)) {
@@ -174,6 +185,7 @@ public final class Main {
 		case TYPE_UINT32:
 		case TYPE_SFIXED32:
 		case TYPE_SINT32:
+		case TYPE_ENUM:
 			return true;
 		default:
 			return false;
@@ -217,6 +229,7 @@ public final class Main {
 		case TYPE_FIXED32:
 		case TYPE_SFIXED32:
 		case TYPE_SINT32:
+		case TYPE_ENUM:
 			return "int";
 		case TYPE_UINT32:
 			return "uint";
@@ -231,7 +244,6 @@ public final class Main {
 		case TYPE_STRING:
 			return "String";
 		case TYPE_MESSAGE:
-		case TYPE_ENUM:
 			Scope<?> typeScope = scope.find(fdp.getTypeName());
 			if (typeScope == null) {
 				throw new IllegalArgumentException(

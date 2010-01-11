@@ -1,2 +1,4 @@
 glob:*.class
 glob:.*
+glob:proto
+glob:classes

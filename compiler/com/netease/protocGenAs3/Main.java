@@ -256,9 +256,10 @@ public final class Main {
 			throw new IllegalArgumentException();
 		}
 	}
-	private static void appendLiteral(StringBuilder sb, Scope<?> scope,
-			FieldDescriptorProto.Type type, String value) {
-		switch (type) {
+	private static void appendDefaultValue(StringBuilder sb, Scope<?> scope,
+			FieldDescriptorProto fdp) {
+		String value = fdp.getDefaultValue();
+		switch (fdp.getType()) {
 		case TYPE_DOUBLE:
 		case TYPE_FLOAT:
 		case TYPE_INT32:
@@ -288,7 +289,8 @@ public final class Main {
 			sb.append('\"');
 			break;
 		case TYPE_ENUM:
-			sb.append(scope.find(value).fullName);
+			sb.append(scope.find(fdp.getTypeName()).
+					children.get(value).fullName);
 			break;
 		case TYPE_BYTES:
 			throw new IllegalArgumentException("Default value (" +
@@ -375,8 +377,7 @@ public final class Main {
 					content.append(getActionScript3Type(scope, fdp));
 					if (fdp.hasDefaultValue()) {
 						content.append(" = ");
-						appendLiteral(content, scope,
-								fdp.getType(), fdp.getDefaultValue());
+						appendDefaultValue(content, scope, fdp);
 					}
 					content.append("\n");
 
@@ -409,8 +410,7 @@ public final class Main {
 					content.append(getActionScript3Type(scope, fdp));
 					if (fdp.hasDefaultValue()) {
 						content.append(" = ");
-						appendLiteral(content, scope,
-								fdp.getType(), fdp.getDefaultValue());
+						appendDefaultValue(content, scope, fdp);
 					}
 					content.append("\n");
 				}
@@ -422,8 +422,7 @@ public final class Main {
 				content.append(getActionScript3Type(scope, fdp));
 				if (fdp.hasDefaultValue()) {
 					content.append(" = ");
-					appendLiteral(content, scope,
-							fdp.getType(), fdp.getDefaultValue());
+					appendDefaultValue(content, scope, fdp);
 				}
 				content.append("\n");
 				break;

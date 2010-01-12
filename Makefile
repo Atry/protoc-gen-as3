@@ -10,14 +10,14 @@ all: classes
 
 classes: compiler/com/netease/protocGenAs3/Main.java proto \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar
-	-mkdir classes
+	mkdir -p classes
 	javac -encoding UTF-8 -Xlint:unchecked -d classes \
 	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar" \
 	-sourcepath "proto$(PATH_SEPARATOR)compiler" \
 	compiler/com/netease/protocGenAs3/Main.java
 
 proto: $(PROTOBUF_DIR)/src/$(PROTOC_EXE)
-	-mkdir proto
+	mkdir -p proto
 	"$(PROTOBUF_DIR)/src/$(PROTOC_EXE)" \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=proto \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"

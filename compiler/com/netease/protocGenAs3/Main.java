@@ -159,20 +159,30 @@ public final class Main {
 		}
 		return root;
 	}
-	private static boolean mustImport(FieldDescriptorProto.Type type) {
-		switch (type) {
-		case TYPE_DOUBLE:
-		case TYPE_FLOAT:
-		case TYPE_INT32:
-		case TYPE_FIXED32:
-		case TYPE_BOOL:
-		case TYPE_UINT32:
-		case TYPE_SFIXED32:
-		case TYPE_SINT32:
-		case TYPE_STRING:
-			return false;
+	private static String getImportType(Scope<?> scope,
+			FieldDescriptorProto fdp) {
+		switch (fdp.getType()) {
+		case TYPE_INT64:
+		case TYPE_UINT64:
+		case TYPE_FIXED64:
+		case TYPE_SFIXED64:
+		case TYPE_SINT64:
+			return "com.hurlant.math.BigInteger";
+		case TYPE_ENUM:
+			if (!fdp.hasDefaultValue()) {
+				return null;
+			}
+		case TYPE_MESSAGE:
+			Scope<?> typeScope = scope.find(fdp.getTypeName());
+			if (typeScope == null) {
+				throw new IllegalArgumentException(
+						fdp.getTypeName() + " not found.");
+			}
+			return typeScope.fullName;
+		case TYPE_BYTES:
+			return "flash.utils.ByteArray";
 		default:
-			return true;
+			return null;
 		}
 	}
 	private static boolean isValueType(FieldDescriptorProto.Type type) {
@@ -240,7 +250,7 @@ public final class Main {
 		case TYPE_FIXED64:
 		case TYPE_SFIXED64:
 		case TYPE_SINT64:
-			return "com.hurlant.crypto.rsa.BigInteger";
+			return "com.hurlant.math.BigInteger";
 		case TYPE_STRING:
 			return "String";
 		case TYPE_MESSAGE:
@@ -340,16 +350,17 @@ public final class Main {
 	}
 	private static void writeMessage(Scope<DescriptorProto> scope,
 			StringBuilder content) {
-		content.append("\timport com.netease.protobuf.*\n");
-		content.append("\timport flash.utils.IExternalizable\n");
-		content.append("\timport flash.utils.IDataOutput\n");
-		content.append("\timport flash.utils.IDataInput\n");
-		content.append("\timport flash.errors.IOError\n");
+		content.append("\timport com.netease.protobuf.*;\n");
+		content.append("\timport flash.utils.IExternalizable;\n");
+		content.append("\timport flash.utils.IDataOutput;\n");
+		content.append("\timport flash.utils.IDataInput;\n");
+		content.append("\timport flash.errors.IOError;\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
-			if (mustImport(fdp.getType())) {
+			String importType = getImportType(scope, fdp);
+			if (importType != null) {
 				content.append("\timport ");
-				content.append(getActionScript3Type(scope, fdp));
-				content.append('\n');
+				content.append(importType);
+				content.append(";\n");
 			}
 		}
 		content.append("\tpublic final class ");
@@ -362,13 +373,13 @@ public final class Main {
 				if (isValueType(fdp.getType())) {
 					content.append("\t\tprivate var has");
 					appendUpperCamelCase(content, fdp.getName());
-					content.append("_:Boolean = false\n");
+					content.append("_:Boolean = false;\n");
 					content.append("\t\tpublic function get has");
 					appendUpperCamelCase(content, fdp.getName());
 					content.append("():Boolean {\n");
 					content.append("\t\t\treturn has");
 					appendUpperCamelCase(content, fdp.getName());
-					content.append("_\n");
+					content.append("_;\n");
 					content.append("\t\t}\n");
 
 					content.append("\t\tprivate var ");
@@ -379,7 +390,7 @@ public final class Main {
 						content.append(" = ");
 						appendDefaultValue(content, scope, fdp);
 					}
-					content.append("\n");
+					content.append(";\n");
 
 					content.append("\t\tpublic function set ");
 					appendLowerCamelCase(content, fdp.getName());
@@ -388,10 +399,10 @@ public final class Main {
 					content.append("):void {\n");
 					content.append("\t\t\thas");
 					appendUpperCamelCase(content, fdp.getName());
-					content.append("_ = true\n");
+					content.append("_ = true;\n");
 					content.append("\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("_ = value\n");
+					content.append("_ = value;\n");
 					content.append("\t\t}\n");
 
 					content.append("\t\tpublic function get ");
@@ -401,7 +412,7 @@ public final class Main {
 					content.append(" {\n");
 					content.append("\t\t\treturn ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("_\n");
+					content.append("_;\n");
 					content.append("\t\t}\n");
 				} else {
 					content.append("\t\tpublic var ");
@@ -412,7 +423,7 @@ public final class Main {
 						content.append(" = ");
 						appendDefaultValue(content, scope, fdp);
 					}
-					content.append("\n");
+					content.append(";\n");
 				}
 				break;
 			case LABEL_REQUIRED:
@@ -424,7 +435,7 @@ public final class Main {
 					content.append(" = ");
 					appendDefaultValue(content, scope, fdp);
 				}
-				content.append("\n");
+				content.append(";\n");
 				break;
 			case LABEL_REPEATED:
 				content.append("\t\t[ArrayElementType(\"");
@@ -432,7 +443,7 @@ public final class Main {
 				content.append("\")]\n");
 				content.append("\t\tpublic var ");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append(":Array = []\n");
+				content.append(":Array = [];\n");
 				break;
 			default:
 				throw new IllegalArgumentException();
@@ -451,29 +462,29 @@ public final class Main {
 					content.append(" != null");
 				}
 				content.append(") {\n");
-				content.append("\t\t\t\tWriteUtils.writeTag(WireType.");
+				content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));
 				content.append(", ");
 				content.append(Integer.toString(fdp.getNumber()));
-				content.append(")\n");
+				content.append(");\n");
 				content.append("\t\t\t\tWriteUtils.write_");
 				content.append(fdp.getType().name());
 				content.append("(output, ");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append(")\n");
+				content.append(");\n");
 				content.append("\t\t\t}\n");
 				break;
 			case LABEL_REQUIRED:
-				content.append("\t\t\tWriteUtils.writeTag(WireType.");
+				content.append("\t\t\tWriteUtils.writeTag(output, WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));
 				content.append(", ");
 				content.append(Integer.toString(fdp.getNumber()));
-				content.append(")\n");
+				content.append(");\n");
 				content.append("\t\t\tWriteUtils.write_");
 				content.append(fdp.getType().name());
 				content.append("(output, ");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append(")\n");
+				content.append(");\n");
 				break;
 			case LABEL_REPEATED:
 				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
@@ -487,16 +498,16 @@ public final class Main {
 					content.append(" in ");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(") {\n");
-					content.append("\t\t\t\tWriteUtils.writeTag(WireType.");
+					content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.");
 					content.append(getActionScript3WireType(fdp.getType()));
 					content.append(", ");
 					content.append(Integer.toString(fdp.getNumber()));
-					content.append(")\n");
+					content.append(");\n");
 					content.append("\t\t\t\tWriteUtils.write_");
 					content.append(fdp.getType().name());
 					content.append("(output, ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append(")\n");
+					content.append("Element);\n");
 					content.append("\t\t\t}\n");
 				}
 				break;
@@ -510,12 +521,12 @@ public final class Main {
 			case LABEL_REQUIRED:
 				content.append("\t\t\tvar ");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append("Count:uint = 0\n");
+				content.append("Count:uint = 0;\n");
 				break;
 			}
 		}
 		content.append("\t\t\twhile (input.bytesAvailable != 0) {\n");
-		content.append("\t\t\t\tvar tag:Tag = ReadUtils.readTag()\n");
+		content.append("\t\t\t\tvar tag:Tag = ReadUtils.readTag(input);\n");
 		content.append("\t\t\t\tswitch (tag.number) {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			content.append("\t\t\t\tcase ");
@@ -527,30 +538,46 @@ public final class Main {
 				content.append("\t\t\t\t\tif (");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append("Count != 0) {\n");
-				content.append("\t\t\t\t\t\tthrow new IOError()\n");
+				content.append("\t\t\t\t\t\tthrow new IOError();\n");
 				content.append("\t\t\t\t\t}\n");
 				content.append("\t\t\t\t\t++");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append("Count\n");
-				content.append("\t\t\t\t\t");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append(" = ReadUtils.read_");
-				content.append(fdp.getType().name());
-				content.append("(input)\n");
-				content.append("\t\t\t\t\tbreak\n");
+				content.append("Count;\n");
+				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+					content.append("\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(" = new ");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append(";\n");
+					content.append("\t\t\t\t\tReadUtils.read_TYPE_MESSAGE(input, ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(");\n");
+				} else {
+					content.append("\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(" = ReadUtils.read_");
+					content.append(fdp.getType().name());
+					content.append("(input);\n");
+				}
+				content.append("\t\t\t\t\tbreak;\n");
 				break;
 			case LABEL_REPEATED:
 				content.append("\t\t\t\t\t");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append(".push(ReadUtils.read_");
 				content.append(fdp.getType().name());
-				content.append("(input))\n");
-				content.append("\t\t\t\t\tbreak\n");
+				content.append("(input");
+				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+					content.append(", new ");
+					content.append(getActionScript3Type(scope, fdp));
+				}
+				content.append("));\n");
+				content.append("\t\t\t\t\tbreak;\n");
 				break;
 			}
 		}
 		content.append("\t\t\t\tdefault:\n");
-		content.append("\t\t\t\t\tReadUtils.skip(input, tag)\n");
+		content.append("\t\t\t\t\tReadUtils.skip(input, tag);\n");
 		content.append("\t\t\t\t}\n");
 		content.append("\t\t\t}\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
@@ -559,7 +586,7 @@ public final class Main {
 				content.append("\t\t\tif (");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append("Count != 1) {\n");
-				content.append("\t\t\t\tthrow new IOError()\n");
+				content.append("\t\t\t\tthrow new IOError();\n");
 				content.append("\t\t\t}\n");
 				break;
 			}
@@ -577,7 +604,7 @@ public final class Main {
 			content.append(evdp.getName());
 			content.append(":int = ");
 			content.append(evdp.getNumber());
-			content.append('\n');
+			content.append(";\n");
 		}
 		content.append("\t}\n");
 	}

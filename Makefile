@@ -28,6 +28,9 @@ $(PROTOBUF_DIR)/src/$(PROTOC_EXE): $(PROTOBUF_DIR)/Makefile
 $(PROTOBUF_DIR)/Makefile: $(PROTOBUF_DIR)/configure
 	cd $(PROTOBUF_DIR) && ./configure
 
+$(PROTOBUF_DIR)/configure:
+	cd $(PROTOBUF_DIR) && ./autogen.sh
+
 $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar: $(PROTOBUF_DIR)/src
 	cd $(PROTOBUF_DIR)/java && mvn package
 

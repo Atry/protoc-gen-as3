@@ -8,21 +8,25 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	import flash.utils.*
+	import flash.utils.*;
 	public final class VarintWriter extends ByteArray {
 		private var bitsLeft:uint = 0
 		public function end():void {
 			if (length == 1) {
 				this[0] &= 0x7F
 			} else {
-				for (var i:uint = length; i > 0; i--) {
-					const byte:uint = this[i - 1]
+				for (var i:uint = length; i > 0;) {
+					const l:uint = i - 1
+					const byte:uint = this[l]
 					if (byte != 0x80) {
-						this[i - 1] = 0x7F & byte
+						this[l] = byte & 0x7F
 						length = i
 						return
 					}
+					i = l
 				}
+				this[0] = 0
+				length = 1
 			}
 		}
 		public function write(number:uint, bits:uint):void {

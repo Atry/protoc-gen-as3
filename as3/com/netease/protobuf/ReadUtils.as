@@ -48,18 +48,18 @@ package com.netease.protobuf {
 			const result:Int64 = new Int64
 			const reader:VarintReader = new VarintReader(input)
 			result.low = reader.read(32)
-			result.high = int(reader.read(32))
+			result.high = reader.read(32)
 			return result
 		}
 		public static function read_TYPE_UINT64(input:IDataInput):UInt64 {
 			const result:UInt64 = new UInt64
 			const reader:VarintReader = new VarintReader(input)
 			result.low = reader.read(32)
-			result.high = int(reader.read(32))
+			result.high = reader.read(32)
 			return result
 		}
 		public static function read_TYPE_INT32(input:IDataInput):int {
-			return int(new VarintReader(input).read(32))
+			return new VarintReader(input).read(32)
 		}
 		public static function read_TYPE_FIXED64(input:IDataInput):Int64 {
 			const result:Int64 = new Int64
@@ -79,8 +79,7 @@ package com.netease.protobuf {
 		}
 		public static function read_TYPE_BYTES(input:IDataInput):ByteArray {
 			const result:ByteArray = new ByteArray
-			result.length = read_TYPE_UINT32(input)
-			input.readBytes(result)
+			input.readBytes(result, 0, read_TYPE_UINT32(input))
 			return result
 		}
 		public static function read_TYPE_UINT32(input:IDataInput):uint {
@@ -90,7 +89,7 @@ package com.netease.protobuf {
 			return read_TYPE_INT32(input)
 		}
 		private static function sintToInt(n:int):int {
-			return int((n << 1) ^ (n >>> 31))
+			return (n << 1) ^ (n >>> 31)
 		}
 		public static function read_TYPE_SFIXED32(input:IDataInput):int {
 			return sintToInt(input.readInt())
@@ -98,9 +97,9 @@ package com.netease.protobuf {
 		public static function read_TYPE_SFIXED64(input:IDataInput):Int64 {
 			const result:Int64 = read_TYPE_FIXED64(input)
 			const low:uint = result.low
-			const high:uint = uint(result.high)
-			result.low = (high >>> 31) ^ uint(low << 1) 
-			result.high = int((low >>> 31) ^ uint(high << 1))
+			const high:uint = result.high
+			result.low = (high >>> 31) ^ (low << 1) 
+			result.high = (low >>> 31) ^ (high << 1)
 			return result
 		}
 		public static function read_TYPE_SINT32(input:IDataInput):int {
@@ -109,9 +108,9 @@ package com.netease.protobuf {
 		public static function read_TYPE_SINT64(input:IDataInput):Int64 {
 			const result:Int64 = read_TYPE_INT64(input)
 			const low:uint = result.low
-			const high:uint = uint(result.high)
-			result.low = uint(high >>> 31) ^ uint(low << 1) 
-			result.high = int((low >>> 31) ^ uint(high << 1))
+			const high:uint = result.high
+			result.low = (high >>> 31) ^ (low << 1) 
+			result.high = (low >>> 31) ^ (high << 1)
 			return result
 		}
 		public static function read_TYPE_MESSAGE(input:IDataInput,

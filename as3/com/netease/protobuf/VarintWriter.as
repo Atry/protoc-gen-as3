@@ -27,11 +27,11 @@ package com.netease.protobuf {
 		}
 		public function write(number:uint, bits:uint):void {
 			if (bits <= bitsLeft) {
-				this[length - 1] |= uint(number << (7 - bitsLeft))
+				this[length - 1] |= number << (7 - bitsLeft)
 				bitsLeft -= bits
 			} else {
 				if (bitsLeft != 0) {
-					this[length - 1] |= uint(number << (7 - bitsLeft))
+					this[length - 1] |= number << (7 - bitsLeft)
 					bits -= bitsLeft
 					number >>>= bitsLeft
 				}

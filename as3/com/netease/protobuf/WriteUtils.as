@@ -27,7 +27,7 @@ package com.netease.protobuf {
 		public static function write_TYPE_INT64(output:IDataOutput, value:Int64):void {
 			const varint:VarintWriter = new VarintWriter;
 			varint.write(value.low, 32);
-			varint.write(uint(value.high), 32);
+			varint.write(value.high, 32);
 			varint.end()
 			output.writeBytes(varint)
 		}
@@ -39,7 +39,7 @@ package com.netease.protobuf {
 			output.writeBytes(varint)
 		}
 		public static function write_TYPE_INT32(output:IDataOutput, value:int):void {
-			write_TYPE_UINT32(output, uint(value))
+			write_TYPE_UINT32(output, value)
 		}
 		public static function write_TYPE_FIXED64(output:IDataOutput, value:Int64):void {
 			output.endian = Endian.LITTLE_ENDIAN
@@ -72,21 +72,20 @@ package com.netease.protobuf {
 			write_TYPE_INT32(output, value)
 		}
 		public static function write_TYPE_SFIXED32(output:IDataOutput, value:int):void {
-			write_TYPE_FIXED32(output, uint(value >>> 31) ^ (value << 1))
+			write_TYPE_FIXED32(output, (value >>> 31) ^ (value << 1))
 		}
 		public static function write_TYPE_SFIXED64(output:IDataOutput, value:Int64):void {
-			// TODO:
 			output.endian = Endian.LITTLE_ENDIAN
-			output.writeUnsignedInt(uint(value.high >>> 31) ^ (value.low << 1))
-			output.writeUnsignedInt(uint(value.low >>> 31) ^ (value.high << 1))
+			output.writeUnsignedInt((value.high >>> 31) ^ (value.low << 1))
+			output.writeUnsignedInt((value.low >>> 31) ^ (value.high << 1))
 		}
 		public static function write_TYPE_SINT32(output:IDataOutput, value:int):void {
-			write_TYPE_UINT32(output, uint(value >>> 31) ^ (value << 1))
+			write_TYPE_UINT32(output, (value >>> 31) ^ (value << 1))
 		}
 		public static function write_TYPE_SINT64(output:IDataOutput, value:Int64):void {
 			const varint:VarintWriter = new VarintWriter;
-			varint.write(uint(value.high >>> 31) ^ (value.low << 1), 32);
-			varint.write(uint(value.low >>> 31) ^ (value.high << 1), 32);
+			varint.write((value.high >>> 31) ^ (value.low << 1), 32);
+			varint.write((value.low >>> 31) ^ (value.high << 1), 32);
 			varint.end()
 			output.writeBytes(varint)
 		}

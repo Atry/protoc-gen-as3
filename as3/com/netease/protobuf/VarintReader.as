@@ -19,10 +19,10 @@ package com.netease.protobuf {
 		public function read(bits:uint):uint {
 			if (bits <= bitsLeft) {
 				bitsLeft -= bits
-				return (number >>> (7 - bits)) & (uint(1 << bits) - 1)
+				return (number >>> (7 - bits)) & ((1 << bits) - 1)
 			} else {
 				var result:uint = (number >>> (7 - bitsLeft)) &
-						(uint(1 << bitsLeft) - 1)
+						((1 << bitsLeft) - 1)
 				bits -= bitsLeft
 				var i:uint = bitsLeft
 				for (;;) {
@@ -32,7 +32,7 @@ package com.netease.protobuf {
 					}
 					number = input.readUnsignedByte()
 					if (bits - i <= 7) {
-						result |= (number & (uint(1 << (bits - i)) - 1)) << i
+						result |= (number & ((1 << (bits - i)) - 1)) << i
 						bitsLeft = 7 + i - bits
 						break
 					} else {

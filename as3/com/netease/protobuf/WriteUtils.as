@@ -9,62 +9,92 @@
 
 package com.netease.protobuf {
 	import flash.utils.*
-	import com.hurlant.math.BigInteger
 	public final class WriteUtils {
 		public static function writeTag(output:IDataOutput,
 				wireType:uint, number:uint):void {
-			// TODO:
+			const varint:VarintWriter = new VarintWriter;
+			varint.write(wireType, 3);
+			varint.write(number, 32);
+			varint.end()
+			output.writeBytes(varint)
 		}
 		public static function write_TYPE_DOUBLE(output:IDataOutput, value:Number):void {
-			// TODO:
+			output.writeDouble(value)
 		}
 		public static function write_TYPE_FLOAT(output:IDataOutput, value:Number):void {
-			// TODO:
+			output.writeFloat(value)
 		}
-		public static function write_TYPE_INT64(output:IDataOutput, value:BigInteger):void {
-			// TODO:
+		public static function write_TYPE_INT64(output:IDataOutput, value:Int64):void {
+			const varint:VarintWriter = new VarintWriter;
+			varint.write(value.low, 32);
+			varint.write(uint(value.high), 32);
+			varint.end()
+			output.writeBytes(varint)
 		}
-		public static function write_TYPE_UNIT64(output:IDataOutput, value:BigInteger):void {
-			// TODO:
+		public static function write_TYPE_UINT64(output:IDataOutput, value:UInt64):void {
+			const varint:VarintWriter = new VarintWriter;
+			varint.write(value.low, 32);
+			varint.write(value.high, 32);
+			varint.end()
+			output.writeBytes(varint)
 		}
 		public static function write_TYPE_INT32(output:IDataOutput, value:int):void {
-			// TODO:
+			write_TYPE_UINT32(output, uint(value))
 		}
-		public static function write_TYPE_FIXED64(output:IDataOutput, value:BigInteger):void {
-			// TODO:
+		public static function write_TYPE_FIXED64(output:IDataOutput, value:Int64):void {
+			output.endian = Endian.LITTLE_ENDIAN
+			output.writeUnsignedInt(value.low)
+			output.writeInt(value.high)
 		}
 		public static function write_TYPE_FIXED32(output:IDataOutput, value:int):void {
-			// TODO:
+			output.endian = Endian.LITTLE_ENDIAN
+			output.writeInt(value)
 		}
 		public static function write_TYPE_BOOL(output:IDataOutput, value:Boolean):void {
-			// TODO:
+			output.writeByte(value ? 1 : 0)
 		}
 		public static function write_TYPE_STRING(output:IDataOutput, value:String):void {
-			// TODO:
+			const ba:ByteArray = new ByteArray
+			ba.writeUTF(value)
+			write_TYPE_BYTES(output, ba)
 		}
 		public static function write_TYPE_BYTES(output:IDataOutput, value:ByteArray):void {
-			// TODO:
+			write_TYPE_UINT32(output, value.length)
+			output.writeBytes(value)
 		}
 		public static function write_TYPE_UINT32(output:IDataOutput, value:uint):void {
-			// TODO:
+			const varint:VarintWriter = new VarintWriter;
+			varint.write(value, 32);
+			varint.end()
+			output.writeBytes(varint)
 		}
 		public static function write_TYPE_ENUM(output:IDataOutput, value:int):void {
-			// TODO:
+			write_TYPE_INT32(output, value)
 		}
 		public static function write_TYPE_SFIXED32(output:IDataOutput, value:int):void {
-			// TODO:
+			write_TYPE_FIXED32(output, uint(value >>> 31) ^ (value << 1))
 		}
-		public static function write_TYPE_SFIXED64(output:IDataOutput, value:BigInteger):void {
+		public static function write_TYPE_SFIXED64(output:IDataOutput, value:Int64):void {
 			// TODO:
+			output.endian = Endian.LITTLE_ENDIAN
+			output.writeUnsignedInt(uint(value.high >>> 31) ^ (value.low << 1))
+			output.writeUnsignedInt(uint(value.low >>> 31) ^ (value.high << 1))
 		}
 		public static function write_TYPE_SINT32(output:IDataOutput, value:int):void {
-			// TODO:
+			write_TYPE_UINT32(output, uint(value >>> 31) ^ (value << 1))
 		}
-		public static function write_TYPE_SINT64(output:IDataOutput, value:BigInteger):void {
-			// TODO:
+		public static function write_TYPE_SINT64(output:IDataOutput, value:Int64):void {
+			const varint:VarintWriter = new VarintWriter;
+			varint.write(uint(value.high >>> 31) ^ (value.low << 1), 32);
+			varint.write(uint(value.low >>> 31) ^ (value.high << 1), 32);
+			varint.end()
+			output.writeBytes(varint)
 		}
 		public static function write_TYPE_MESSAGE(output:IDataOutput, value:IExternalizable):void {
-			// TODO:
+			const ba:ByteArray = new ByteArray
+			value.writeExternal(ba)
+			write_TYPE_INT32(output, ba.length)
+			output.writeBytes(ba)
 		}
 	}
 }

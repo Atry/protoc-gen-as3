@@ -162,12 +162,6 @@ public final class Main {
 	private static String getImportType(Scope<?> scope,
 			FieldDescriptorProto fdp) {
 		switch (fdp.getType()) {
-		case TYPE_INT64:
-		case TYPE_UINT64:
-		case TYPE_FIXED64:
-		case TYPE_SFIXED64:
-		case TYPE_SINT64:
-			return "com.hurlant.math.BigInteger";
 		case TYPE_ENUM:
 			if (!fdp.hasDefaultValue()) {
 				return null;
@@ -246,11 +240,12 @@ public final class Main {
 		case TYPE_BOOL:
 			return "Boolean";
 		case TYPE_INT64:
-		case TYPE_UINT64:
 		case TYPE_FIXED64:
 		case TYPE_SFIXED64:
 		case TYPE_SINT64:
-			return "com.hurlant.math.BigInteger";
+			return "Int64";
+		case TYPE_UINT64:
+			return "UInt64";
 		case TYPE_STRING:
 			return "String";
 		case TYPE_MESSAGE:
@@ -577,7 +572,7 @@ public final class Main {
 			}
 		}
 		content.append("\t\t\t\tdefault:\n");
-		content.append("\t\t\t\t\tReadUtils.skip(input, tag);\n");
+		content.append("\t\t\t\t\tReadUtils.skip(input, tag.wireType);\n");
 		content.append("\t\t\t\t}\n");
 		content.append("\t\t\t}\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {

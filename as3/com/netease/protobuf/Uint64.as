@@ -8,8 +8,8 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	public final class Tag {
-		public var wireType:uint
-		public var number:uint
+	public final class UInt64 {
+		public var high:uint;
+		public var low:uint;
 	}
 }

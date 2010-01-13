@@ -9,65 +9,115 @@
 
 package com.netease.protobuf {
 	import flash.utils.*
-	import com.hurlant.math.BigInteger
 	public final class ReadUtils {
-		public static function skip(input:IDataInput, tag:Tag):void {
-			// TODO:
+		public static function skip(input:IDataInput, wireType:uint):void {
+			switch (wireType) {
+			case WireType.VARINT:
+				while (input.readUnsignedByte() > 0x80) {}
+				break
+			case WireType.FIXED_64_BIT:
+				input.readInt()
+				input.readInt()
+				break
+			case WireType.LENGTH_DELIMITED:
+				for (var i:uint = read_TYPE_UINT32(input); i != 0; i--) {
+					input.readByte()
+				}
+				break
+			case WireType.FIXED_32_BIT:
+				input.readInt()
+				break
+			default:
+				throw new ArgumentError
+			}
 		}
 		public static function readTag(input:IDataInput):Tag {
-			// TODO:
+			const tag:Tag = new Tag
+			const reader:VarintReader = new VarintReader(input)
+			tag.wireType = reader.read(3)
+			tag.number = reader.read(32)
+			return tag
 		}
 		public static function read_TYPE_DOUBLE(input:IDataInput):Number {
-			// TODO:
+			return input.readDouble()
 		}
 		public static function read_TYPE_FLOAT(input:IDataInput):Number {
-			// TODO:
+			return input.readFloat()
 		}
-		public static function read_TYPE_INT64(input:IDataInput):BigInteger {
-			// TODO:
+		public static function read_TYPE_INT64(input:IDataInput):Int64 {
+			const result:Int64 = new Int64
+			const reader:VarintReader = new VarintReader(input)
+			result.low = reader.read(32)
+			result.high = int(reader.read(32))
+			return result
 		}
-		public static function read_TYPE_UNIT64(input:IDataInput):BigInteger {
-			// TODO:
+		public static function read_TYPE_UINT64(input:IDataInput):UInt64 {
+			const result:UInt64 = new UInt64
+			const reader:VarintReader = new VarintReader(input)
+			result.low = reader.read(32)
+			result.high = int(reader.read(32))
+			return result
 		}
 		public static function read_TYPE_INT32(input:IDataInput):int {
-			// TODO:
+			return int(new VarintReader(input).read(32))
 		}
-		public static function read_TYPE_FIXED64(input:IDataInput):BigInteger {
-			// TODO:
+		public static function read_TYPE_FIXED64(input:IDataInput):Int64 {
+			const result:Int64 = new Int64
+			result.low = input.readUnsignedInt()
+			result.high = input.readInt()
+			return result
 		}
 		public static function read_TYPE_FIXED32(input:IDataInput):int {
-			// TODO:
+			return input.readInt()
 		}
 		public static function read_TYPE_BOOL(input:IDataInput):Boolean {
-			// TODO:
+			return read_TYPE_UINT32(input) != 0
 		}
 		public static function read_TYPE_STRING(input:IDataInput):String {
-			// TODO:
+			const length:uint = read_TYPE_UINT32(input)
+			return input.readUTFBytes(length)
 		}
 		public static function read_TYPE_BYTES(input:IDataInput):ByteArray {
-			// TODO:
+			const result:ByteArray = new ByteArray
+			result.length = read_TYPE_UINT32(input)
+			input.readBytes(result)
+			return result
 		}
 		public static function read_TYPE_UINT32(input:IDataInput):uint {
-			// TODO:
+			return (new VarintReader(input)).read(32)
 		}
 		public static function read_TYPE_ENUM(input:IDataInput):int {
-			// TODO:
+			return read_TYPE_INT32(input)
+		}
+		private static function sintToInt(n:int):int {
+			return int((n << 1) ^ (n >>> 31))
 		}
 		public static function read_TYPE_SFIXED32(input:IDataInput):int {
-			// TODO:
+			return sintToInt(input.readInt())
 		}
-		public static function read_TYPE_SFIXED64(input:IDataInput):BigInteger {
-			// TODO:
+		public static function read_TYPE_SFIXED64(input:IDataInput):Int64 {
+			const result:Int64 = read_TYPE_FIXED64(input)
+			const low:uint = result.low
+			const high:uint = uint(result.high)
+			result.low = (high >>> 31) ^ uint(low << 1) 
+			result.high = int((low >>> 31) ^ uint(high << 1))
+			return result
 		}
 		public static function read_TYPE_SINT32(input:IDataInput):int {
-			// TODO:
+			return sintToInt(read_TYPE_INT32(input))
 		}
-		public static function read_TYPE_SINT64(input:IDataInput):BigInteger {
-			// TODO:
+		public static function read_TYPE_SINT64(input:IDataInput):Int64 {
+			const result:Int64 = read_TYPE_INT64(input)
+			const low:uint = result.low
+			const high:uint = uint(result.high)
+			result.low = uint(high >>> 31) ^ uint(low << 1) 
+			result.high = int((low >>> 31) ^ uint(high << 1))
+			return result
 		}
 		public static function read_TYPE_MESSAGE(input:IDataInput,
 				message:IExternalizable):IExternalizable {
-			// TODO:
+			message.readExternal(read_TYPE_BYTES(input))
+			return message
 		}
 	}
 }

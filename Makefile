@@ -27,7 +27,7 @@ proto/google/protobuf/compiler/Plugin.java: \
 dist.tar.gz: dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
 	dist/protobuf.swc \
 	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
-	tar  -zcf dist.tar.gz $?
+	tar  -zcf dist.tar.gz dist
 
 dist/protoc-gen-as3: | dist
 	echo -n -e '#!/bin/sh\ncd `dirname "$$0"`\njava -cp protobuf-java-2.3.0.jar -jar protoc-gen-as3.jar' > $@

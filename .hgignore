@@ -5,3 +5,4 @@ glob:classes
 glob:test.swc
 glob:test_proto
 glob:dist/
+glob:dist.tar.gz

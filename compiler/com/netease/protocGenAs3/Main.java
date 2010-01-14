@@ -142,8 +142,8 @@ public final class Main {
 		Scope<Object> root = Scope.root();
 		List<String> filesToGenerate = request.getFileToGenerateList();
 		for (FileDescriptorProto fdp : request.getProtoFileList()) {
-			String packageName = fdp.hasPackage() ? fdp.getPackage() : "";
-			Scope<?> packageScope = root.findOrCreate(packageName);
+			Scope<?> packageScope = fdp.hasPackage() ?
+					root.findOrCreate(fdp.getPackage()) : root;
 			boolean export = filesToGenerate.contains(fdp.getName());
 			if (fdp.getServiceCount() != 0) {
 				System.err.println("Warning: Service is not supported.");

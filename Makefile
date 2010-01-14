@@ -24,7 +24,31 @@ proto/google/protobuf/compiler/Plugin.java: \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=proto \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
 
-classes proto test_proto:
+dist.tar.gz: dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
+	dist/protobuf.swc \
+	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
+	tar  -zcf dist.tar.gz $?
+
+dist/protoc-gen-as3: | dist
+	echo -n -e '#!/bin/sh\ncd `dirname "$$0"`\njava -cp protobuf-java-2.3.0.jar -jar protoc-gen-as3.jar' > $@
+	chmod +x $@
+
+dist/protoc-gen-as3.bat: | dist
+	echo -n -e '@echo off\r\ncd %~dp0\r\njava -cp protobuf-java-2.3.0.jar -jar protoc-gen-as3.jar' > $@
+	chmod +x $@
+
+dist/protobuf.swc: as3 | dist
+	$(COMPC) -include-sources+=as3 -output=$@
+
+dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class | dist
+	jar ecf com/netease/protocGenAs3/Main $@ classes
+
+dist/protobuf-java-2.3.0.jar: \
+	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \
+	| dist
+	cp $< $@
+
+classes proto test_proto dist:
 	mkdir $@
 
 $(PROTOBUF_DIR)/src/$(PROTOC_EXE): $(PROTOBUF_DIR)/Makefile
@@ -45,10 +69,14 @@ plugin: all
 	com.netease.protocGenAs3.Main
 
 clean:
+	rm -fr dist
+	rm -fr dist.tar.gz
 	rm -fr classes
 	rm -fr proto
+	rm -fr test_proto
+	rm -fr test.swc
 
-test: test_proto/protobuf_unittest
+test.swc: test_proto/protobuf_unittest
 	$(COMPC) -include-sources+=test_proto,as3 -output=test.swc
 
 test_proto/protobuf_unittest: \

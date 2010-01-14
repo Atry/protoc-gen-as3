@@ -10,7 +10,7 @@
 package com.netease.protobuf {
 	import flash.utils.*
 	public final class Extension {
-		public static function repeaedReadFunction(f:Function):Function {
+		public static function repeatedReadFunction(f:Function):Function {
 			return function (input:IDataInput,
 					object:Array, fieldNumber:uint):void {
 				var a:Array = object[fieldNumber]
@@ -27,7 +27,7 @@ package com.netease.protobuf {
 				object[fieldNumber] = f(input)
 			}
 		}
-		public static function repeatedMessageReadFuction(c:Class):Function {
+		public static function repeatedMessageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
 					object:Array, fieldNumber:uint):void {
 				var a:Array = object[fieldNumber]

@@ -48,15 +48,19 @@ clean:
 	rm -fr classes
 	rm -fr proto
 
-test_proto/protobuf_unittest/: \
-	$(PROTOBUF_DIR)/src/protoc$(PROTOC_EXE) \
+test: test_proto/protobuf_unittest
+	$(COMPC) -include-sources+=test_proto,as3 -output=test.swc
+
+test_proto/protobuf_unittest: \
+	$(PROTOBUF_DIR)/src/$(PROTOC_EXE) \
 	classes/com/netease/protocGenAs3/Main.class \
 	| test_proto
-	PATH=protoc-gen-as3/bin:$$PATH \
-	"$(PROTOBUF_DIR)/src/protoc$(PROTOC_EXE)" \
+	PATH=bin:$$PATH \
+	"$(PROTOBUF_DIR)/src/$(PROTOC_EXE)" \
 	"--proto_path=$(PROTOBUF_DIR)/src" \
 	--as3_out=test_proto \
-	$(PROTOBUF_DIR)/src/google/protobuf/unittest.proto
+	$(PROTOBUF_DIR)/src/google/protobuf/unittest.proto \
+	$(PROTOBUF_DIR)/src/google/protobuf/unittest_import.proto
 	touch $@
 
 .PHONY: plugin all clean

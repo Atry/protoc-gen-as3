@@ -13,6 +13,7 @@ import static com.google.protobuf.DescriptorProtos.*;
 import java.io.*;
 import java.util.regex.*;
 import java.util.*;
+import java.math.*;
 public final class Main {
 	private static final class Scope<Proto> {
 		// 如果 proto instanceOf Scope ，则这个 Scope 对另一 Scope 的引用。
@@ -323,17 +324,45 @@ public final class Main {
 		switch (fdp.getType()) {
 		case TYPE_DOUBLE:
 		case TYPE_FLOAT:
+			if (value.equals("nan")) {
+				sb.append("NaN");
+			} else if (value.equals("inf")) {
+				sb.append("Infinity");
+			} else if (value.equals("-inf")) {
+				sb.append("-Infinity");
+			} else {
+				sb.append(value);
+			}
+			break;
+		case TYPE_UINT64:
+			{
+				long v = new BigInteger(value).longValue();
+				sb.append("new UInt64(");
+				sb.append(Long.toString(v & 0xFFFFFFFFL));
+				sb.append(", ");
+				sb.append(Long.toString((v >>> 32) & 0xFFFFFFFFL));
+				sb.append(")");
+			}
+			break;
+		case TYPE_INT64:
+		case TYPE_FIXED64:
+		case TYPE_SFIXED64:
+		case TYPE_SINT64:
+			{
+				long v = Long.parseLong(value);
+				sb.append("new Int64(");
+				sb.append(Long.toString(v & 0xFFFFFFFFL));
+				sb.append(", ");
+				sb.append(Integer.toString((int)v >>> 32));
+				sb.append(")");
+			}
+			break;
 		case TYPE_INT32:
 		case TYPE_FIXED32:
 		case TYPE_SFIXED32:
 		case TYPE_SINT32:
 		case TYPE_UINT32:
 		case TYPE_BOOL:
-		case TYPE_INT64:
-		case TYPE_UINT64:
-		case TYPE_FIXED64:
-		case TYPE_SFIXED64:
-		case TYPE_SINT64:
 			sb.append(value);
 			break;
 		case TYPE_STRING:
@@ -354,8 +383,15 @@ public final class Main {
 					children.get(value).fullName);
 			break;
 		case TYPE_BYTES:
-			throw new IllegalArgumentException("Default value (" +
-					value + ") for bytes type is not supported.");
+			sb.append("(function ():ByteArray { ");
+			sb.append("const ba:ByteArray = new ByteArray;");
+			sb.append("ba.writeMultiByte(");
+			sb.append("'");
+			sb.append(value);
+			sb.append("', 'iso-8859-1');");
+			sb.append("return ba;");
+			sb.append("})();\n");
+			break;
 		default:
 			throw new IllegalArgumentException();
 		}
@@ -474,6 +510,10 @@ public final class Main {
 			content.append("\t\t}\n");
 		}
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
+			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+				continue;
+			}
 			assert(fdp.hasLabel());
 			switch (fdp.getLabel()) {
 			case LABEL_OPTIONAL:
@@ -558,6 +598,10 @@ public final class Main {
 		}
 		content.append("\t\tpublic function writeExternal(output:IDataOutput):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
+			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+				continue;
+			}
 			switch (fdp.getLabel()) {
 			case LABEL_OPTIONAL:
 				content.append("\t\t\tif (");
@@ -594,7 +638,7 @@ public final class Main {
 				content.append(");\n");
 				break;
 			case LABEL_REPEATED:
-				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
+				if (false && fdp.hasOptions() && fdp.getOptions().getPacked()) {
 					throw new RuntimeException(
 							"Packed repeated filed is not supported.");
 				} else {
@@ -628,6 +672,10 @@ public final class Main {
 		content.append("\t\t}\n");
 		content.append("\t\tpublic function readExternal(input:IDataInput):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
+			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+				continue;
+			}
 			switch (fdp.getLabel()) {
 			case LABEL_OPTIONAL:
 			case LABEL_REQUIRED:
@@ -641,6 +689,10 @@ public final class Main {
 		content.append("\t\t\t\tvar tag:Tag = ReadUtils.readTag(input);\n");
 		content.append("\t\t\t\tswitch (tag.number) {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
+			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+				continue;
+			}
 			content.append("\t\t\t\tcase ");
 			content.append(Integer.toString(fdp.getNumber()));
 			content.append(":\n");
@@ -700,6 +752,10 @@ public final class Main {
 		content.append("\t\t\t\t}\n");
 		content.append("\t\t\t}\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
+			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+				continue;
+			}
 			switch (fdp.getLabel()) {
 			case LABEL_REQUIRED:
 				content.append("\t\t\tif (");
@@ -781,8 +837,14 @@ public final class Main {
 		} else if (scope.proto instanceof EnumDescriptorProto) {
 			writeEnum((Scope<EnumDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof FieldDescriptorProto) {
-			writeExtension((Scope<FieldDescriptorProto>)scope, content,
-					initializerContent);
+			Scope<FieldDescriptorProto> fdpScope =
+					(Scope<FieldDescriptorProto>)scope;
+			if (fdpScope.proto.getType() ==
+					FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+			} else {
+				writeExtension(fdpScope, content, initializerContent);
+			}
 		} else {
 			throw new IllegalArgumentException();
 		}
@@ -814,7 +876,7 @@ public final class Main {
 		initializerContent.append("}\n");
 		responseBuilder.addFile(
 			CodeGeneratorResponse.File.newBuilder().
-				setName("initializer.include.as").
+				setName("initializer.as.inc").
 				setContent(initializerContent.toString()).
 			build()
 		);

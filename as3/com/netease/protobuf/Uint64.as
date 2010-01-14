@@ -9,7 +9,11 @@
 
 package com.netease.protobuf {
 	public final class UInt64 {
-		public var high:uint;
 		public var low:uint;
+		public var high:uint;
+		public function UInt64(low:uint = 0, high:uint = 0) {
+			this.low = low
+			this.high = high
+		}
 	}
 }

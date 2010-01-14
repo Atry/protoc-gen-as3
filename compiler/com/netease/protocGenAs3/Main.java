@@ -109,6 +109,12 @@ public final class Main {
 			return new Scope<Object>(null, null, false, "");
 		}
 	}
+	private static void addExtensionToScope(Scope<?> scope,
+			FieldDescriptorProto efdp, boolean export) {
+		StringBuilder sb = new StringBuilder();
+		appendLowerCamelCase(sb, efdp.getName());
+		scope.addChild(sb.toString(), efdp, true);
+	}
 	private static void addEnumToScope(Scope<?> scope, EnumDescriptorProto edp,
 			boolean export) {
 		assert(edp.hasName());
@@ -122,12 +128,6 @@ public final class Main {
 	}
 	private static void addMessageToScope(Scope<?> scope, DescriptorProto dp,
 			boolean export) {
-		if (dp.getExtensionCount() != 0) {
-			System.err.println("Warning: Extension is not supported.");
-		}
-		if (dp.getExtensionRangeCount() != 0) {
-			System.err.println("Warning: Extension is not supported.");
-		}
 		Scope<DescriptorProto> messageScope =
 				scope.addChild(dp.getName(), dp, export);
 		for (EnumDescriptorProto edp : dp.getEnumTypeList()) {
@@ -147,8 +147,8 @@ public final class Main {
 			if (fdp.getServiceCount() != 0) {
 				System.err.println("Warning: Service is not supported.");
 			}
-			if (fdp.getExtensionCount() != 0) {
-				System.err.println("Warning: Extension is not supported.");
+			for (FieldDescriptorProto efdp : fdp.getExtensionList()) {
+				addExtensionToScope(packageScope, efdp, export);
 			}
 			for (EnumDescriptorProto edp : fdp.getEnumTypeList()) {
 				addEnumToScope(packageScope, edp, export);
@@ -159,6 +159,7 @@ public final class Main {
 		}
 		return root;
 	}
+	@SuppressWarnings("fallthrough")
 	private static String getImportType(Scope<?> scope,
 			FieldDescriptorProto fdp) {
 		switch (fdp.getType()) {
@@ -166,6 +167,7 @@ public final class Main {
 			if (!fdp.hasDefaultValue()) {
 				return null;
 			}
+			// fall-through
 		case TYPE_MESSAGE:
 			Scope<?> typeScope = scope.find(fdp.getTypeName());
 			if (typeScope == null) {
@@ -223,7 +225,7 @@ public final class Main {
 			throw new IllegalArgumentException();
 		}
 	}
-	private static String getActionScript3Type(Scope<DescriptorProto> scope,
+	private static String getActionScript3Type(Scope<?> scope,
 			FieldDescriptorProto fdp) {
 		switch (fdp.getType()) {
 		case TYPE_DOUBLE:
@@ -254,11 +256,65 @@ public final class Main {
 				throw new IllegalArgumentException(
 						fdp.getTypeName() + " not found.");
 			}
+			if (typeScope == scope) {
+				// workaround for mxmlc's bug.
+				return typeScope.fullName.substring(
+						typeScope.fullName.lastIndexOf('.') + 1);
+			}
 			return typeScope.fullName;
 		case TYPE_BYTES:
 			return "flash.utils.ByteArray";
 		default:
 			throw new IllegalArgumentException();
+		}
+	}
+	private static void appendWriteFunction(StringBuilder content,
+			Scope<?> scope, FieldDescriptorProto fdp) {
+		switch (fdp.getLabel()) {
+		case LABEL_REQUIRED:
+			throw new IllegalArgumentException();
+		case LABEL_OPTIONAL:
+			content.append("Extension.writeFunction(");
+			break;
+		case LABEL_REPEATED:
+			content.append("Extension.repeatedWriteFunction(");
+			break;
+		}
+		content.append("WireType.");
+		content.append(getActionScript3WireType(fdp.getType()));
+		content.append(", WriteUtils.write_");
+		content.append(fdp.getType().name());
+		content.append(")");
+	}
+	private static void appendReadFunction(StringBuilder content,
+			Scope<?> scope, FieldDescriptorProto fdp) {
+		if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+			switch (fdp.getLabel()) {
+			case LABEL_REQUIRED:
+				throw new IllegalArgumentException();
+			case LABEL_OPTIONAL:
+				content.append("Extension.messageReadFunction(");
+				break;
+			case LABEL_REPEATED:
+				content.append("Extension.repeatedMessageReadFunction(");
+				break;
+			}
+			content.append(getActionScript3Type(scope, fdp));
+			content.append(")");
+		} else {
+			switch (fdp.getLabel()) {
+			case LABEL_REQUIRED:
+				throw new IllegalArgumentException();
+			case LABEL_OPTIONAL:
+				content.append("Extension.readFunction(");
+				break;
+			case LABEL_REPEATED:
+				content.append("Extension.repeatedReadFunction(");
+				break;
+			}
+			content.append("ReadUtils.read_");
+			content.append(fdp.getType().name());
+			content.append(")");
 		}
 	}
 	private static void appendDefaultValue(StringBuilder sb, Scope<?> scope,
@@ -344,23 +400,79 @@ public final class Main {
 		}
 	}
 	private static void writeMessage(Scope<DescriptorProto> scope,
-			StringBuilder content) {
+			StringBuilder content, StringBuilder initializerContent) {
 		content.append("\timport com.netease.protobuf.*;\n");
 		content.append("\timport flash.utils.IExternalizable;\n");
 		content.append("\timport flash.utils.IDataOutput;\n");
 		content.append("\timport flash.utils.IDataInput;\n");
 		content.append("\timport flash.errors.IOError;\n");
+		HashSet<String> importTypes = new HashSet<String>();
+		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
+			importTypes.add(scope.find(efdp.getExtendee()).fullName);
+			if (efdp.getType().equals(FieldDescriptorProto.Type.TYPE_MESSAGE)) {
+				importTypes.add(scope.find(efdp.getTypeName()).fullName);
+			}
+			String importType = getImportType(scope, efdp);
+			if (importType != null) {
+				importTypes.add(importType);
+			}
+		}
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			String importType = getImportType(scope, fdp);
 			if (importType != null) {
-				content.append("\timport ");
-				content.append(importType);
-				content.append(";\n");
+				importTypes.add(importType);
 			}
 		}
-		content.append("\tpublic final class ");
-		content.append(scope.proto.getName());
-		content.append(" implements IExternalizable {\n");
+		for (String importType : importTypes) {
+			content.append("\timport ");
+			content.append(importType);
+			content.append(";\n");
+		}
+		if (scope.proto.getExtensionRangeCount() > 0) {
+			content.append("\tpublic dynamic final class ");
+			content.append(scope.proto.getName());
+			content.append(" extends Array implements IExternalizable {\n");
+			content.append("\t\t[ArrayElementType(\"Function\")]\n");
+			content.append("\t\tpublic static const extensionWriteFunctions:Array = [];\n");
+			content.append("\t\t[ArrayElementType(\"Function\")]\n");
+			content.append("\t\tpublic static const extensionReadFunctions:Array = [];\n");
+		} else {
+			content.append("\tpublic final class ");
+			content.append(scope.proto.getName());
+			content.append(" implements IExternalizable {\n");
+		}
+		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
+			initializerContent.append("import ");
+			initializerContent.append(scope.fullName);
+			initializerContent.append(";\n");
+			initializerContent.append("void(");
+			initializerContent.append(scope.fullName);
+			initializerContent.append(".");
+			appendLowerCamelCase(initializerContent, efdp.getName());
+			initializerContent.append(");\n");
+			String extendee = scope.find(efdp.getExtendee()).fullName;
+			content.append("\t\tpublic static const ");
+			appendLowerCamelCase(content, efdp.getName());
+			content.append(":uint = ");
+			content.append(efdp.getNumber());
+			content.append(";\n");
+			content.append("\t\t{\n");
+			content.append("\t\t\t");
+			content.append(extendee);
+			content.append(".extensionReadFunctions[");
+			appendLowerCamelCase(content, efdp.getName());
+			content.append("] = ");
+			appendReadFunction(content, scope, efdp);
+			content.append(";\n");
+			content.append("\t\t\t");
+			content.append(extendee);
+			content.append(".extensionWriteFunctions[");
+			appendLowerCamelCase(content, efdp.getName());
+			content.append("] = ");
+			appendWriteFunction(content, scope, efdp);
+			content.append(";\n");
+			content.append("\t\t}\n");
+		}
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			assert(fdp.hasLabel());
 			switch (fdp.getLabel()) {
@@ -508,6 +620,11 @@ public final class Main {
 				break;
 			}
 		}
+		if (scope.proto.getExtensionRangeCount() > 0) {
+			content.append("\t\t\tfor (var tagNumber:* in this) {\n");
+			content.append("\t\t\t\textensionWriteFunctions[tagNumber](output, this, tagNumber);\n");
+			content.append("\t\t\t}\n");
+		}
 		content.append("\t\t}\n");
 		content.append("\t\tpublic function readExternal(input:IDataInput):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
@@ -572,6 +689,13 @@ public final class Main {
 			}
 		}
 		content.append("\t\t\t\tdefault:\n");
+		if (scope.proto.getExtensionRangeCount() > 0) {
+			content.append("\t\t\t\t\tconst readFunction:Function = extensionReadFunctions[tag.number];\n");
+			content.append("\t\t\t\t\tif (readFunction != null) {\n");
+			content.append("\t\t\t\t\t\treadFunction(input, this, tag.number);\n");
+			content.append("\t\t\t\t\t\tbreak;\n");
+			content.append("\t\t\t\t\t}\n");
+		}
 		content.append("\t\t\t\t\tReadUtils.skip(input, tag.wireType);\n");
 		content.append("\t\t\t\t}\n");
 		content.append("\t\t\t}\n");
@@ -589,6 +713,48 @@ public final class Main {
 		content.append("\t\t}\n");
 		content.append("\t}\n");
 	}
+	private static void writeExtension(Scope<FieldDescriptorProto> scope,
+			StringBuilder content, StringBuilder initializerContent) {
+		initializerContent.append("import ");
+		initializerContent.append(scope.fullName);
+		initializerContent.append(";\n");
+		initializerContent.append("void(");
+		initializerContent.append(scope.fullName);
+		initializerContent.append(");\n");
+		content.append("\timport com.netease.protobuf.*;\n");
+		if (scope.proto.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+			content.append("\timport ");
+			content.append(
+					scope.parent.find(scope.proto.getTypeName()).fullName);
+			content.append(";\n");
+		}
+		String extendee = scope.parent.find(scope.proto.getExtendee()).fullName;
+		content.append("\timport ");
+		content.append(extendee);
+		content.append(";\n");
+		content.append("\tpublic const ");
+		appendLowerCamelCase(content, scope.proto.getName());
+		content.append(":uint = ");
+		content.append(scope.proto.getNumber());
+		content.append(";\n");
+		content.append("\t{\n");
+		content.append("\t\t");
+		content.append(extendee);
+		content.append(".extensionReadFunctions[");
+		appendLowerCamelCase(content, scope.proto.getName());
+		content.append("] = ");
+		appendReadFunction(content, scope.parent, scope.proto);
+		content.append(";\n");
+		content.append("\t\t");
+		content.append(extendee);
+		content.append(".extensionWriteFunctions[");
+		appendLowerCamelCase(content, scope.proto.getName());
+		content.append("] = ");
+		appendWriteFunction(content, scope.parent, scope.proto);
+		content.append(";\n");
+		content.append("\t}\n");
+	}
+
 	private static void writeEnum(Scope<EnumDescriptorProto> scope,
 			StringBuilder content) {
 		content.append("\tpublic final class ");
@@ -604,26 +770,32 @@ public final class Main {
 		content.append("\t}\n");
 	}
 	@SuppressWarnings("unchecked")
-	private static void writeFile(Scope<?> scope, StringBuilder content) {
+	private static void writeFile(Scope<?> scope, StringBuilder content,
+			StringBuilder initializerContent) {
 		content.append("package ");
 		content.append(scope.parent.fullName);
 		content.append(" {\n");
 		if (scope.proto instanceof DescriptorProto) {
-			writeMessage((Scope<DescriptorProto>)scope, content);
+			writeMessage((Scope<DescriptorProto>)scope, content,
+					initializerContent);
 		} else if (scope.proto instanceof EnumDescriptorProto) {
 			writeEnum((Scope<EnumDescriptorProto>)scope, content);
+		} else if (scope.proto instanceof FieldDescriptorProto) {
+			writeExtension((Scope<FieldDescriptorProto>)scope, content,
+					initializerContent);
 		} else {
 			throw new IllegalArgumentException();
 		}
 		content.append("}\n");
 	}
 	private static void writeFiles(Scope<?> root,
-			CodeGeneratorResponse.Builder responseBuilder) {
+			CodeGeneratorResponse.Builder responseBuilder,
+			StringBuilder initializerContent) {
 		for (Map.Entry<String, Scope<?>> entry : root.children.entrySet()) {
 			Scope<?> scope = entry.getValue();
 			if (scope.export) {
 				StringBuilder content = new StringBuilder();
-				writeFile(scope, content);
+				writeFile(scope, content, initializerContent);
 				responseBuilder.addFile(
 					CodeGeneratorResponse.File.newBuilder().
 						setName(scope.fullName.replace('.', '/') + ".as").
@@ -631,8 +803,21 @@ public final class Main {
 					build()
 				);
 			}
-			writeFiles(scope, responseBuilder);
+			writeFiles(scope, responseBuilder, initializerContent);
 		}
+	}
+	private static void writeFiles(Scope<?> root,
+			CodeGeneratorResponse.Builder responseBuilder) {
+		StringBuilder initializerContent = new StringBuilder();
+		initializerContent.append("{\n");
+		writeFiles(root, responseBuilder, initializerContent);
+		initializerContent.append("}\n");
+		responseBuilder.addFile(
+			CodeGeneratorResponse.File.newBuilder().
+				setName("initializer.include.as").
+				setContent(initializerContent.toString()).
+			build()
+		);
 	}
 	public static void main(String[] args) throws IOException {
 		CodeGeneratorRequest request = CodeGeneratorRequest.

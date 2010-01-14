@@ -6,21 +6,26 @@
 # as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 include config.mk
 
-all: classes
+all: classes/com/netease/protocGenAs3/Main.class 
 
-classes: compiler/com/netease/protocGenAs3/Main.java proto \
-	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar
-	mkdir -p classes
-	javac -encoding UTF-8 -Xlint:unchecked -d classes \
+classes/com/netease/protocGenAs3/Main.class: \
+	proto/google/protobuf/compiler/Plugin.java \
+	compiler/com/netease/protocGenAs3/Main.java \
+	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \
+	| classes
+	javac -encoding UTF-8 -Xlint:all -d classes \
 	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar" \
 	-sourcepath "proto$(PATH_SEPARATOR)compiler" \
 	compiler/com/netease/protocGenAs3/Main.java
 
-proto: $(PROTOBUF_DIR)/src/$(PROTOC_EXE)
-	mkdir -p proto
+proto/google/protobuf/compiler/Plugin.java: \
+	$(PROTOBUF_DIR)/src/$(PROTOC_EXE) | proto
 	"$(PROTOBUF_DIR)/src/$(PROTOC_EXE)" \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=proto \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
+
+classes proto test_proto:
+	mkdir $@
 
 $(PROTOBUF_DIR)/src/$(PROTOC_EXE): $(PROTOBUF_DIR)/Makefile
 	cd $(PROTOBUF_DIR) && make
@@ -42,5 +47,16 @@ plugin: all
 clean:
 	rm -fr classes
 	rm -fr proto
+
+test_proto/protobuf_unittest/: \
+	$(PROTOBUF_DIR)/src/protoc$(PROTOC_EXE) \
+	classes/com/netease/protocGenAs3/Main.class \
+	| test_proto
+	PATH=protoc-gen-as3/bin:$$PATH \
+	"$(PROTOBUF_DIR)/src/protoc$(PROTOC_EXE)" \
+	"--proto_path=$(PROTOBUF_DIR)/src" \
+	--as3_out=test_proto \
+	$(PROTOBUF_DIR)/src/google/protobuf/unittest.proto
+	touch $@
 
 .PHONY: plugin all clean

@@ -638,7 +638,7 @@ public final class Main {
 				content.append(");\n");
 				break;
 			case LABEL_REPEATED:
-				if (false && fdp.hasOptions() && fdp.getOptions().getPacked()) {
+				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
 					throw new RuntimeException(
 							"Packed repeated filed is not supported.");
 				} else {

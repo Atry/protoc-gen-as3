@@ -27,6 +27,28 @@ package com.netease.protobuf {
 				object[fieldNumber] = f(input)
 			}
 		}
+		public static function packedRepeatedReadFunction(f:Function):Function {
+			return function (input:IDataInput,
+					object:Array, fieldNumber:uint):void {
+				var a:Array = object[fieldNumber]
+				if (a == null) {
+					a = []
+					object[fieldNumber] = a
+				}
+				ReadUtils.readPackedRepeated(input, f, a)
+			}
+		}
+		public static function packedRepeatedMessageReadFunction(c:Class):Function {
+			return function (input:IDataInput,
+					object:Array, fieldNumber:uint):void {
+				var a:Array = object[fieldNumber]
+				if (a == null) {
+					a = []
+					object[fieldNumber] = a
+				}
+				ReadUtils.readPackedRepeatedMessage(input, c, a)
+			}
+		}
 		public static function repeatedMessageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
 					object:Array, fieldNumber:uint):void {
@@ -53,6 +75,17 @@ package com.netease.protobuf {
 					object:Array, fieldNumber:uint):void {
 				WriteUtils.writeTag(output, wireType, fieldNumber)
 				f(output, object[fieldNumber])
+			}
+		}
+		public static function packedRepeatedWriteFunction(f:Function):Function {
+			return function (output:IDataOutput,
+					object:Array, fieldNumber:uint):void {
+				WriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, fieldNumber)
+				const ba:ByteArray = new ByteArray
+				for each(var v:* in object[fieldNumber]) {
+					f(ba, v)
+				}
+				WriteUtils.write_TYPE_BYTES(output, ba)
 			}
 		}
 		public static function repeatedWriteFunction(wireType:uint, f:Function):Function {

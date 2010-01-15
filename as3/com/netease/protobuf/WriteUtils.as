@@ -95,5 +95,14 @@ package com.netease.protobuf {
 			write_TYPE_INT32(output, ba.length)
 			output.writeBytes(ba)
 		}
+		public static function writePackedRepeated(output:IDataOutput,
+				writeFunction:Function, value:Array):void {
+			const ba:ByteArray = new ByteArray
+			for each (var element:* in value) {
+				writeFunction(ba, element)
+			}
+			write_TYPE_INT32(output, ba.length)
+			output.writeBytes(ba)
+		}
 	}
 }

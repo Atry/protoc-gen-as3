@@ -275,15 +275,21 @@ public final class Main {
 		case LABEL_REQUIRED:
 			throw new IllegalArgumentException();
 		case LABEL_OPTIONAL:
-			content.append("Extension.writeFunction(");
+			content.append("Extension.writeFunction(WireType.");
+			content.append(getActionScript3WireType(fdp.getType()));
+			content.append(", ");
 			break;
 		case LABEL_REPEATED:
-			content.append("Extension.repeatedWriteFunction(");
+			if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
+				content.append("Extension.packedRepeatedWriteFunction(");
+			} else {
+				content.append("Extension.repeatedWriteFunction(WireType.");
+				content.append(getActionScript3WireType(fdp.getType()));
+				content.append(", ");
+			}
 			break;
 		}
-		content.append("WireType.");
-		content.append(getActionScript3WireType(fdp.getType()));
-		content.append(", WriteUtils.write_");
+		content.append("WriteUtils.write_");
 		content.append(fdp.getType().name());
 		content.append(")");
 	}
@@ -297,7 +303,11 @@ public final class Main {
 				content.append("Extension.messageReadFunction(");
 				break;
 			case LABEL_REPEATED:
-				content.append("Extension.repeatedMessageReadFunction(");
+				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
+					content.append("Extension.packedRepeatedMessageReadFunction(");
+				} else {
+					content.append("Extension.repeatedMessageReadFunction(");
+				}
 				break;
 			}
 			content.append(getActionScript3Type(scope, fdp));
@@ -310,7 +320,11 @@ public final class Main {
 				content.append("Extension.readFunction(");
 				break;
 			case LABEL_REPEATED:
-				content.append("Extension.repeatedReadFunction(");
+				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
+					content.append("Extension.packedRepeatedReadFunction(");
+				} else {
+					content.append("Extension.repeatedReadFunction(");
+				}
 				break;
 			}
 			content.append("ReadUtils.read_");
@@ -639,8 +653,20 @@ public final class Main {
 				break;
 			case LABEL_REPEATED:
 				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
-					throw new RuntimeException(
-							"Packed repeated filed is not supported.");
+					content.append("\t\t\tif (");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(" != null && ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(".length > 0) {\n");
+					content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, ");
+					content.append(Integer.toString(fdp.getNumber()));
+					content.append(");\n");
+					content.append("\t\t\t\tWriteUtils.writePackedRepeated(output, WriteUtils.write_");
+					content.append(fdp.getType().name());
+					content.append(", ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(");\n");
+					content.append("\t\t\t}\n");
 				} else {
 					content.append("\t\t\tfor each(var ");
 					appendLowerCamelCase(content, fdp.getName());
@@ -677,6 +703,13 @@ public final class Main {
 				continue;
 			}
 			switch (fdp.getLabel()) {
+			case LABEL_REPEATED:
+				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
+					content.append("\t\t\tvar ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append("Count:uint = 0;\n");
+				}
+				break;
 			case LABEL_OPTIONAL:
 			case LABEL_REQUIRED:
 				content.append("\t\t\tvar ");
@@ -723,26 +756,49 @@ public final class Main {
 					content.append(fdp.getType().name());
 					content.append("(input);\n");
 				}
-				content.append("\t\t\t\t\tbreak;\n");
 				break;
 			case LABEL_REPEATED:
-				content.append("\t\t\t\t\t");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append(".push(ReadUtils.read_");
-				content.append(fdp.getType().name());
-				content.append("(input");
-				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
-					content.append(", new ");
-					content.append(getActionScript3Type(scope, fdp));
+				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
+					content.append("\t\t\t\t\tif (");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append("Count != 0) {\n");
+					content.append("\t\t\t\t\t\tthrow new IOError();\n");
+					content.append("\t\t\t\t\t}\n");
+					content.append("\t\t\t\t\t++");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append("Count;\n");
+					if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+						content.append("\t\t\t\t\tReadUtils.readPackedRepeatedMessage(input, ");
+						content.append(getActionScript3Type(scope, fdp));
+						content.append(", ");
+						appendLowerCamelCase(content, fdp.getName());
+						content.append(");\n");
+					} else {
+						content.append("\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read_");
+						content.append(fdp.getType().name());
+						content.append(", ");
+						appendLowerCamelCase(content, fdp.getName());
+						content.append(");\n");
+					}
+				} else {
+					content.append("\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(".push(ReadUtils.read_");
+					content.append(fdp.getType().name());
+					content.append("(input");
+					if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+						content.append(", new ");
+						content.append(getActionScript3Type(scope, fdp));
+					}
+					content.append("));\n");
 				}
-				content.append("));\n");
-				content.append("\t\t\t\t\tbreak;\n");
 				break;
 			}
+			content.append("\t\t\t\t\tbreak;\n");
 		}
 		content.append("\t\t\t\tdefault:\n");
 		if (scope.proto.getExtensionRangeCount() > 0) {
-			content.append("\t\t\t\t\tconst readFunction:Function = extensionReadFunctions[tag.number];\n");
+			content.append("\t\t\t\t\tvar readFunction:Function = extensionReadFunctions[tag.number];\n");
 			content.append("\t\t\t\t\tif (readFunction != null) {\n");
 			content.append("\t\t\t\t\t\treadFunction(input, this, tag.number);\n");
 			content.append("\t\t\t\t\t\tbreak;\n");

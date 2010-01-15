@@ -118,5 +118,23 @@ package com.netease.protobuf {
 			message.readExternal(read_TYPE_BYTES(input))
 			return message
 		}
+		public static function readPackedRepeated(input:IDataInput,
+				readFuntion:Function, value:Array):void {
+			const ba:ByteArray = new ByteArray
+			input.readBytes(ba, 0, read_TYPE_UINT32(input))
+			while (ba.bytesAvailable > 0) {
+				value.push(readFuntion(ba))
+			}
+		}
+		public static function readPackedRepeatedMessage(input:IDataInput,
+				c:Class, value:Array):void {
+			const ba:ByteArray = new ByteArray
+			input.readBytes(ba, 0, read_TYPE_UINT32(input))
+			while (ba.bytesAvailable > 0) {
+				var m:IExternalizable = new c
+				read_TYPE_MESSAGE(ba, m)
+				value.push(m)
+			}
+		}
 	}
 }

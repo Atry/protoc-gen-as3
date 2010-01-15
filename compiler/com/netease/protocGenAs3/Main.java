@@ -15,6 +15,15 @@ import java.util.regex.*;
 import java.util.*;
 import java.math.*;
 public final class Main {
+	private static final String[] ACTIONSCRIPT_KEYWORDS = {
+		"as", "break", "case", "catch", "class", "const", "continue", "default",
+		"delete", "do", "else", "extends", "false", "finally", "for",
+		"function", "if", "implements", "import", "in", "instanceof",
+		"interface", "internal", "is", "native", "new", "null", "package",
+		"private", "protected", "public", "return", "super", "switch", "this",
+		"throw", "to", "true", "try", "typeof", "use", "var", "void", "while",
+		"with"
+	};
 	private static final class Scope<Proto> {
 		// 如果 proto instanceOf Scope ，则这个 Scope 对另一 Scope 的引用。
 		public final String fullName;
@@ -411,6 +420,9 @@ public final class Main {
 		}
 	}
 	private static void appendLowerCamelCase(StringBuilder sb, String s) {
+		if (Arrays.binarySearch(ACTIONSCRIPT_KEYWORDS, s) >= 0) {
+			sb.append("__");
+		}
 		boolean upper = false;
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);

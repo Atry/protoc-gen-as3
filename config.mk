@@ -5,5 +5,5 @@ PATH_SEPARATOR=;
 else
 PATH_SEPARATOR=:
 endif
-PROTOC_EXE=protoc$(EXE)
+PROTOC=protoc$(EXE)
 COMPC=compc$(EXE)

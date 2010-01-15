@@ -16,8 +16,8 @@ package com.netease.protobuf {
 				this[0] &= 0x7F
 			} else {
 				for (var i:uint = length; i > 0;) {
-					const l:uint = i - 1
-					const byte:uint = this[l]
+					var l:uint = i - 1
+					var byte:uint = this[l]
 					if (byte != 0x80) {
 						this[l] = byte & 0x7F
 						length = i

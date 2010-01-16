@@ -9,19 +9,19 @@ include config.mk
 all: classes/com/netease/protocGenAs3/Main.class dist/protobuf.swc 
 
 classes/com/netease/protocGenAs3/Main.class: \
-	proto/google/protobuf/compiler/Plugin.java \
+	plugin.proto.java/google/protobuf/compiler/Plugin.java \
 	compiler/com/netease/protocGenAs3/Main.java \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \
 	| classes
 	javac -encoding UTF-8 -Xlint:all -d classes \
 	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar" \
-	-sourcepath "proto$(PATH_SEPARATOR)compiler" \
+	-sourcepath "plugin.proto.java$(PATH_SEPARATOR)compiler" \
 	compiler/com/netease/protocGenAs3/Main.java
 
-proto/google/protobuf/compiler/Plugin.java: \
-	$(PROTOBUF_DIR)/src/$(PROTOC) | proto
+plugin.proto.java/google/protobuf/compiler/Plugin.java: \
+	$(PROTOBUF_DIR)/src/$(PROTOC) | plugin.proto.java
 	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
-	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=proto \
+	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=plugin.proto.java \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
 
 dist.tar.gz: dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
@@ -51,7 +51,7 @@ dist/protobuf-java-2.3.0.jar: \
 	| dist
 	cp $< $@
 
-descriptor.proto.as3 classes proto test_proto dist:
+descriptor.proto.as3 classes plugin.proto.java unittest.proto.as3 dist:
 	mkdir $@
 
 $(PROTOBUF_DIR)/src/$(PROTOC): $(PROTOBUF_DIR)/Makefile
@@ -75,12 +75,13 @@ clean:
 	rm -fr dist
 	rm -fr dist.tar.gz
 	rm -fr classes
-	rm -fr proto
-	rm -fr test_proto
+	rm -fr unittest.proto.as3
+	rm -fr descriptor.proto.as3
+	rm -fr plugin.proto.java
 	rm -fr test.swc
 
-test.swc: test_proto/protobuf_unittest
-	$(COMPC) -include-sources+=test_proto,as3 -output=test.swc
+test.swc: unittest.proto.as3/protobuf_unittest
+	$(COMPC) -include-sources+=unittest.proto.as3,as3 -output=test.swc
 
 descriptor.proto.as3/google: \
 	$(PROTOBUF_DIR)/src/$(PROTOC) \
@@ -93,14 +94,14 @@ descriptor.proto.as3/google: \
 	"$(PROTOBUF_DIR)/src/google/protobuf/descriptor.proto"
 	touch $@
 
-test_proto/protobuf_unittest: \
+unittest.proto.as3/protobuf_unittest: \
 	$(PROTOBUF_DIR)/src/$(PROTOC) \
 	classes/com/netease/protocGenAs3/Main.class \
-	| test_proto
+	| unittest.proto.as3
 	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
 	--plugin=protoc-gen-as3=bin/protoc-gen-as3 \
 	"--proto_path=$(PROTOBUF_DIR)/src" \
-	--as3_out=test_proto \
+	--as3_out=unittest.proto.as3 \
 	$(PROTOBUF_DIR)/src/google/protobuf/unittest.proto \
 	$(PROTOBUF_DIR)/src/google/protobuf/unittest_import.proto
 	touch $@

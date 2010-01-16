@@ -1,9 +1,8 @@
 glob:*.class
 glob:.*
-glob:proto
-glob:classes
 glob:test.swc
-glob:test_proto
 glob:dist/
 glob:dist.tar.gz
 glob:descriptor.proto.as3/
+glob:unittest.proto.as3/
+glob:plugin.proto.java/

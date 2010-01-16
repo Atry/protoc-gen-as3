@@ -7,3 +7,4 @@ PATH_SEPARATOR=:
 endif
 PROTOC=protoc$(EXE)
 COMPC=compc$(EXE)
+MXMLC=mxmlc$(EXE)

@@ -40,8 +40,8 @@ dist/protoc-gen-as3.bat: | dist
 	echo -n -e '@echo off\r\ncd %~dp0\r\njava -cp protobuf-java-2.3.0.jar -jar protoc-gen-as3.jar' > $@
 	chmod +x $@
 
-dist/protobuf.swc: as3 descriptor.proto.as3/google | dist
-	$(COMPC) -include-sources+=as3,descriptor.proto.as3 -output=$@
+dist/protobuf.swc: as3 | dist
+	$(COMPC) -include-sources+=as3 -output=$@
 
 dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class | dist
 	jar ecf com/netease/protocGenAs3/Main $@ classes
@@ -79,9 +79,18 @@ clean:
 	rm -fr descriptor.proto.as3
 	rm -fr plugin.proto.java
 	rm -fr test.swc
+	rm -fr test.swf
 
-test.swc: unittest.proto.as3/protobuf_unittest
-	$(COMPC) -include-sources+=unittest.proto.as3,as3 -output=test.swc
+test: test.swf
+	echo -e 'c\r\nq' | fdb.exe $<
+
+test.swf: test.swc test/Test.as dist/protobuf.swc
+	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \
+	-source-path+=test test/Test.as -debug
+
+test.swc: unittest.proto.as3/protobuf_unittest dist/protobuf.swc
+	$(COMPC) -include-sources+=unittest.proto.as3 \
+	-external-library-path+=dist/protobuf.swc -output=$@
 
 descriptor.proto.as3/google: \
 	$(PROTOBUF_DIR)/src/$(PROTOC) \
@@ -106,4 +115,4 @@ unittest.proto.as3/protobuf_unittest: \
 	$(PROTOBUF_DIR)/src/google/protobuf/unittest_import.proto
 	touch $@
 
-.PHONY: plugin all clean
+.PHONY: plugin all clean test

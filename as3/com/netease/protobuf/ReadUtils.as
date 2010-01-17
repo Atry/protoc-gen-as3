@@ -79,7 +79,10 @@ package com.netease.protobuf {
 		}
 		public static function read_TYPE_BYTES(input:IDataInput):ByteArray {
 			const result:ByteArray = new ByteArray
-			input.readBytes(result, 0, read_TYPE_UINT32(input))
+			const length:uint = read_TYPE_UINT32(input)
+			if (length > 0) {
+				input.readBytes(result, 0, length)
+			}
 			return result
 		}
 		public static function read_TYPE_UINT32(input:IDataInput):uint {
@@ -120,16 +123,14 @@ package com.netease.protobuf {
 		}
 		public static function readPackedRepeated(input:IDataInput,
 				readFuntion:Function, value:Array):void {
-			const ba:ByteArray = new ByteArray
-			input.readBytes(ba, 0, read_TYPE_UINT32(input))
+			const ba:ByteArray = read_TYPE_BYTES(input)
 			while (ba.bytesAvailable > 0) {
 				value.push(readFuntion(ba))
 			}
 		}
 		public static function readPackedRepeatedMessage(input:IDataInput,
 				c:Class, value:Array):void {
-			const ba:ByteArray = new ByteArray
-			input.readBytes(ba, 0, read_TYPE_UINT32(input))
+			const ba:ByteArray = read_TYPE_BYTES(input)
 			while (ba.bytesAvailable > 0) {
 				var m:IExternalizable = new c
 				read_TYPE_MESSAGE(ba, m)

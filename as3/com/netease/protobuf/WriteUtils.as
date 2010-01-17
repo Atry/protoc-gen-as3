@@ -54,9 +54,16 @@ package com.netease.protobuf {
 			output.writeByte(value ? 1 : 0)
 		}
 		public static function write_TYPE_STRING(output:IDataOutput, value:String):void {
-			const ba:ByteArray = new ByteArray
-			ba.writeUTF(value)
-			write_TYPE_BYTES(output, ba)
+			var plb:PostposeLengthBuffer = output as PostposeLengthBuffer
+			if (plb == null) {
+				plb = new PostposeLengthBuffer
+			}
+			const i:uint = plb.beginBlock()
+			plb.writeUTF(value)
+			plb.endBlock(i)
+			if (plb != output) {
+				plb.toNormal(output)
+			}
 		}
 		public static function write_TYPE_BYTES(output:IDataOutput, value:ByteArray):void {
 			write_TYPE_UINT32(output, value.length)
@@ -90,19 +97,31 @@ package com.netease.protobuf {
 			output.writeBytes(varint)
 		}
 		public static function write_TYPE_MESSAGE(output:IDataOutput, value:IExternalizable):void {
-			const ba:ByteArray = new ByteArray
-			value.writeExternal(ba)
-			write_TYPE_INT32(output, ba.length)
-			output.writeBytes(ba)
+			var plb:PostposeLengthBuffer = output as PostposeLengthBuffer
+			if (plb == null) {
+				plb = new PostposeLengthBuffer
+			}
+			const i:uint = plb.beginBlock()
+			value.writeExternal(plb)
+			plb.endBlock(i)
+			if (plb != output) {
+				plb.toNormal(output)
+			}
 		}
 		public static function writePackedRepeated(output:IDataOutput,
 				writeFunction:Function, value:Array):void {
-			const ba:ByteArray = new ByteArray
-			for each (var element:* in value) {
-				writeFunction(ba, element)
+			var plb:PostposeLengthBuffer = output as PostposeLengthBuffer
+			if (plb == null) {
+				plb = new PostposeLengthBuffer
 			}
-			write_TYPE_INT32(output, ba.length)
-			output.writeBytes(ba)
+			const i:uint = plb.beginBlock()
+			for each (var element:* in value) {
+				writeFunction(plb, element)
+			}
+			plb.endBlock(i)
+			if (plb != output) {
+				plb.toNormal(output)
+			}
 		}
 	}
 }

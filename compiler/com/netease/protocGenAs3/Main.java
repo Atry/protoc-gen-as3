@@ -406,14 +406,10 @@ public final class Main {
 					children.get(value).fullName);
 			break;
 		case TYPE_BYTES:
-			sb.append("(function ():ByteArray { ");
-			sb.append("const ba:ByteArray = new ByteArray;");
-			sb.append("ba.writeMultiByte(");
-			sb.append("'");
+			sb.append("stringToByteArray(");
+			sb.append("\"");
 			sb.append(value);
-			sb.append("', 'iso-8859-1');");
-			sb.append("return ba;");
-			sb.append("})();\n");
+			sb.append("\")");
 			break;
 		default:
 			throw new IllegalArgumentException();
@@ -543,61 +539,64 @@ public final class Main {
 			assert(fdp.hasLabel());
 			switch (fdp.getLabel()) {
 			case LABEL_OPTIONAL:
+				content.append("\t\tprivate var ");
+				appendLowerCamelCase(content, fdp.getName());
+				content.append("_:");
+				content.append(getActionScript3Type(scope, fdp));
+				content.append(";\n");
+
 				if (isValueType(fdp.getType())) {
 					content.append("\t\tprivate var has");
 					appendUpperCamelCase(content, fdp.getName());
 					content.append("_:Boolean = false;\n");
-					content.append("\t\tpublic function get has");
-					appendUpperCamelCase(content, fdp.getName());
-					content.append("():Boolean {\n");
+				}
+				content.append("\t\tpublic function get has");
+				appendUpperCamelCase(content, fdp.getName());
+				content.append("():Boolean {\n");
+				if (isValueType(fdp.getType())) {
 					content.append("\t\t\treturn has");
 					appendUpperCamelCase(content, fdp.getName());
 					content.append("_;\n");
-					content.append("\t\t}\n");
-
-					content.append("\t\tprivate var ");
+				} else {
+					content.append("\t\t\treturn null != ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("_:");
-					content.append(getActionScript3Type(scope, fdp));
-					if (fdp.hasDefaultValue()) {
-						content.append(" = ");
-						appendDefaultValue(content, scope, fdp);
-					}
-					content.append(";\n");
+					content.append("_;\n");
+				}
+				content.append("\t\t}\n");
 
-					content.append("\t\tpublic function set ");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("(value:");
-					content.append(getActionScript3Type(scope, fdp));
-					content.append("):void {\n");
+				content.append("\t\tpublic function set ");
+				appendLowerCamelCase(content, fdp.getName());
+				content.append("(value:");
+				content.append(getActionScript3Type(scope, fdp));
+				content.append("):void {\n");
+				if (isValueType(fdp.getType())) {
 					content.append("\t\t\thas");
 					appendUpperCamelCase(content, fdp.getName());
 					content.append("_ = true;\n");
-					content.append("\t\t\t");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("_ = value;\n");
-					content.append("\t\t}\n");
-
-					content.append("\t\tpublic function get ");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("():");
-					content.append(getActionScript3Type(scope, fdp));
-					content.append(" {\n");
-					content.append("\t\t\treturn ");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("_;\n");
-					content.append("\t\t}\n");
-				} else {
-					content.append("\t\tpublic var ");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append(":");
-					content.append(getActionScript3Type(scope, fdp));
-					if (fdp.hasDefaultValue()) {
-						content.append(" = ");
-						appendDefaultValue(content, scope, fdp);
-					}
-					content.append(";\n");
 				}
+				content.append("\t\t\t");
+				appendLowerCamelCase(content, fdp.getName());
+				content.append("_ = value;\n");
+				content.append("\t\t}\n");
+
+				content.append("\t\tpublic function get ");
+				appendLowerCamelCase(content, fdp.getName());
+				content.append("():");
+				content.append(getActionScript3Type(scope, fdp));
+				content.append(" {\n");
+				if (fdp.hasDefaultValue()) {
+					content.append("\t\t\tif(!has");
+					appendUpperCamelCase(content, fdp.getName());
+					content.append(") {\n");
+					content.append("\t\t\t\treturn ");
+					appendDefaultValue(content, scope, fdp);
+					content.append(";\n");
+					content.append("\t\t\t}\n");
+				}
+				content.append("\t\t\treturn ");
+				appendLowerCamelCase(content, fdp.getName());
+				content.append("_;\n");
+				content.append("\t\t}\n");
 				break;
 			case LABEL_REQUIRED:
 				content.append("\t\tpublic var ");
@@ -631,13 +630,8 @@ public final class Main {
 			switch (fdp.getLabel()) {
 			case LABEL_OPTIONAL:
 				content.append("\t\t\tif (");
-				if (isValueType(fdp.getType())) {
-					content.append("has");
-					appendUpperCamelCase(content, fdp.getName());
-				} else {
-					appendLowerCamelCase(content, fdp.getName());
-					content.append(" != null");
-				}
+				content.append("has");
+				appendUpperCamelCase(content, fdp.getName());
 				content.append(") {\n");
 				content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));

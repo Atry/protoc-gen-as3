@@ -81,11 +81,7 @@ package com.netease.protobuf {
 			return function (output:IDataOutput,
 					object:Array, fieldNumber:uint):void {
 				WriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, fieldNumber)
-				const ba:ByteArray = new ByteArray
-				for each(var v:* in object[fieldNumber]) {
-					f(ba, v)
-				}
-				WriteUtils.write_TYPE_BYTES(output, ba)
+				WriteUtils.writePackedRepeated(output, f, object[fieldNumber])
 			}
 		}
 		public static function repeatedWriteFunction(wireType:uint, f:Function):Function {

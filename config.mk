@@ -8,3 +8,4 @@ endif
 PROTOC=protoc$(EXE)
 COMPC=compc$(EXE)
 MXMLC=mxmlc$(EXE)
+FDB=fdb$(EXE)

@@ -27,24 +27,24 @@ plugin.proto.java/google/protobuf/compiler/Plugin.java: \
 dist.tar.gz: dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
 	dist/protobuf.swc dist/README\
 	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
-	tar -zcf dist.tar.gz dist
+	tar -acf dist.tar.gz -C dist .
 
 dist/README: README | dist
 	cp README dist/README
 
 dist/protoc-gen-as3: | dist
-	echo -n -e '#!/bin/sh\ncd `dirname "$$0"`\njava -cp protobuf-java-2.3.0.jar -jar protoc-gen-as3.jar' > $@
+	echo '#!/bin/sh\ncd `dirname "$$0"`\njava -jar protoc-gen-as3.jar' > $@
 	chmod +x $@
 
 dist/protoc-gen-as3.bat: | dist
-	echo -n -e '@echo off\r\ncd %~dp0\r\njava -cp protobuf-java-2.3.0.jar -jar protoc-gen-as3.jar' > $@
+	echo '@echo off\r\ncd %~dp0\r\njava -jar protoc-gen-as3.jar' > $@
 	chmod +x $@
 
 dist/protobuf.swc: as3 | dist
 	$(COMPC) -include-sources+=as3 -output=$@
 
 dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class | dist
-	jar ecf com/netease/protocGenAs3/Main $@ classes
+	jar mcf MANIFEST.MF $@ -C classes .
 
 dist/protobuf-java-2.3.0.jar: \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \

@@ -59,7 +59,7 @@ package com.netease.protobuf {
 				plb = new PostposeLengthBuffer
 			}
 			const i:uint = plb.beginBlock()
-			plb.writeUTF(value)
+			plb.writeUTFBytes(value)
 			plb.endBlock(i)
 			if (plb != output) {
 				plb.toNormal(output)

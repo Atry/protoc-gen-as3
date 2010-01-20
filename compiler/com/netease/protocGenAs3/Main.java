@@ -11,7 +11,6 @@ package com.netease.protocGenAs3;
 import static google.protobuf.compiler.Plugin.*;
 import static com.google.protobuf.DescriptorProtos.*;
 import java.io.*;
-import java.util.regex.*;
 import java.util.*;
 import java.math.*;
 public final class Main {

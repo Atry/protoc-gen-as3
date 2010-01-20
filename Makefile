@@ -82,7 +82,7 @@ clean:
 	rm -fr test.swf
 
 test: test.swf
-	echo -e 'c\r\nq' | $(FDB) $<
+	echo c | $(FDB) $<
 
 test.swf: test.swc test/Test.as dist/protobuf.swc
 	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \

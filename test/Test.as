@@ -75,6 +75,7 @@ package {
 			test(t2)
 
 			const t3:TestAllTypes = new TestAllTypes
+			t3.optionalString = "111foo"
 			t3.defaultNestedEnum = NestedEnum.FOO
 			t3.repeatedNestedMessage.push(new NestedMessage)
 			t3.repeatedNestedMessage.push(new NestedMessage)

@@ -115,8 +115,8 @@ package com.netease.protobuf {
 				plb = new PostposeLengthBuffer
 			}
 			const i:uint = plb.beginBlock()
-			for each (var element:* in value) {
-				writeFunction(plb, element)
+			for (var j:uint = 0; j < value.length; j++) {
+				writeFunction(plb, value[j])
 			}
 			plb.endBlock(i)
 			if (plb != output) {

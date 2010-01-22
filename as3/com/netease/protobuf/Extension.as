@@ -38,17 +38,6 @@ package com.netease.protobuf {
 				ReadUtils.readPackedRepeated(input, f, a)
 			}
 		}
-		public static function packedRepeatedMessageReadFunction(c:Class):Function {
-			return function (input:IDataInput,
-					object:Array, fieldNumber:uint):void {
-				var a:Array = object[fieldNumber]
-				if (a == null) {
-					a = []
-					object[fieldNumber] = a
-				}
-				ReadUtils.readPackedRepeatedMessage(input, c, a)
-			}
-		}
 		public static function repeatedMessageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
 					object:Array, fieldNumber:uint):void {
@@ -87,9 +76,10 @@ package com.netease.protobuf {
 		public static function repeatedWriteFunction(wireType:uint, f:Function):Function {
 			return function (output:IDataOutput,
 					object:Array, fieldNumber:uint):void {
-				for each(var v:* in object[fieldNumber]) {
+				const field:Array = object[fieldNumber]
+				for (var i:uint = 0; i < field.length; i++) {
 					WriteUtils.writeTag(output, wireType, fieldNumber)
-					f(output, v)
+					f(output, field[i])
 				}
 			}
 		}

@@ -311,11 +311,8 @@ public final class Main {
 				content.append("Extension.messageReadFunction(");
 				break;
 			case LABEL_REPEATED:
-				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
-					content.append("Extension.packedRepeatedMessageReadFunction(");
-				} else {
-					content.append("Extension.repeatedMessageReadFunction(");
-				}
+				assert(!(fdp.hasOptions() && fdp.getOptions().getPacked()));
+				content.append("Extension.repeatedMessageReadFunction(");
 				break;
 			}
 			content.append(getActionScript3Type(scope, fdp));
@@ -673,13 +670,15 @@ public final class Main {
 					content.append(");\n");
 					content.append("\t\t\t}\n");
 				} else {
-					content.append("\t\t\tfor each(var ");
+					content.append("\t\t\tfor (var ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("Element:");
-					content.append(getActionScript3Type(scope, fdp));
-					content.append(" in ");
+					content.append("Index:uint = 0; ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append(") {\n");
+					content.append("Index < ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(".length; ++");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append("Index) {\n");
 					content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.");
 					content.append(getActionScript3WireType(fdp.getType()));
 					content.append(", ");
@@ -689,7 +688,9 @@ public final class Main {
 					content.append(fdp.getType().name());
 					content.append("(output, ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("Element);\n");
+					content.append("[");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append("Index]);\n");
 					content.append("\t\t\t}\n");
 				}
 				break;
@@ -772,19 +773,13 @@ public final class Main {
 					content.append("\t\t\t\t\t++");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append("Count;\n");
-					if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
-						content.append("\t\t\t\t\tReadUtils.readPackedRepeatedMessage(input, ");
-						content.append(getActionScript3Type(scope, fdp));
-						content.append(", ");
-						appendLowerCamelCase(content, fdp.getName());
-						content.append(");\n");
-					} else {
-						content.append("\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read_");
-						content.append(fdp.getType().name());
-						content.append(", ");
-						appendLowerCamelCase(content, fdp.getName());
-						content.append(");\n");
-					}
+					assert(fdp.getType() !=
+							FieldDescriptorProto.Type.TYPE_MESSAGE);
+					content.append("\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read_");
+					content.append(fdp.getType().name());
+					content.append(", ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(");\n");
 				} else {
 					content.append("\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());

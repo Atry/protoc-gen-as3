@@ -1,0 +1,9 @@
+glob:*.class
+glob:.*
+glob:test.swc
+glob:test.swf
+glob:dist/
+glob:dist.tar.gz
+glob:descriptor.proto.as3/
+glob:unittest.proto.as3/
+glob:plugin.proto.java/

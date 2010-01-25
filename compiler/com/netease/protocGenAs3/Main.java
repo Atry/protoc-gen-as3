@@ -698,7 +698,11 @@ public final class Main {
 		}
 		if (scope.proto.getExtensionRangeCount() > 0) {
 			content.append("\t\t\tfor (var tagNumber:* in this) {\n");
-			content.append("\t\t\t\textensionWriteFunctions[tagNumber](output, this, tagNumber);\n");
+			content.append("\t\t\t\tvar writeFunction:Function = extensionWriteFunctions[tagNumber];\n");
+			content.append("\t\t\t\tif (writeFunction == null) {\n");
+			content.append("\t\t\t\t\tthrow new IOError('Attemp to write an unknown field.')\n");
+			content.append("\t\t\t\t}\n");
+			content.append("\t\t\t\twriteFunction(output, this, tagNumber);\n");
 			content.append("\t\t\t}\n");
 		}
 		content.append("\t\t}\n");
@@ -741,7 +745,7 @@ public final class Main {
 				content.append("\t\t\t\t\tif (");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append("Count != 0) {\n");
-				content.append("\t\t\t\t\t\tthrow new IOError();\n");
+				content.append("\t\t\t\t\t\tthrow new IOError('Bad data format.');\n");
 				content.append("\t\t\t\t\t}\n");
 				content.append("\t\t\t\t\t++");
 				appendLowerCamelCase(content, fdp.getName());
@@ -768,7 +772,7 @@ public final class Main {
 					content.append("\t\t\t\t\tif (");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append("Count != 0) {\n");
-					content.append("\t\t\t\t\t\tthrow new IOError();\n");
+					content.append("\t\t\t\t\t\tthrow new IOError('Bad data format.');\n");
 					content.append("\t\t\t\t\t}\n");
 					content.append("\t\t\t\t\t++");
 					appendLowerCamelCase(content, fdp.getName());
@@ -817,7 +821,7 @@ public final class Main {
 				content.append("\t\t\tif (");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append("Count != 1) {\n");
-				content.append("\t\t\t\tthrow new IOError();\n");
+				content.append("\t\t\t\tthrow new IOError('Bad data format.');\n");
 				content.append("\t\t\t}\n");
 				break;
 			}

@@ -1,3 +1,2 @@
-Manifest-Version: 1.0
 Main-Class: com/netease/protocGenAs3/Main
 Class-Path: protobuf-java-2.3.0.jar

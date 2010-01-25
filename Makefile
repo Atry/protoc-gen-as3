@@ -45,7 +45,8 @@ dist/protoc-gen-as3.bat: | dist
 dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*.as) | dist
 	$(COMPC) -include-sources+=as3 -output=$@
 
-dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class | dist
+dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class \
+	MANIFEST.MF | dist
 	jar mcf MANIFEST.MF $@ -C classes .
 
 dist/protobuf-java-2.3.0.jar: \

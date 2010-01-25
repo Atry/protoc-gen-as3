@@ -55,6 +55,7 @@ package {
 				s += " "
 			}
 			trace(s)
+			trace(input)
 			ba.position = 0
 			const output:IExternalizable =
 					new (getDefinitionByName(getQualifiedClassName(input)))

@@ -12,30 +12,31 @@ package com.netease.protobuf {
 	public function messageToString(message:Object):String {
 		var s:String = getQualifiedClassName(message) + "(\n"
 		const descriptor:XML = describeType(message)
-		function testField(name:String):void {
-			var hasField:String = "has" + name.charAt(0).toUpperCase() + name.substr(1)
-			if (descriptor.accessor.(@name == hasField).length() != 0 && !message[hasField]) {
-				return
-			}
-			var field:* = message[name]
-			if (field.constructor == Array && field.length == 0) {
-				return
-			}
-			s += name + "=" + message[name] + ";\n"
-		} 
 		for each(var getter:String in descriptor.accessor.(@access != "writeonly").@name) {
 			if (getter.search(/^has(.)(.*)$/) != -1) {
 				continue
 			}
-			testField(getter)
+			s += fieldToString(message, descriptor, getter)
 		}
 		for each(var field:String in descriptor.variable.@name) {
-			testField(field)
+			s += fieldToString(message, descriptor, field)
 		}
-		for (var k:String in message) {
+		for (var k:* in message) {
 			s += k + "=" + message[k] + ";\n"
 		}
 		s += ")"
 		return s
 	}
+}
+
+function fieldToString(message:Object, descriptor:XML, name:String):String {
+	var hasField:String = "has" + name.charAt(0).toUpperCase() + name.substr(1)
+	if (descriptor.accessor.(@name == hasField).length() != 0 && !message[hasField]) {
+		return ""
+	}
+	var field:* = message[name]
+	if (field.constructor == Array && field.length == 0) {
+		return ""
+	}
+	return name + "=" + message[name] + ";\n"
 }

@@ -10,6 +10,7 @@
 package com.netease.protocGenAs3;
 import static google.protobuf.compiler.Plugin.*;
 import static com.google.protobuf.DescriptorProtos.*;
+import com.google.protobuf.*;
 import java.io.*;
 import java.util.*;
 import java.math.*;
@@ -482,6 +483,10 @@ public final class Main {
 			content.append(importType);
 			content.append(";\n");
 		}
+		if (scope.proto.hasOptions() &&
+				scope.proto.getOptions().getExtension(Options.as3Bindable)) {
+			content.append("\t[Bindable]\n");
+		}
 		if (scope.proto.getExtensionRangeCount() > 0) {
 			content.append("\tpublic dynamic final class ");
 			content.append(scope.proto.getName());
@@ -942,8 +947,10 @@ public final class Main {
 		);
 	}
 	public static void main(String[] args) throws IOException {
+		ExtensionRegistry registry = ExtensionRegistry.newInstance();
+		Options.registerAllExtensions(registry);
 		CodeGeneratorRequest request = CodeGeneratorRequest.
-				parseFrom(System.in);
+				parseFrom(System.in, registry);
 		CodeGeneratorResponse response;
 		try {
 			Scope<Object> root = buildScopeTree(request);

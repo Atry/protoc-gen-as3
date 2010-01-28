@@ -7,3 +7,4 @@ glob:dist.tar.gz
 glob:descriptor.proto.as3/
 glob:unittest.proto.as3/
 glob:plugin.proto.java/
+glob:options.proto.java/

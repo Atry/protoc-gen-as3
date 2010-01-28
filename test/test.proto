@@ -1,0 +1,9 @@
+package test;
+import "options.proto";
+message AAA {
+	option (as3_bindable) = true;
+}
+message BBB {
+	option (as3_bindable) = true;
+	optional AAA aaa = 1;
+}

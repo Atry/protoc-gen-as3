@@ -123,7 +123,7 @@ public final class Main {
 			FieldDescriptorProto efdp, boolean export) {
 		StringBuilder sb = new StringBuilder();
 		appendLowerCamelCase(sb, efdp.getName());
-		scope.addChild(sb.toString(), efdp, true);
+		scope.addChild(sb.toString(), efdp, export);
 	}
 	private static void addEnumToScope(Scope<?> scope, EnumDescriptorProto edp,
 			boolean export) {

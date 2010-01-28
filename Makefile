@@ -6,7 +6,11 @@
 # as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 include config.mk
 
-all: classes/com/netease/protocGenAs3/Main.class dist/protobuf.swc 
+PROTOC_GEN_AS3=dist/protoc-gen-as3$(BAT)
+
+all: dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
+	dist/protobuf.swc dist/README dist/options.proto\
+	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
 
 classes/com/netease/protocGenAs3/Main.class: \
 	plugin.proto.java/google/protobuf/compiler/Plugin.java \
@@ -25,9 +29,7 @@ plugin.proto.java/google/protobuf/compiler/Plugin.java: \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=plugin.proto.java \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
 
-dist.tar.gz: dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
-	dist/protobuf.swc dist/README dist/options.proto\
-	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
+dist.tar.gz: all
 	tar -acf dist.tar.gz -C dist .
 
 dist/README: README | dist
@@ -35,17 +37,21 @@ dist/README: README | dist
 
 dist/options.proto: options.proto | dist
 	cp $< $@
-dist/protoc-gen-as3: | dist
+
+dist/protoc-gen-as3: dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar \
+	| dist
 	(echo '#!/bin/sh';\
 	echo 'cd `dirname "$$0"` && java -jar protoc-gen-as3.jar') > $@
 	chmod +x $@
 
-dist/protoc-gen-as3.bat: | dist
+dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar \
+	| dist
 	(echo '@cd %~dp0';\
 	echo '@java -jar protoc-gen-as3.jar') > $@
 	chmod +x $@
 
-dist/protobuf.swc: descriptor.proto.as3/google $(wildcard as3/com/netease/protobuf/*.as) | dist
+dist/protobuf.swc: descriptor.proto.as3/google \
+	$(wildcard as3/com/netease/protobuf/*.as) | dist
 	$(COMPC) -include-sources+=as3,descriptor.proto.as3 -output=$@
 
 dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class \
@@ -71,11 +77,6 @@ $(PROTOBUF_DIR)/configure:
 
 $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar: $(PROTOBUF_DIR)/src
 	cd $(PROTOBUF_DIR)/java && mvn package
-
-plugin: classes/com/netease/protocGenAs3/Main.class
-	java -ea \
-	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar$(PATH_SEPARATOR)classes" \
-	com.netease.protocGenAs3.Main
 
 clean:
 	rm -fr dist
@@ -111,10 +112,10 @@ options.proto.java/com: \
 
 descriptor.proto.as3/google: \
 	$(PROTOBUF_DIR)/src/$(PROTOC) \
-	classes/com/netease/protocGenAs3/Main.class \
+	$(PROTOC_GEN_AS3) \
 	| descriptor.proto.as3
 	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
-	--plugin=protoc-gen-as3=bin/protoc-gen-as3 \
+	--plugin=protoc-gen-as3=$(PROTOC_GEN_AS3) \
 	"--proto_path=$(PROTOBUF_DIR)/src" \
 	--as3_out=descriptor.proto.as3 \
 	"$(PROTOBUF_DIR)/src/google/protobuf/descriptor.proto"
@@ -122,10 +123,10 @@ descriptor.proto.as3/google: \
 
 unittest.proto.as3/protobuf_unittest: \
 	$(PROTOBUF_DIR)/src/$(PROTOC) \
-	classes/com/netease/protocGenAs3/Main.class \
+	$(PROTOC_GEN_AS3) \
 	| unittest.proto.as3
 	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
-	--plugin=protoc-gen-as3=bin/protoc-gen-as3 \
+	--plugin=protoc-gen-as3=$(PROTOC_GEN_AS3) \
 	--proto_path=. --proto_path=test \
 	"--proto_path=$(PROTOBUF_DIR)/src" \
 	--as3_out=unittest.proto.as3 \

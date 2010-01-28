@@ -1,5 +1,6 @@
 PROTOBUF_DIR=../protobuf-2.3.0
 ifeq ($(OS), Windows_NT)
+BAT=.bat
 EXE=.exe
 PATH_SEPARATOR=;
 else

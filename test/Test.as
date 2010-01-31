@@ -82,11 +82,15 @@ package {
 			t3.repeatedNestedMessage.push(new NestedMessage)
 			t3.repeatedNestedMessage[1].bb = 123
 			t3.optionalInt32 = -23412413
+			t3.optionalDouble = 123.456
 			t3.repeatedNestedEnum.push(NestedEnum.FOO)
 			t3.repeatedNestedEnum.push(NestedEnum.BAR)
 			t3.optionalNestedMessage = new NestedMessage
 			t3.optionalNestedMessage.bb = 234
 			test(t3)
+			const t4:TestPackedTypes = new TestPackedTypes
+			t4.packedDouble = [1]
+			test(t4)
 
 			trace("All tests pass.")
 			fscommand("quit")

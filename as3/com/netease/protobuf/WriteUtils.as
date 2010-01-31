@@ -19,9 +19,11 @@ package com.netease.protobuf {
 			output.writeBytes(varint)
 		}
 		public static function write_TYPE_DOUBLE(output:IDataOutput, value:Number):void {
+			output.endian = Endian.LITTLE_ENDIAN
 			output.writeDouble(value)
 		}
 		public static function write_TYPE_FLOAT(output:IDataOutput, value:Number):void {
+			output.endian = Endian.LITTLE_ENDIAN
 			output.writeFloat(value)
 		}
 		public static function write_TYPE_INT64(output:IDataOutput, value:Int64):void {

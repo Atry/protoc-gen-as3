@@ -39,9 +39,11 @@ package com.netease.protobuf {
 			return tag
 		}
 		public static function read_TYPE_DOUBLE(input:IDataInput):Number {
+			input.endian = Endian.LITTLE_ENDIAN
 			return input.readDouble()
 		}
 		public static function read_TYPE_FLOAT(input:IDataInput):Number {
+			input.endian = Endian.LITTLE_ENDIAN
 			return input.readFloat()
 		}
 		public static function read_TYPE_INT64(input:IDataInput):Int64 {
@@ -62,12 +64,14 @@ package com.netease.protobuf {
 			return new VarintReader(input).read(32)
 		}
 		public static function read_TYPE_FIXED64(input:IDataInput):Int64 {
+			input.endian = Endian.LITTLE_ENDIAN
 			const result:Int64 = new Int64
 			result.low = input.readUnsignedInt()
 			result.high = input.readInt()
 			return result
 		}
 		public static function read_TYPE_FIXED32(input:IDataInput):int {
+			input.endian = Endian.LITTLE_ENDIAN
 			return input.readInt()
 		}
 		public static function read_TYPE_BOOL(input:IDataInput):Boolean {
@@ -95,6 +99,7 @@ package com.netease.protobuf {
 			return (n << 1) ^ (n >>> 31)
 		}
 		public static function read_TYPE_SFIXED32(input:IDataInput):int {
+			input.endian = Endian.LITTLE_ENDIAN
 			return sintToInt(input.readInt())
 		}
 		public static function read_TYPE_SFIXED64(input:IDataInput):Int64 {

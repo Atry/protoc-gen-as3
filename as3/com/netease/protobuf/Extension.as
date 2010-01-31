@@ -12,39 +12,43 @@ package com.netease.protobuf {
 	public final class Extension {
 		public static function repeatedReadFunction(f:Function):Function {
 			return function (input:IDataInput,
-					object:Array, fieldNumber:uint):void {
-				var a:Array = object[fieldNumber]
+					object:Array, tag:Tag):void {
+				var a:Array = object[tag.number]
 				if (a == null) {
 					a = []
-					object[fieldNumber] = a
+					object[tag.number] = a
 				}
 				a.push(f(input))
 			}
 		}
 		public static function readFunction(f:Function):Function {
 			return function (input:IDataInput,
-					object:Array, fieldNumber:uint):void {
-				object[fieldNumber] = f(input)
+					object:Array, tag:Tag):void {
+				object[tag.number] = f(input)
 			}
 		}
 		public static function packedRepeatedReadFunction(f:Function):Function {
 			return function (input:IDataInput,
-					object:Array, fieldNumber:uint):void {
-				var a:Array = object[fieldNumber]
+					object:Array, tag:Tag):void {
+				var a:Array = object[tag.number]
 				if (a == null) {
 					a = []
-					object[fieldNumber] = a
+					object[tag.number] = a
 				}
-				ReadUtils.readPackedRepeated(input, f, a)
+				if (tag.wireType == WireType.LENGTH_DELIMITED) {
+					ReadUtils.readPackedRepeated(input, f, a)
+				} else {
+					a.push(f(input))
+				}
 			}
 		}
 		public static function repeatedMessageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
-					object:Array, fieldNumber:uint):void {
-				var a:Array = object[fieldNumber]
+					object:Array, tag:Tag):void {
+				var a:Array = object[tag.number]
 				if (a == null) {
 					a = []
-					object[fieldNumber] = a
+					object[tag.number] = a
 				}
 				const m:IExternalizable = new c
 				ReadUtils.read_TYPE_MESSAGE(input, m)
@@ -53,10 +57,10 @@ package com.netease.protobuf {
 		}
 		public static function messageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
-					object:Array, fieldNumber:uint):void {
+					object:Array, tag:Tag):void {
 				const m:IExternalizable = new c
 				ReadUtils.read_TYPE_MESSAGE(input, m)
-				object[fieldNumber] = m
+				object[tag.number] = m
 			}
 		}
 		public static function writeFunction(wireType:uint, f:Function):Function {

@@ -326,9 +326,24 @@ public final class Main {
 				content.append("Extension.readFunction(");
 				break;
 			case LABEL_REPEATED:
-				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
+				switch (fdp.getType()) {
+					case TYPE_DOUBLE:
+					case TYPE_FLOAT:
+					case TYPE_BOOL:
+					case TYPE_INT32:
+					case TYPE_FIXED32:
+					case TYPE_UINT32:
+					case TYPE_SFIXED32:
+					case TYPE_SINT32:
+					case TYPE_INT64:
+					case TYPE_FIXED64:
+					case TYPE_UINT64:
+					case TYPE_SFIXED64:
+					case TYPE_SINT64:
+					case TYPE_ENUM:
 					content.append("Extension.packedRepeatedReadFunction(");
-				} else {
+					break;
+					default:
 					content.append("Extension.repeatedReadFunction(");
 				}
 				break;
@@ -718,13 +733,6 @@ public final class Main {
 				continue;
 			}
 			switch (fdp.getLabel()) {
-			case LABEL_REPEATED:
-				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
-					content.append("\t\t\tvar ");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("Count:uint = 0;\n");
-				}
-				break;
 			case LABEL_OPTIONAL:
 			case LABEL_REQUIRED:
 				content.append("\t\t\tvar ");
@@ -773,34 +781,40 @@ public final class Main {
 				}
 				break;
 			case LABEL_REPEATED:
-				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
-					content.append("\t\t\t\t\tif (");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("Count != 0) {\n");
-					content.append("\t\t\t\t\t\tthrow new IOError('Bad data format.');\n");
-					content.append("\t\t\t\t\t}\n");
-					content.append("\t\t\t\t\t++");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("Count;\n");
-					assert(fdp.getType() !=
-							FieldDescriptorProto.Type.TYPE_MESSAGE);
-					content.append("\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read_");
+				switch (fdp.getType()) {
+					case TYPE_DOUBLE:
+					case TYPE_FLOAT:
+					case TYPE_BOOL:
+					case TYPE_INT32:
+					case TYPE_FIXED32:
+					case TYPE_UINT32:
+					case TYPE_SFIXED32:
+					case TYPE_SINT32:
+					case TYPE_INT64:
+					case TYPE_FIXED64:
+					case TYPE_UINT64:
+					case TYPE_SFIXED64:
+					case TYPE_SINT64:
+					case TYPE_ENUM:
+					content.append("\t\t\t\t\tif (tag.wireType == WireType.LENGTH_DELIMITED) {\n");
+					content.append("\t\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read_");
 					content.append(fdp.getType().name());
 					content.append(", ");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(");\n");
-				} else {
-					content.append("\t\t\t\t\t");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append(".push(ReadUtils.read_");
-					content.append(fdp.getType().name());
-					content.append("(input");
-					if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
-						content.append(", new ");
-						content.append(getActionScript3Type(scope, fdp));
-					}
-					content.append("));\n");
+					content.append("\t\t\t\t\tbreak;\n");
+					content.append("\t\t\t\t\t}\n");
 				}
+				content.append("\t\t\t\t\t");
+				appendLowerCamelCase(content, fdp.getName());
+				content.append(".push(ReadUtils.read_");
+				content.append(fdp.getType().name());
+				content.append("(input");
+				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+					content.append(", new ");
+					content.append(getActionScript3Type(scope, fdp));
+				}
+				content.append("));\n");
 				break;
 			}
 			content.append("\t\t\t\t\tbreak;\n");
@@ -809,7 +823,7 @@ public final class Main {
 		if (scope.proto.getExtensionRangeCount() > 0) {
 			content.append("\t\t\t\t\tvar readFunction:Function = extensionReadFunctions[tag.number];\n");
 			content.append("\t\t\t\t\tif (readFunction != null) {\n");
-			content.append("\t\t\t\t\t\treadFunction(input, this, tag.number);\n");
+			content.append("\t\t\t\t\t\treadFunction(input, this, tag);\n");
 			content.append("\t\t\t\t\t\tbreak;\n");
 			content.append("\t\t\t\t\t}\n");
 		}

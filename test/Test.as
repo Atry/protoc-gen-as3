@@ -57,8 +57,7 @@ package {
 			trace(s)
 			trace(input)
 			ba.position = 0
-			const output:IExternalizable =
-					new (getDefinitionByName(getQualifiedClassName(input)))
+			const output:IExternalizable = new (Object(input).constructor)
 			output.readExternal(ba)
 			assertSame(input, output)
 		}

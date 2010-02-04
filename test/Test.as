@@ -13,6 +13,7 @@ package {
 	import flash.display.*
 	import flash.utils.*
 	import flash.system.*
+	import com.netease.protobuf.*
 	include "../unittest.proto.as3/initializer.as.inc"
 	public final class Test extends Sprite {
 		private static function assert(b:Boolean,
@@ -90,6 +91,12 @@ package {
 			const t4:TestPackedTypes = new TestPackedTypes
 			t4.packedDouble = [1]
 			test(t4)
+			const t5:TestAllTypes = new TestAllTypes
+			t5.optionalSint32 = -3
+			test(t5)
+			const t6:TestAllTypes = new TestAllTypes
+			t6.optionalSint64 = new Int64(-3, -1)
+			test(t6)
 
 			trace("All tests pass.")
 			fscommand("quit")

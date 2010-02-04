@@ -96,7 +96,7 @@ package com.netease.protobuf {
 			return read_TYPE_INT32(input)
 		}
 		private static function sintToInt(n:int):int {
-			return (n << 1) ^ (n >>> 31)
+			return (n >>> 1) ^ -(n & 1)
 		}
 		public static function read_TYPE_SFIXED32(input:IDataInput):int {
 			input.endian = Endian.LITTLE_ENDIAN
@@ -106,8 +106,8 @@ package com.netease.protobuf {
 			const result:Int64 = read_TYPE_FIXED64(input)
 			const low:uint = result.low
 			const high:uint = result.high
-			result.low = (high >>> 31) ^ (low << 1) 
-			result.high = (low >>> 31) ^ (high << 1)
+			result.low = (high >> 1) ^ (low << 31) 
+			result.high = (low >> 1) ^ (high << 31)
 			return result
 		}
 		public static function read_TYPE_SINT32(input:IDataInput):int {
@@ -117,8 +117,8 @@ package com.netease.protobuf {
 			const result:Int64 = read_TYPE_INT64(input)
 			const low:uint = result.low
 			const high:uint = result.high
-			result.low = (high >>> 31) ^ (low << 1) 
-			result.high = (low >>> 31) ^ (high << 1)
+			result.low = (high >> 1) ^ (low << 31) 
+			result.high = (low >> 1) ^ (high << 31)
 			return result
 		}
 		public static function read_TYPE_MESSAGE(input:IDataInput,

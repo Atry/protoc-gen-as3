@@ -81,20 +81,20 @@ package com.netease.protobuf {
 			write_TYPE_INT32(output, value)
 		}
 		public static function write_TYPE_SFIXED32(output:IDataOutput, value:int):void {
-			write_TYPE_FIXED32(output, (value >> 31) ^ (value << 1))
+			write_TYPE_FIXED32(output, ZigZag.encode32(value))
 		}
 		public static function write_TYPE_SFIXED64(output:IDataOutput, value:Int64):void {
 			output.endian = Endian.LITTLE_ENDIAN
-			output.writeUnsignedInt((value.high >> 31) ^ (value.low << 1));
-			output.writeUnsignedInt((value.low >>> 31) | (0xfffffffe & (value.high >> 31) ^ (value.high << 1)));
+			output.writeUnsignedInt(ZigZag.encode64low(value.low, value.high))
+			output.writeUnsignedInt(ZigZag.encode64high(value.low, value.high))
 		}
 		public static function write_TYPE_SINT32(output:IDataOutput, value:int):void {
-			write_TYPE_UINT32(output, (value >> 31) ^ (value << 1))
+			write_TYPE_UINT32(output, ZigZag.encode32(value))
 		}
 		public static function write_TYPE_SINT64(output:IDataOutput, value:Int64):void {
 			const varint:VarintWriter = new VarintWriter;
-			varint.write((value.high >> 31) ^ (value.low << 1), 32);
-			varint.write((value.low >>> 31) | (0xfffffffe & (value.high >> 31) ^ (value.high << 1)), 32);
+			varint.write(ZigZag.encode64low(value.low, value.high), 32)
+			varint.write(ZigZag.encode64high(value.low, value.high), 32)
 			varint.end()
 			output.writeBytes(varint)
 		}

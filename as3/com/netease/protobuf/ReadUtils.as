@@ -95,30 +95,27 @@ package com.netease.protobuf {
 		public static function read_TYPE_ENUM(input:IDataInput):int {
 			return read_TYPE_INT32(input)
 		}
-		private static function sintToInt(n:int):int {
-			return (n >>> 1) ^ -(n & 1)
-		}
 		public static function read_TYPE_SFIXED32(input:IDataInput):int {
 			input.endian = Endian.LITTLE_ENDIAN
-			return sintToInt(input.readInt())
+			return ZigZag.decode32(input.readInt())
 		}
 		public static function read_TYPE_SFIXED64(input:IDataInput):Int64 {
 			const result:Int64 = read_TYPE_FIXED64(input)
 			const low:uint = result.low
 			const high:uint = result.high
-			result.low = (high >> 1) ^ (low << 31) 
-			result.high = (low >> 1) ^ (high << 31)
+			result.low = ZigZag.decode64low(low, high)
+			result.high = ZigZag.decode64high(low, high)
 			return result
 		}
 		public static function read_TYPE_SINT32(input:IDataInput):int {
-			return sintToInt(read_TYPE_INT32(input))
+			return ZigZag.decode32(read_TYPE_INT32(input))
 		}
 		public static function read_TYPE_SINT64(input:IDataInput):Int64 {
 			const result:Int64 = read_TYPE_INT64(input)
 			const low:uint = result.low
 			const high:uint = result.high
-			result.low = (high >> 1) ^ (low << 31) 
-			result.high = (low >> 1) ^ (high << 31)
+			result.low = ZigZag.decode64low(low, high)
+			result.high = ZigZag.decode64high(low, high)
 			return result
 		}
 		public static function read_TYPE_MESSAGE(input:IDataInput,

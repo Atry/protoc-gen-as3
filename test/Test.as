@@ -87,15 +87,17 @@ package {
 			t3.repeatedNestedEnum.push(NestedEnum.BAR)
 			t3.optionalNestedMessage = new NestedMessage
 			t3.optionalNestedMessage.bb = 234
+			t3.optionalSint32 = -3
+			t3.optionalSint64 = new Int64(199999999, 199999999)
 			test(t3)
 			const t4:TestPackedTypes = new TestPackedTypes
 			t4.packedDouble = [1]
 			test(t4)
 			const t5:TestAllTypes = new TestAllTypes
-			t5.optionalSint32 = -3
+			t5.optionalSint32 = -199999999
 			test(t5)
 			const t6:TestAllTypes = new TestAllTypes
-			t6.optionalSint64 = new Int64(-3, -1)
+			t6.optionalSint64 = new Int64(uint(-199999999), -199999999)
 			test(t6)
 
 			trace("All tests pass.")

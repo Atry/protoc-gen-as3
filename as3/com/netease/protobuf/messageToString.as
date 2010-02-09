@@ -35,8 +35,8 @@ function fieldToString(message:Object, descriptor:XML, name:String):String {
 		return ""
 	}
 	var field:* = message[name]
-	if (field.constructor == Array && field.length == 0) {
+	if (field != null && field.constructor == Array && field.length == 0) {
 		return ""
 	}
-	return name + "=" + message[name] + ";\n"
+	return name + "=" + field + ";\n"
 }

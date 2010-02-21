@@ -9,6 +9,7 @@
 
 package com.netease.protobuf {
 	import flash.utils.*
+	import flash.errors.*
 	public final class ReadUtils {
 		public static function skip(input:IDataInput, wireType:uint):void {
 			switch (wireType) {
@@ -28,7 +29,7 @@ package com.netease.protobuf {
 				input.readInt()
 				break
 			default:
-				throw new ArgumentError
+				throw new IOError
 			}
 		}
 		public static function readTag(input:IDataInput):Tag {
@@ -36,6 +37,7 @@ package com.netease.protobuf {
 			const reader:VarintReader = new VarintReader(input)
 			tag.wireType = reader.read(3)
 			tag.number = reader.read(32)
+			reader.end()
 			return tag
 		}
 		public static function read_TYPE_DOUBLE(input:IDataInput):Number {
@@ -51,6 +53,7 @@ package com.netease.protobuf {
 			const reader:VarintReader = new VarintReader(input)
 			result.low = reader.read(32)
 			result.high = reader.read(32)
+			reader.end()
 			return result
 		}
 		public static function read_TYPE_UINT64(input:IDataInput):UInt64 {
@@ -58,10 +61,18 @@ package com.netease.protobuf {
 			const reader:VarintReader = new VarintReader(input)
 			result.low = reader.read(32)
 			result.high = reader.read(32)
+			reader.end()
 			return result
 		}
 		public static function read_TYPE_INT32(input:IDataInput):int {
-			return new VarintReader(input).read(32)
+			const reader:VarintReader = new VarintReader(input)
+			const low:int = reader.read(32)
+			const high:uint = reader.read(32)
+			reader.end()
+			if (uint(low >> 31) != high) {
+				throw new IOError
+			}
+			return low
 		}
 		public static function read_TYPE_FIXED64(input:IDataInput):Int64 {
 			input.endian = Endian.LITTLE_ENDIAN
@@ -90,7 +101,10 @@ package com.netease.protobuf {
 			return result
 		}
 		public static function read_TYPE_UINT32(input:IDataInput):uint {
-			return (new VarintReader(input)).read(32)
+			const reader:VarintReader = new VarintReader(input)
+			const result:uint = reader.read(32)
+			reader.end()
+			return result
 		}
 		public static function read_TYPE_ENUM(input:IDataInput):int {
 			return read_TYPE_INT32(input)
@@ -108,7 +122,7 @@ package com.netease.protobuf {
 			return result
 		}
 		public static function read_TYPE_SINT32(input:IDataInput):int {
-			return ZigZag.decode32(read_TYPE_INT32(input))
+			return ZigZag.decode32(read_TYPE_UINT32(input))
 		}
 		public static function read_TYPE_SINT64(input:IDataInput):Int64 {
 			const result:Int64 = read_TYPE_INT64(input)

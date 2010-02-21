@@ -41,7 +41,13 @@ package com.netease.protobuf {
 			output.writeBytes(varint)
 		}
 		public static function write_TYPE_INT32(output:IDataOutput, value:int):void {
-			write_TYPE_UINT32(output, value)
+			const varint:VarintWriter = new VarintWriter;
+			varint.write(value, 32);
+			if (value < 0) {
+				varint.write(0xffffffff, 32);
+			}
+			varint.end()
+			output.writeBytes(varint)
 		}
 		public static function write_TYPE_FIXED64(output:IDataOutput, value:Int64):void {
 			output.endian = Endian.LITTLE_ENDIAN

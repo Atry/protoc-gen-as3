@@ -8,7 +8,7 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	public class Message {
+	public class ExtensibleMessage extends Array {
 		public function toString():String {
 			return messageToString(this)
 		}

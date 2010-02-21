@@ -8,6 +8,7 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
+	import flash.errors.*
 	import flash.utils.*
 	public final class VarintReader {
 		private var input:IDataInput
@@ -16,6 +17,14 @@ package com.netease.protobuf {
 		}
 		private var bitsLeft:uint = 0
 		private var number:uint = 0x80
+		public function end():void {
+			if (number >= 0x80) {
+				throw new IOError
+			}
+			if (read(bitsLeft) != 0) {
+				throw new IOError
+			}
+		}
 		public function read(bits:uint):uint {
 			if (bits <= bitsLeft) {
 				bitsLeft -= bits
@@ -23,7 +32,6 @@ package com.netease.protobuf {
 			} else {
 				var result:uint = (number >>> (7 - bitsLeft)) &
 						((1 << bitsLeft) - 1)
-				bits -= bitsLeft
 				var i:uint = bitsLeft
 				for (;;) {
 					if (number < 0x80) {

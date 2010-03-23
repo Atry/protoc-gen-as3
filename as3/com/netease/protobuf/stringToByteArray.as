@@ -11,7 +11,9 @@ package com.netease.protobuf {
 	import flash.utils.ByteArray
 	public function stringToByteArray(s:String):ByteArray {
 		const ba:ByteArray = new ByteArray
-		ba.writeMultiByte(s, "iso-8859-1")
+		for (var i:uint = 0; i < s.length; ++i) {
+			ba.writeByte(s.charCodeAt(i))
+		}
 		return ba
 	}
 }

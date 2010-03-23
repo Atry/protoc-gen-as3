@@ -498,12 +498,12 @@ public final class Main {
 			content.append(importType);
 			content.append(";\n");
 		}
-		content.appent("\t// @@protoc_insertion_point(imports)\n");
+		content.append("\t// @@protoc_insertion_point(imports)\n");
 		if (scope.proto.hasOptions() &&
 				scope.proto.getOptions().getExtension(Options.as3Bindable)) {
 			content.append("\t[Bindable]\n");
 		}
-		content.appent("\t// @@protoc_insertion_point(class_metadata)\n");
+		content.append("\t// @@protoc_insertion_point(class_metadata)\n");
 		if (scope.proto.getExtensionRangeCount() > 0) {
 			content.append("\tpublic dynamic final class ");
 			content.append(scope.proto.getName());

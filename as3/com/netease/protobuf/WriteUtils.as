@@ -10,126 +10,110 @@
 package com.netease.protobuf {
 	import flash.utils.*
 	public final class WriteUtils {
-		public static function writeTag(output:IDataOutput,
-				wireType:uint, number:uint):void {
-			const varint:VarintWriter = new VarintWriter;
-			varint.write(wireType, 3);
-			varint.write(number, 32);
-			varint.end()
-			output.writeBytes(varint)
+		private static function writeVarint64(output:PostposeLengthBuffer, low:uint, high:uint):void {
+			if (high == 0) {
+				write_TYPE_UINT32(output, low)
+			} else {
+				for (var i:uint = 0; i < 4; ++i) {
+					output.writeByte((low & 0x7F) | 0x80)
+					low >>>= 7
+				}
+				if ((high & (0xFFFFFFF << 3)) == 0) {
+					output.writeByte((high << 4) | low)
+				} else {
+					output.writeByte((((high << 4) | low) & 0x7F) | 0x80)
+					write_TYPE_UINT32(output, high >>> 3)
+				}
+			}
 		}
-		public static function write_TYPE_DOUBLE(output:IDataOutput, value:Number):void {
+		public static function writeTag(output:PostposeLengthBuffer,
+				wireType:uint, number:uint):void {
+			write_TYPE_UINT32(output, (number << 3) | wireType)
+		}
+		public static function write_TYPE_DOUBLE(output:PostposeLengthBuffer, value:Number):void {
 			output.endian = Endian.LITTLE_ENDIAN
 			output.writeDouble(value)
 		}
-		public static function write_TYPE_FLOAT(output:IDataOutput, value:Number):void {
+		public static function write_TYPE_FLOAT(output:PostposeLengthBuffer, value:Number):void {
 			output.endian = Endian.LITTLE_ENDIAN
 			output.writeFloat(value)
 		}
-		public static function write_TYPE_INT64(output:IDataOutput, value:Int64):void {
-			const varint:VarintWriter = new VarintWriter;
-			varint.write(value.low, 32);
-			varint.write(value.high, 32);
-			varint.end()
-			output.writeBytes(varint)
+		public static function write_TYPE_INT64(output:PostposeLengthBuffer, value:Int64):void {
+			writeVarint64(output, value.low, value.high)
 		}
-		public static function write_TYPE_UINT64(output:IDataOutput, value:UInt64):void {
-			const varint:VarintWriter = new VarintWriter;
-			varint.write(value.low, 32);
-			varint.write(value.high, 32);
-			varint.end()
-			output.writeBytes(varint)
+		public static function write_TYPE_UINT64(output:PostposeLengthBuffer, value:UInt64):void {
+			writeVarint64(output, value.low, value.high)
 		}
-		public static function write_TYPE_INT32(output:IDataOutput, value:int):void {
-			const varint:VarintWriter = new VarintWriter;
-			varint.write(value, 32);
+		public static function write_TYPE_INT32(output:PostposeLengthBuffer, value:int):void {
 			if (value < 0) {
-				varint.write(0xffffffff, 32);
+				writeVarint64(output, value, 0xFFFFFFFF)
+			} else {
+				write_TYPE_UINT32(output, value)
 			}
-			varint.end()
-			output.writeBytes(varint)
 		}
-		public static function write_TYPE_FIXED64(output:IDataOutput, value:Int64):void {
+		public static function write_TYPE_FIXED64(output:PostposeLengthBuffer, value:Int64):void {
 			output.endian = Endian.LITTLE_ENDIAN
 			output.writeUnsignedInt(value.low)
 			output.writeInt(value.high)
 		}
-		public static function write_TYPE_FIXED32(output:IDataOutput, value:int):void {
+		public static function write_TYPE_FIXED32(output:PostposeLengthBuffer, value:int):void {
 			output.endian = Endian.LITTLE_ENDIAN
 			output.writeInt(value)
 		}
-		public static function write_TYPE_BOOL(output:IDataOutput, value:Boolean):void {
+		public static function write_TYPE_BOOL(output:PostposeLengthBuffer, value:Boolean):void {
 			output.writeByte(value ? 1 : 0)
 		}
-		public static function write_TYPE_STRING(output:IDataOutput, value:String):void {
-			var plb:PostposeLengthBuffer = output as PostposeLengthBuffer
-			if (plb == null) {
-				plb = new PostposeLengthBuffer
-			}
-			const i:uint = plb.beginBlock()
-			plb.writeUTFBytes(value)
-			plb.endBlock(i)
-			if (plb != output) {
-				plb.toNormal(output)
-			}
+		public static function write_TYPE_STRING(output:PostposeLengthBuffer, value:String):void {
+			const i:uint = output.beginBlock()
+			output.writeUTFBytes(value)
+			output.endBlock(i)
 		}
-		public static function write_TYPE_BYTES(output:IDataOutput, value:ByteArray):void {
+		public static function write_TYPE_BYTES(output:PostposeLengthBuffer, value:ByteArray):void {
 			write_TYPE_UINT32(output, value.length)
 			output.writeBytes(value)
 		}
-		public static function write_TYPE_UINT32(output:IDataOutput, value:uint):void {
-			const varint:VarintWriter = new VarintWriter;
-			varint.write(value, 32);
-			varint.end()
-			output.writeBytes(varint)
+		public static function write_TYPE_UINT32(output:PostposeLengthBuffer, value:uint):void {
+			for (;;) {
+				if ((value & ~0x7F) == 0) {
+					output.writeByte(value)
+					return;
+				} else {
+					output.writeByte((value & 0x7F) | 0x80)
+					value >>>= 7
+				}
+			}
 		}
-		public static function write_TYPE_ENUM(output:IDataOutput, value:int):void {
+		public static function write_TYPE_ENUM(output:PostposeLengthBuffer, value:int):void {
 			write_TYPE_INT32(output, value)
 		}
-		public static function write_TYPE_SFIXED32(output:IDataOutput, value:int):void {
+		public static function write_TYPE_SFIXED32(output:PostposeLengthBuffer, value:int):void {
 			write_TYPE_FIXED32(output, ZigZag.encode32(value))
 		}
-		public static function write_TYPE_SFIXED64(output:IDataOutput, value:Int64):void {
+		public static function write_TYPE_SFIXED64(output:PostposeLengthBuffer, value:Int64):void {
 			output.endian = Endian.LITTLE_ENDIAN
 			output.writeUnsignedInt(ZigZag.encode64low(value.low, value.high))
 			output.writeUnsignedInt(ZigZag.encode64high(value.low, value.high))
 		}
-		public static function write_TYPE_SINT32(output:IDataOutput, value:int):void {
+		public static function write_TYPE_SINT32(output:PostposeLengthBuffer, value:int):void {
 			write_TYPE_UINT32(output, ZigZag.encode32(value))
 		}
-		public static function write_TYPE_SINT64(output:IDataOutput, value:Int64):void {
-			const varint:VarintWriter = new VarintWriter;
-			varint.write(ZigZag.encode64low(value.low, value.high), 32)
-			varint.write(ZigZag.encode64high(value.low, value.high), 32)
-			varint.end()
-			output.writeBytes(varint)
+		public static function write_TYPE_SINT64(output:PostposeLengthBuffer, value:Int64):void {
+			writeVarint64(output,
+					ZigZag.encode64low(value.low, value.high),
+					ZigZag.encode64high(value.low, value.high))
 		}
-		public static function write_TYPE_MESSAGE(output:IDataOutput, value:IExternalizable):void {
-			var plb:PostposeLengthBuffer = output as PostposeLengthBuffer
-			if (plb == null) {
-				plb = new PostposeLengthBuffer
-			}
-			const i:uint = plb.beginBlock()
-			value.writeExternal(plb)
-			plb.endBlock(i)
-			if (plb != output) {
-				plb.toNormal(output)
-			}
+		public static function write_TYPE_MESSAGE(output:PostposeLengthBuffer, value:IExternalizable):void {
+			const i:uint = output.beginBlock()
+			value.writeExternal(output)
+			output.endBlock(i)
 		}
-		public static function writePackedRepeated(output:IDataOutput,
+		public static function writePackedRepeated(output:PostposeLengthBuffer,
 				writeFunction:Function, value:Array):void {
-			var plb:PostposeLengthBuffer = output as PostposeLengthBuffer
-			if (plb == null) {
-				plb = new PostposeLengthBuffer
-			}
-			const i:uint = plb.beginBlock()
+			const i:uint = output.beginBlock()
 			for (var j:uint = 0; j < value.length; j++) {
-				writeFunction(plb, value[j])
+				writeFunction(output, value[j])
 			}
-			plb.endBlock(i)
-			if (plb != output) {
-				plb.toNormal(output)
-			}
+			output.endBlock(i)
 		}
 	}
 }

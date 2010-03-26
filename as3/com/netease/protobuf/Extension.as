@@ -64,21 +64,21 @@ package com.netease.protobuf {
 			}
 		}
 		public static function writeFunction(wireType:uint, f:Function):Function {
-			return function (output:IDataOutput,
+			return function (output:PostposeLengthBuffer,
 					object:Array, fieldNumber:uint):void {
 				WriteUtils.writeTag(output, wireType, fieldNumber)
 				f(output, object[fieldNumber])
 			}
 		}
 		public static function packedRepeatedWriteFunction(f:Function):Function {
-			return function (output:IDataOutput,
+			return function (output:PostposeLengthBuffer,
 					object:Array, fieldNumber:uint):void {
 				WriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, fieldNumber)
 				WriteUtils.writePackedRepeated(output, f, object[fieldNumber])
 			}
 		}
 		public static function repeatedWriteFunction(wireType:uint, f:Function):Function {
-			return function (output:IDataOutput,
+			return function (output:PostposeLengthBuffer,
 					object:Array, fieldNumber:uint):void {
 				const field:Array = object[fieldNumber]
 				for (var i:uint = 0; i < field.length; i++) {

@@ -9,8 +9,6 @@
 
 package com.netease.protobuf {
 	public class Message {
-		public function toString():String {
-			return messageToString(this)
-		}
+		include "message.as.inc"
 	}
 }

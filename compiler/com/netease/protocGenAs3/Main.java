@@ -473,7 +473,6 @@ public final class Main {
 			StringBuilder content, StringBuilder initializerContent) {
 		content.append("\timport com.netease.protobuf.*;\n");
 		content.append("\timport flash.utils.IExternalizable;\n");
-		content.append("\timport flash.utils.IDataOutput;\n");
 		content.append("\timport flash.utils.IDataInput;\n");
 		content.append("\timport flash.errors.IOError;\n");
 		HashSet<String> importTypes = new HashSet<String>();
@@ -639,7 +638,7 @@ public final class Main {
 				throw new IllegalArgumentException();
 			}
 		}
-		content.append("\t\tpublic function writeExternal(output:IDataOutput):void {\n");
+		content.append("\t\tprotected override function writePostposeLength(output:PostposeLengthBuffer):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");

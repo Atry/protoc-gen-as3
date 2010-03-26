@@ -11,46 +11,52 @@ package com.netease.protobuf {
 	import flash.utils.*
 	import flash.errors.*
 	public final class PostposeLengthBuffer extends ByteArray {
-		[ArrayElementType("uint")]
-		private const slices:Array = []
+		//*
+			// for flash player 9
+			[ArrayElementType("uint")]
+			private const _slices:Array = []
+		/*/
+			// for flash player 10
+			private const _slices:Vector.<uint> = new Vector.<uint>
+		//*/
 		public function beginBlock():uint {
 			if (beginSliceIndex % 2 != 0) {
 				throw new IllegalOperationError
 			}
-			slices.push(position)
-			const beginSliceIndex:uint = slices.length
-			slices.length += 2
-			slices.push(position)
+			_slices.push(position)
+			const beginSliceIndex:uint = _slices.length
+			_slices.length += 2
+			_slices.push(position)
 			return beginSliceIndex
 		}
 		public function endBlock(beginSliceIndex:uint):void {
-			if (slices.length % 2 != 0) {
+			if (_slices.length % 2 != 0) {
 				throw new IllegalOperationError
 			}
-			slices.push(position)
-			const beginPosition:uint = slices[beginSliceIndex + 2]
-			slices[beginSliceIndex] = position
+			_slices.push(position)
+			const beginPosition:uint = _slices[beginSliceIndex + 2]
+			_slices[beginSliceIndex] = position
 			WriteUtils.write_TYPE_UINT32(this, position - beginPosition)
-			slices[beginSliceIndex + 1] = position
-			slices.push(position)
+			_slices[beginSliceIndex + 1] = position
+			_slices.push(position)
 		}
 		public function toNormal(output:IDataOutput):void {
-			if (slices.length % 2 != 0) {
+			if (_slices.length % 2 != 0) {
 				throw new IllegalOperationError
 			}
 			var i:uint = 0
 			var begin:uint = 0
-			do {
-				var end:uint = slices[i]
+			while (i < _slices.length) {
+				var end:uint = _slices[i]
 				++i
 				if (end > begin) {
 					output.writeBytes(this, begin, end - begin)
 				} else if (end < begin) {
 					throw new IllegalOperationError
 				}
-				begin = slices[i]
+				begin = _slices[i]
 				++i
-			} while (i < slices.length)
+			}
 			output.writeBytes(this, begin)
 		}
 	}

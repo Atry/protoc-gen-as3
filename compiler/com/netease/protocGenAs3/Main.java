@@ -759,7 +759,11 @@ public final class Main {
 				content.append("\t\t\t\t\tif (");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append("Count != 0) {\n");
-				content.append("\t\t\t\t\t\tthrow new IOError('Bad data format.');\n");
+				content.append("\t\t\t\t\t\tthrow new IOError('Bad data format: ");
+				content.append(scope.proto.getName());
+				content.append('.');
+				appendLowerCamelCase(content, fdp.getName());
+				content.append(" cannot be set twice.');\n");
 				content.append("\t\t\t\t\t}\n");
 				content.append("\t\t\t\t\t++");
 				appendLowerCamelCase(content, fdp.getName());
@@ -841,7 +845,11 @@ public final class Main {
 				content.append("\t\t\tif (");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append("Count != 1) {\n");
-				content.append("\t\t\t\tthrow new IOError('Bad data format.');\n");
+				content.append("\t\t\t\tthrow new IOError('Bad data format: ");
+				content.append(scope.proto.getName());
+				content.append('.');
+				appendLowerCamelCase(content, fdp.getName());
+				content.append(" must be set.');\n");
 				content.append("\t\t\t}\n");
 				break;
 			}

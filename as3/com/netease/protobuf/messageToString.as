@@ -28,14 +28,14 @@ package com.netease.protobuf {
 		return s
 	}
 }
-
+import com.netease.protobuf.*
 function fieldToString(message:Object, descriptor:XML, name:String):String {
 	var hasField:String = "has" + name.charAt(0).toUpperCase() + name.substr(1)
 	if (descriptor.accessor.(@name == hasField).length() != 0 && !message[hasField]) {
 		return ""
 	}
 	var field:* = message[name]
-	if (field != null && field.constructor == Array && field.length == 0) {
+	if (field != null && !(field is Message || field is ExtensibleMessage) && field is Array && field.length == 0) {
 		return ""
 	}
 	return name + "=" + field + ";\n"

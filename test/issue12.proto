@@ -1,0 +1,16 @@
+package issue12;
+
+message Message {
+    enum Type {
+        Chat = 100;
+    }
+
+    extensions 100 to 200;
+}
+
+message ChatMessage {
+    extend Message {
+        optional ChatMessage type = 100;
+    }
+    optional string text = 1;
+}

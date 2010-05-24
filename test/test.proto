@@ -1,5 +1,6 @@
 package test;
 import "options.proto";
+import "issue12.proto";
 message AAA {
 	option (as3_bindable) = true;
 }

@@ -506,7 +506,7 @@ public final class Main {
 		if (scope.proto.getExtensionRangeCount() > 0) {
 			content.append("\tpublic dynamic final class ");
 			content.append(scope.proto.getName());
-			content.append(" extends ExtensibleMessage implements IExternalizable {\n");
+			content.append(" extends com.netease.protobuf.ExtensibleMessage implements flash.utils.IExternalizable {\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
 			content.append("\t\tpublic static const extensionWriteFunctions:Array = [];\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
@@ -514,7 +514,7 @@ public final class Main {
 		} else {
 			content.append("\tpublic final class ");
 			content.append(scope.proto.getName());
-			content.append(" extends Message implements IExternalizable {\n");
+			content.append(" extends com.netease.protobuf.Message implements flash.utils.IExternalizable {\n");
 		}
 		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
 			initializerContent.append("import ");

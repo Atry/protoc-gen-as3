@@ -124,15 +124,17 @@ descriptor.proto.as3/google: \
 unittest.proto.as3/protobuf_unittest: \
 	$(PROTOBUF_DIR)/src/$(PROTOC) \
 	$(PROTOC_GEN_AS3) \
+	$(wildcard test/*.proto) \
 	| unittest.proto.as3
 	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
 	--plugin=protoc-gen-as3=$(PROTOC_GEN_AS3) \
-	--proto_path=. --proto_path=test \
+	--proto_path=test --proto_path=. \
 	"--proto_path=$(PROTOBUF_DIR)/src" \
 	--as3_out=unittest.proto.as3 \
-	test/test.proto \
 	$(PROTOBUF_DIR)/src/google/protobuf/unittest.proto \
-	$(PROTOBUF_DIR)/src/google/protobuf/unittest_import.proto
+	$(PROTOBUF_DIR)/src/google/protobuf/unittest_import.proto \
+	test/issue12.proto \
+	test/test.proto 
 	touch $@
 
 .PHONY: plugin all clean test

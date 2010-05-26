@@ -807,7 +807,7 @@ public final class Main {
 					content.append(", ");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(");\n");
-					content.append("\t\t\t\t\tbreak;\n");
+					content.append("\t\t\t\t\t\tbreak;\n");
 					content.append("\t\t\t\t\t}\n");
 				}
 				content.append("\t\t\t\t\t");

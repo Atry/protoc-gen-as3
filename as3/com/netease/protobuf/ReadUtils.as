@@ -8,8 +8,8 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	import flash.utils.*
-	import flash.errors.*
+	import flash.errors.*;
+	import flash.utils.*;
 	public final class ReadUtils {
 		public static function skip(input:IDataInput, wireType:uint):void {
 			switch (wireType) {
@@ -34,10 +34,9 @@ package com.netease.protobuf {
 		}
 		public static function readTag(input:IDataInput):Tag {
 			const tag:Tag = new Tag
-			const reader:VarintReader = new VarintReader(input)
-			tag.wireType = reader.read(3)
-			tag.number = reader.read(32)
-			reader.end()
+			const tagNumber:uint = read_TYPE_UINT32(input)
+			tag.wireType = tagNumber & 7
+			tag.number = tagNumber >>> 3
 			return tag
 		}
 		public static function read_TYPE_DOUBLE(input:IDataInput):Number {
@@ -50,29 +49,84 @@ package com.netease.protobuf {
 		}
 		public static function read_TYPE_INT64(input:IDataInput):Int64 {
 			const result:Int64 = new Int64
-			const reader:VarintReader = new VarintReader(input)
-			result.low = reader.read(32)
-			result.high = reader.read(32)
-			reader.end()
+			var b:uint
+			var i:uint = 0
+			for (;; i += 7) {
+				b = input.readUnsignedByte()
+				if (i == 28) {
+					break
+				} else {
+					if (b >= 0x80) {
+						result.low |= ((b & 0x7f) << i)
+					} else {
+						result.low |= (b << i)
+						return result
+					}
+				}
+			}
+			if (b >= 0x80) {
+				b &= 0x7f
+				result.low |= (b << i)
+				result.high = b >>> 4
+			} else {
+				result.low |= (b << i)
+				result.high = b >>> 4
+				return result
+			}
+			for (i = 3;; i += 7) {
+				b = input.readUnsignedByte()
+				if (i < 32) {
+					if (b >= 0x80) {
+						result.high |= ((b & 0x7f) << i)
+					} else {
+						result.high |= (b << i)
+						break
+					}
+				}
+			}
 			return result
 		}
 		public static function read_TYPE_UINT64(input:IDataInput):UInt64 {
 			const result:UInt64 = new UInt64
-			const reader:VarintReader = new VarintReader(input)
-			result.low = reader.read(32)
-			result.high = reader.read(32)
-			reader.end()
+			var b:uint
+			var i:uint = 0
+			for (;; i += 7) {
+				b = input.readUnsignedByte()
+				if (i == 28) {
+					break
+				} else {
+					if (b >= 0x80) {
+						result.low |= ((b & 0x7f) << i)
+					} else {
+						result.low |= (b << i)
+						return result
+					}
+				}
+			}
+			if (b >= 0x80) {
+				b &= 0x7f
+				result.low |= (b << i)
+				result.high = b >>> 4
+			} else {
+				result.low |= (b << i)
+				result.high = b >>> 4
+				return result
+			}
+			for (i = 3;; i += 7) {
+				b = input.readUnsignedByte()
+				if (i < 32) {
+					if (b >= 0x80) {
+						result.high |= ((b & 0x7f) << i)
+					} else {
+						result.high |= (b << i)
+						break
+					}
+				}
+			}
 			return result
 		}
 		public static function read_TYPE_INT32(input:IDataInput):int {
-			const reader:VarintReader = new VarintReader(input)
-			const low:int = reader.read(32)
-			const high:uint = reader.read(32)
-			reader.end()
-			if (uint(low >> 31) != high) {
-				throw new IOError
-			}
-			return low
+			return int(read_TYPE_UINT32(input))
 		}
 		public static function read_TYPE_FIXED64(input:IDataInput):Int64 {
 			input.endian = Endian.LITTLE_ENDIAN
@@ -101,9 +155,21 @@ package com.netease.protobuf {
 			return result
 		}
 		public static function read_TYPE_UINT32(input:IDataInput):uint {
-			const reader:VarintReader = new VarintReader(input)
-			const result:uint = reader.read(32)
-			reader.end()
+			var result:uint = 0
+			for (var i:uint = 0;; i += 7) {
+				const b:uint = input.readUnsignedByte()
+				if (i < 32) {
+					if (b >= 0x80) {
+						result |= ((b & 0x7f) << i)
+					} else {
+						result |= (b << i)
+						break
+					}
+				} else {
+					while (input.readUnsignedByte() >= 0x80) {}
+					break
+				}
+			}
 			return result
 		}
 		public static function read_TYPE_ENUM(input:IDataInput):int {

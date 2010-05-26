@@ -97,14 +97,19 @@ package {
 			t5.optionalSint32 = -199999999
 			test(t5)
 			const t6:TestAllTypes = new TestAllTypes
-			t6.optionalSint64 = new Int64(uint(-185754567), -198741265)
+			t6.optionalInt64 = new Int64(uint(-185754567), -198741265)
 			test(t6)
 			const t7:TestAllTypes = new TestAllTypes
-			t7.optionalInt64 = new Int64(uint(-185754567), -198741265)
+			const s64:Int64 = new Int64(uint(-171754567), -198741265)
+			t7.optionalInt64 = new Int64(ZigZag.encode64low(s64.low, s64.high),
+										 ZigZag.encode64high(s64.low, s64.high))
 			test(t7)
 			const t8:TestAllTypes = new TestAllTypes
 			t8.optionalInt32 = -1
 			test(t8)
+			const t9:TestAllTypes = new TestAllTypes
+			t9.optionalSint64 = new Int64(uint(-171754567), -198741265)
+			test(t9)
 
 			trace("All tests pass.")
 			fscommand("quit")

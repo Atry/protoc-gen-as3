@@ -8,7 +8,10 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	public class Message implements IMessage {
-		include "message.as.inc"
+	internal interface IMessage {
+		/**
+		 *  @private
+		 */
+		function writeToBuffer(output:WritingBuffer):void
 	}
 }

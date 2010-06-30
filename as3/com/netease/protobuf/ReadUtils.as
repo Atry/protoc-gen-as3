@@ -29,7 +29,7 @@ package com.netease.protobuf {
 				input.readInt()
 				break
 			default:
-				throw new IOError
+				throw new IOError("Invalid wire type: " + wireType)
 			}
 		}
 		public static function readTag(input:IDataInput):Tag {

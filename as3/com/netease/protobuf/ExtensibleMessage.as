@@ -8,7 +8,7 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	public class ExtensibleMessage extends Array {
+	public class ExtensibleMessage extends Array implements IMessage {
 		include "message.as.inc"
 	}
 }

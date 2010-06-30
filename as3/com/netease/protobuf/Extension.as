@@ -50,7 +50,7 @@ package com.netease.protobuf {
 					a = []
 					object[tag.number] = a
 				}
-				const m:IExternalizable = new c
+				const m:IMessage = new c
 				ReadUtils.read_TYPE_MESSAGE(input, m)
 				a.push(m)
 			}
@@ -58,27 +58,27 @@ package com.netease.protobuf {
 		public static function messageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
 					object:Array, tag:Tag):void {
-				const m:IExternalizable = new c
+				const m:IMessage = new c
 				ReadUtils.read_TYPE_MESSAGE(input, m)
 				object[tag.number] = m
 			}
 		}
 		public static function writeFunction(wireType:uint, f:Function):Function {
-			return function (output:PostposeLengthBuffer,
+			return function (output:WritingBuffer,
 					object:Array, fieldNumber:uint):void {
 				WriteUtils.writeTag(output, wireType, fieldNumber)
 				f(output, object[fieldNumber])
 			}
 		}
 		public static function packedRepeatedWriteFunction(f:Function):Function {
-			return function (output:PostposeLengthBuffer,
+			return function (output:WritingBuffer,
 					object:Array, fieldNumber:uint):void {
 				WriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, fieldNumber)
 				WriteUtils.writePackedRepeated(output, f, object[fieldNumber])
 			}
 		}
 		public static function repeatedWriteFunction(wireType:uint, f:Function):Function {
-			return function (output:PostposeLengthBuffer,
+			return function (output:WritingBuffer,
 					object:Array, fieldNumber:uint):void {
 				const field:Array = object[fieldNumber]
 				for (var i:uint = 0; i < field.length; i++) {

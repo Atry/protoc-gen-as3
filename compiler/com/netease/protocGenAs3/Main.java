@@ -638,7 +638,7 @@ public final class Main {
 				throw new IllegalArgumentException();
 			}
 		}
-		content.append("\t\tprotected override function writePostposeLength(output:PostposeLengthBuffer):void {\n");
+		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\tpublic override function writeToBuffer(output:WritingBuffer):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");

@@ -1,20 +1,31 @@
+// vim: tabstop=4 shiftwidth=4
+
+// Copyright (c) 2010 , 杨博 (Yang Bo) All rights reserved.
+//
+//         pop.atry@gmail.com
+//
+// Use, modification and distribution are subject to the "New BSD License"
+// as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
+
 public function toString():String {
 	return messageToString(this)
 }
-protected function writePostposeLength(output:PostposeLengthBuffer):void {
+/**
+ *  @private
+ */
+public function writeToBuffer(output:WritingBuffer):void {
 	import flash.errors.IllegalOperationError
 	throw new IllegalOperationError("Not implemented.")
 }
 import flash.utils.IDataOutput
 public final function writeExternal(output:IDataOutput):void {
-	import com.netease.protobuf.PostposeLengthBuffer
-	var plb:PostposeLengthBuffer = output as PostposeLengthBuffer
-	if (plb == null) {
-		plb = new PostposeLengthBuffer
-		writePostposeLength(plb)
-		plb.toNormal(output)
+	var wb:WritingBuffer = output as WritingBuffer
+	if (wb == null) {
+		wb = new WritingBuffer
+		writeToBuffer(wb)
+		wb.toNormal(output)
 	} else {
-		writePostposeLength(plb)
+		writeToBuffer(wb)
 	}
 }
 

@@ -10,3 +10,6 @@ PROTOC=protoc$(EXE)
 COMPC=compc$(EXE)
 MXMLC=mxmlc$(EXE)
 FDB=fdb$(EXE)
+MVN=mvn
+JAVAC=javac
+JAR=jar

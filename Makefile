@@ -7,10 +7,11 @@
 include config.mk
 
 PROTOC_GEN_AS3=dist/protoc-gen-as3$(BAT)
-
-all: dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
+ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
 	dist/protobuf.swc dist/README dist/options.proto\
 	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
+
+all: $(ALL)
 
 classes/com/netease/protocGenAs3/Main.class: \
 	plugin.proto.java/google/protobuf/compiler/Plugin.java \
@@ -18,7 +19,7 @@ classes/com/netease/protocGenAs3/Main.class: \
 	compiler/com/netease/protocGenAs3/Main.java \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \
 	| classes
-	javac -encoding UTF-8 -Xlint:all -d classes \
+	$(JAVAC) -encoding UTF-8 -Xlint:all -d classes \
 	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar" \
 	-sourcepath "plugin.proto.java$(PATH_SEPARATOR)compiler$(PATH_SEPARATOR)options.proto.java" \
 	compiler/com/netease/protocGenAs3/Main.java
@@ -29,7 +30,7 @@ plugin.proto.java/google/protobuf/compiler/Plugin.java: \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=plugin.proto.java \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
 
-dist.tar.gz: all
+dist.tar.gz: $(ALL)
 	tar -acf dist.tar.gz -C dist .
 
 dist/README: README | dist
@@ -56,7 +57,7 @@ dist/protobuf.swc: descriptor.proto.as3/google \
 
 dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class \
 	MANIFEST.MF | dist
-	jar mcf MANIFEST.MF $@ -C classes .
+	$(JAR) mcf MANIFEST.MF $@ -C classes .
 
 dist/protobuf-java-2.3.0.jar: \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \
@@ -76,7 +77,7 @@ $(PROTOBUF_DIR)/configure:
 	cd $(PROTOBUF_DIR) && ./autogen.sh
 
 $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar: $(PROTOBUF_DIR)/src
-	cd $(PROTOBUF_DIR)/java && mvn package
+	cd $(PROTOBUF_DIR)/java && $(MVN) package
 
 clean:
 	rm -fr dist

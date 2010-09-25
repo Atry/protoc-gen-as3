@@ -497,7 +497,7 @@ public final class Main {
 			content.append(importType);
 			content.append(";\n");
 		}
-		content.append("\t// @@protoc_insertion_point(imports)\n");
+		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 		if (scope.proto.hasOptions() &&
 				scope.proto.getOptions().getExtension(Options.as3Bindable)) {
 			content.append("\t[Bindable]\n");
@@ -508,9 +508,9 @@ public final class Main {
 			content.append(scope.proto.getName());
 			content.append(" extends com.netease.protobuf.ExtensibleMessage implements flash.utils.IExternalizable {\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
-			content.append("\t\tpublic static const extensionWriteFunctions:Array = [];\n");
+			content.append("\t\tpublic static const extensionWriteFunctions:Array = [];\n\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
-			content.append("\t\tpublic static const extensionReadFunctions:Array = [];\n");
+			content.append("\t\tpublic static const extensionReadFunctions:Array = [];\n\n");
 		} else {
 			content.append("\tpublic final class ");
 			content.append(scope.proto.getName());
@@ -530,7 +530,7 @@ public final class Main {
 			appendLowerCamelCase(content, efdp.getName());
 			content.append(":uint = ");
 			content.append(efdp.getNumber());
-			content.append(";\n");
+			content.append(";\n\n");
 			content.append("\t\t{\n");
 			content.append("\t\t\t");
 			content.append(extendee);
@@ -546,7 +546,7 @@ public final class Main {
 			content.append("] = ");
 			appendWriteFunction(content, scope, efdp);
 			content.append(";\n");
-			content.append("\t\t}\n");
+			content.append("\t\t}\n\n");
 		}
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
@@ -556,30 +556,49 @@ public final class Main {
 			assert(fdp.hasLabel());
 			switch (fdp.getLabel()) {
 			case LABEL_OPTIONAL:
-				content.append("\t\tprivate var ");
+				content.append("\t\tprivate var _");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append("_:");
+				content.append(":");
 				content.append(getActionScript3Type(scope, fdp));
-				content.append(";\n");
+				content.append(";\n\n");
 
 				if (isValueType(fdp.getType())) {
-					content.append("\t\tprivate var has");
+					content.append("\t\tprivate var _has");
 					appendUpperCamelCase(content, fdp.getName());
-					content.append("_:Boolean = false;\n");
+					content.append(":Boolean = false;\n\n");
 				}
+				content.append("\t\tpublic function remove");
+				appendUpperCamelCase(content, fdp.getName());
+				content.append("():void {\n");
+				if (isValueType(fdp.getType())) {
+					content.append("\t\t\t_has");
+					appendUpperCamelCase(content, fdp.getName());
+					content.append(" = false;\n");
+					content.append("\t\t\t_");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(" = new ");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append("();\n");
+				} else {
+					content.append("\t\t\t_");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(" = null;\n");
+				}
+				content.append("\t\t}\n\n");
+
 				content.append("\t\tpublic function get has");
 				appendUpperCamelCase(content, fdp.getName());
 				content.append("():Boolean {\n");
 				if (isValueType(fdp.getType())) {
-					content.append("\t\t\treturn has");
+					content.append("\t\t\treturn _has");
 					appendUpperCamelCase(content, fdp.getName());
-					content.append("_;\n");
+					content.append(";\n");
 				} else {
-					content.append("\t\t\treturn null != ");
+					content.append("\t\t\treturn null != _");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("_;\n");
+					content.append(";\n");
 				}
-				content.append("\t\t}\n");
+				content.append("\t\t}\n\n");
 
 				content.append("\t\tpublic function set ");
 				appendLowerCamelCase(content, fdp.getName());
@@ -587,14 +606,14 @@ public final class Main {
 				content.append(getActionScript3Type(scope, fdp));
 				content.append("):void {\n");
 				if (isValueType(fdp.getType())) {
-					content.append("\t\t\thas");
+					content.append("\t\t\t_has");
 					appendUpperCamelCase(content, fdp.getName());
-					content.append("_ = true;\n");
+					content.append(" = true;\n");
 				}
-				content.append("\t\t\t");
+				content.append("\t\t\t_");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append("_ = value;\n");
-				content.append("\t\t}\n");
+				content.append(" = value;\n");
+				content.append("\t\t}\n\n");
 
 				content.append("\t\tpublic function get ");
 				appendLowerCamelCase(content, fdp.getName());
@@ -610,10 +629,10 @@ public final class Main {
 					content.append(";\n");
 					content.append("\t\t\t}\n");
 				}
-				content.append("\t\t\treturn ");
+				content.append("\t\t\treturn _");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append("_;\n");
-				content.append("\t\t}\n");
+				content.append(";\n");
+				content.append("\t\t}\n\n");
 				break;
 			case LABEL_REQUIRED:
 				content.append("\t\tpublic var ");
@@ -624,7 +643,7 @@ public final class Main {
 					content.append(" = ");
 					appendDefaultValue(content, scope, fdp);
 				}
-				content.append(";\n");
+				content.append(";\n\n");
 				break;
 			case LABEL_REPEATED:
 				content.append("\t\t[ArrayElementType(\"");
@@ -632,7 +651,7 @@ public final class Main {
 				content.append("\")]\n");
 				content.append("\t\tpublic var ");
 				appendLowerCamelCase(content, fdp.getName());
-				content.append(":Array = [];\n");
+				content.append(":Array = [];\n\n");
 				break;
 			default:
 				throw new IllegalArgumentException();
@@ -657,7 +676,7 @@ public final class Main {
 				content.append(");\n");
 				content.append("\t\t\t\tWriteUtils.write_");
 				content.append(fdp.getType().name());
-				content.append("(output, ");
+				content.append("(output, _");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append(");\n");
 				content.append("\t\t\t}\n");
@@ -726,7 +745,7 @@ public final class Main {
 			content.append("\t\t\t\twriteFunction(output, this, tagNumber);\n");
 			content.append("\t\t\t}\n");
 		}
-		content.append("\t\t}\n");
+		content.append("\t\t}\n\n");
 		content.append("\t\tpublic function readExternal(input:IDataInput):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
@@ -854,7 +873,7 @@ public final class Main {
 				break;
 			}
 		}
-		content.append("\t\t}\n");
+		content.append("\t\t}\n\n");
 		content.append("\t}\n");
 	}
 	private static void writeExtension(Scope<FieldDescriptorProto> scope,

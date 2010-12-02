@@ -10,22 +10,14 @@
 public function toString():String {
 	return messageToString(this)
 }
-/**
- *  @private
- */
 public function writeToBuffer(output:WritingBuffer):void {
 	import flash.errors.IllegalOperationError
 	throw new IllegalOperationError("Not implemented.")
 }
 import flash.utils.IDataOutput
 public final function writeExternal(output:IDataOutput):void {
-	var wb:WritingBuffer = output as WritingBuffer
-	if (wb == null) {
-		wb = new WritingBuffer
-		writeToBuffer(wb)
-		wb.toNormal(output)
-	} else {
-		writeToBuffer(wb)
-	}
+	const wb:WritingBuffer = new WritingBuffer
+	writeToBuffer(wb)
+	wb.toNormal(output)
 }
 

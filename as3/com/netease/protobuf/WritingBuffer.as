@@ -10,6 +10,9 @@
 package com.netease.protobuf {
 	import flash.errors.*;
 	import flash.utils.*;
+	/**
+	 * @private
+	 */
 	public final class WritingBuffer extends ByteArray {
 		private const _slices:ByteArray = new ByteArray
 		public function beginBlock():uint {

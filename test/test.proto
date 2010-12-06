@@ -9,3 +9,6 @@ message BBB {
 	optional AAA aaa = 1;
 	optional int32 i = 2;
 }
+service Foo {
+	rpc Search (BBB) returns (AAA);
+}

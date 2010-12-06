@@ -119,6 +119,10 @@ public final class Main {
 			return new Scope<Object>(null, null, false, "");
 		}
 	}
+	private static void addServiceToScope(Scope<?> scope,
+			ServiceDescriptorProto sdp, boolean export) {
+		scope.addChild(sdp.getName(), sdp, export);
+	}
 	private static void addExtensionToScope(Scope<?> scope,
 			FieldDescriptorProto efdp, boolean export) {
 		StringBuilder sb = new StringBuilder();
@@ -154,8 +158,8 @@ public final class Main {
 			Scope<?> packageScope = fdp.hasPackage() ?
 					root.findOrCreate(fdp.getPackage()) : root;
 			boolean export = filesToGenerate.contains(fdp.getName());
-			if (fdp.getServiceCount() != 0) {
-				System.err.println("Warning: Service is not supported.");
+			for (ServiceDescriptorProto sdp : fdp.getServiceList()) {
+				addServiceToScope(packageScope, sdp, export);
 			}
 			for (FieldDescriptorProto efdp : fdp.getExtensionList()) {
 				addExtensionToScope(packageScope, efdp, export);
@@ -431,8 +435,9 @@ public final class Main {
 		if (Arrays.binarySearch(ACTIONSCRIPT_KEYWORDS, s) >= 0) {
 			sb.append("__");
 		}
+		sb.append(Character.toLowerCase(s.charAt(0)));
 		boolean upper = false;
-		for (int i = 0; i < s.length(); i++) {
+		for (int i = 1; i < s.length(); i++) {
 			char c = s.charAt(i);
 			if (upper) {
 				if (Character.isLowerCase(c)) {
@@ -941,6 +946,8 @@ public final class Main {
 		if (scope.proto instanceof DescriptorProto) {
 			writeMessage((Scope<DescriptorProto>)scope, content,
 					initializerContent);
+		} else if (scope.proto instanceof ServiceDescriptorProto) {
+			writeService((Scope<ServiceDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof EnumDescriptorProto) {
 			writeEnum((Scope<EnumDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof FieldDescriptorProto) {
@@ -988,6 +995,42 @@ public final class Main {
 			build()
 		);
 	}
+	private static void writeService(Scope<ServiceDescriptorProto> scope,
+			StringBuilder content) {
+		HashSet<String> importTypes = new HashSet<String>();
+		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+			importTypes.add(scope.find(mdp.getInputType()).fullName);
+			importTypes.add(scope.find(mdp.getOutputType()).fullName);
+		}
+		for (String importType : importTypes) {
+			content.append("\timport ");
+			content.append(importType);
+			content.append(";\n");
+		}
+		content.append("\t// @@protoc_insertion_point(imports)\n\n");
+		content.append("\tpublic final class ");
+		content.append(scope.proto.getName());
+		content.append(" {\n");
+		content.append("\t\tpublic var send:Function;\n\n");
+		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+			content.append("\t\tpublic function ");
+			appendLowerCamelCase(content, mdp.getName());
+			content.append("(input:");
+			content.append(scope.find(mdp.getInputType()).fullName);
+			content.append(", callback:Function):void {\n");
+			content.append("\t\t\tsend(\"");
+			content.append(scope.fullName);
+			content.append("\", \"");
+			content.append(mdp.getName());
+			content.append("\", input, callback, ");
+			content.append(scope.find(mdp.getOutputType()).fullName);
+			content.append(");\n");
+			content.append("\t\t}\n\n");
+		}
+		content.append("\t}\n");
+
+	}
+
 	public static void main(String[] args) throws IOException {
 		ExtensionRegistry registry = ExtensionRegistry.newInstance();
 		Options.registerAllExtensions(registry);

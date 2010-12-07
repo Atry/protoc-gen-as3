@@ -6,7 +6,12 @@
 # as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 include config.mk
 
+ifeq ($(OS), Windows_NT)
+PROTOC_GEN_AS3=dist\\protoc-gen-as3$(BAT)
+else
 PROTOC_GEN_AS3=dist/protoc-gen-as3$(BAT)
+endif
+
 ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
 	dist/protobuf.swc dist/README dist/options.proto\
 	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
@@ -25,8 +30,8 @@ classes/com/netease/protocGenAs3/Main.class: \
 	compiler/com/netease/protocGenAs3/Main.java
 
 plugin.proto.java/google/protobuf/compiler/Plugin.java: \
-	$(PROTOBUF_DIR)/src/$(PROTOC) | plugin.proto.java
-	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
+	$(PROTOCDEPS) | plugin.proto.java
+	$(PROTOC) \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=plugin.proto.java \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
 
@@ -67,8 +72,11 @@ dist/protobuf-java-2.3.0.jar: \
 options.proto.java descriptor.proto.as3 classes plugin.proto.java unittest.proto.as3 dist:
 	mkdir $@
 
-$(PROTOBUF_DIR)/src/$(PROTOC): $(PROTOBUF_DIR)/Makefile
-	cd $(PROTOBUF_DIR) && make
+ifndef PROTOC
+PROTO=$(PROTOBUF_DIR)/src/protoc$(EXE)
+PROTODEPS=$(PROTOC)
+$(PROTOC):
+	$(MAKE) $(PROTOBUF_DIR)/Makefile && cd $(PROTOBUF_DIR) && make
 
 $(PROTOBUF_DIR)/Makefile: $(PROTOBUF_DIR)/configure
 	cd $(PROTOBUF_DIR) && ./configure
@@ -78,6 +86,7 @@ $(PROTOBUF_DIR)/configure:
 
 $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar: $(PROTOBUF_DIR)/src
 	cd $(PROTOBUF_DIR)/java && $(MVN) package
+endif
 
 clean:
 	rm -fr dist
@@ -103,19 +112,19 @@ test.swc: unittest.proto.as3/protobuf_unittest dist/protobuf.swc
 
 options.proto.java/com: \
 	options.proto \
-	$(PROTOBUF_DIR)/src/$(PROTOC) \
+	$(PROTOCDEPS) \
 	| options.proto.java 
-	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
+	$(PROTOC) \
 	--proto_path=. \
 	"--proto_path=$(PROTOBUF_DIR)/src" \
 	--java_out=options.proto.java $<
 	touch $@
 
 descriptor.proto.as3/google: \
-	$(PROTOBUF_DIR)/src/$(PROTOC) \
-	$(PROTOC_GEN_AS3) \
+	$(PROTOCDEPS) \
+	dist/protoc-gen-as3$(BAT) \
 	| descriptor.proto.as3
-	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
+	$(PROTOC) \
 	--plugin=protoc-gen-as3=$(PROTOC_GEN_AS3) \
 	"--proto_path=$(PROTOBUF_DIR)/src" \
 	--as3_out=descriptor.proto.as3 \
@@ -123,11 +132,11 @@ descriptor.proto.as3/google: \
 	touch $@
 
 unittest.proto.as3/protobuf_unittest: \
-	$(PROTOBUF_DIR)/src/$(PROTOC) \
-	$(PROTOC_GEN_AS3) \
+	$(PROTOCDEPS) \
+	dist/protoc-gen-as3$(BAT) \
 	$(wildcard test/*.proto) \
 	| unittest.proto.as3
-	"$(PROTOBUF_DIR)/src/$(PROTOC)" \
+	$(PROTOC) \
 	--plugin=protoc-gen-as3=$(PROTOC_GEN_AS3) \
 	--proto_path=test --proto_path=. \
 	"--proto_path=$(PROTOBUF_DIR)/src" \

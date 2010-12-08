@@ -1020,7 +1020,7 @@ public final class Main {
 			content.append(", callback:Function):void {\n");
 			content.append("\t\t\tsend(\"");
 			content.append(scope.fullName);
-			content.append("\", \"");
+			content.append(".");
 			content.append(mdp.getName());
 			content.append("\", input, callback, ");
 			content.append(scope.find(mdp.getOutputType()).fullName);

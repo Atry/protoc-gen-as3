@@ -89,15 +89,15 @@ $(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar: $(PROTOBUF_DIR)/src
 endif
 
 clean:
-	rm -fr dist
-	rm -fr dist.tar.gz
-	rm -fr classes
-	rm -fr unittest.proto.as3
-	rm -fr descriptor.proto.as3
-	rm -fr plugin.proto.java
-	rm -fr test.swc
-	rm -fr test.swf
-	rm -rf options.proto.java
+	$(RM) -r dist
+	$(RM) -r dist.tar.gz
+	$(RM) -r classes
+	$(RM) -r unittest.proto.as3
+	$(RM) -r descriptor.proto.as3
+	$(RM) -r plugin.proto.java
+	$(RM) -r test.swc
+	$(RM) -r test.swf
+	$(RM) -r options.proto.java
 
 test: test.swf
 	echo c | $(FDB) $<

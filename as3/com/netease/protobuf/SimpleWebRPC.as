@@ -17,8 +17,7 @@ package com.netease.protobuf {
 			this.urlPrefix = urlPrefix;
 		}
 		private static const REF:Dictionary = new Dictionary();
-		public function send(serviceName:String,
-							 methodName:String,
+		public function send(qualifiedMethodName:String,
 							 input:IExternalizable,
 							 callback:Function,
 							 outputType:Class):void {
@@ -40,7 +39,7 @@ package com.netease.protobuf {
 			loader.addEventListener(
 					SecurityErrorEvent.SECURITY_ERROR, errorEventHandler)
 			const request:URLRequest = new URLRequest(
-				urlPrefix + serviceName + ":" + methodName)
+				urlPrefix + qualifiedMethodName)
 			request.method = URLRequestMethod.POST
 			const requestContent:ByteArray = new ByteArray
 			input.writeExternal(requestContent)

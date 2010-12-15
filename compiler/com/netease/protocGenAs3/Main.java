@@ -1017,12 +1017,12 @@ public final class Main {
 			appendLowerCamelCase(content, mdp.getName());
 			content.append("(input:");
 			content.append(scope.find(mdp.getInputType()).fullName);
-			content.append(", callback:Function):void {\n");
+			content.append(", rpcResult:Function):void {\n");
 			content.append("\t\t\tsend(\"");
 			content.append(scope.fullName);
 			content.append(".");
 			content.append(mdp.getName());
-			content.append("\", input, callback, ");
+			content.append("\", input, rpcResult, ");
 			content.append(scope.find(mdp.getOutputType()).fullName);
 			content.append(");\n");
 			content.append("\t\t}\n\n");

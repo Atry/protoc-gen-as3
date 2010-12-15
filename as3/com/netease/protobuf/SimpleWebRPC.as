@@ -39,7 +39,7 @@ package com.netease.protobuf {
 			loader.addEventListener(
 					SecurityErrorEvent.SECURITY_ERROR, errorEventHandler)
 			const request:URLRequest = new URLRequest(
-				urlPrefix + qualifiedMethodName)
+				urlPrefix + qualifiedMethodName.replace(/\./, "/"))
 			request.method = URLRequestMethod.POST
 			const requestContent:ByteArray = new ByteArray
 			input.writeExternal(requestContent)

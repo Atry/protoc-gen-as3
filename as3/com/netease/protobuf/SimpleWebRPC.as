@@ -19,7 +19,7 @@ package com.netease.protobuf {
 		private static const REF:Dictionary = new Dictionary();
 		public function send(qualifiedMethodName:String,
 							 input:IExternalizable,
-							 callback:Function,
+							 rpcResult:Function,
 							 outputType:Class):void {
 
 			const loader:URLLoader = new URLLoader
@@ -29,11 +29,11 @@ package com.netease.protobuf {
 				delete REF[loader]
 				const output:IExternalizable = new outputType
 				output.readExternal(loader.data)
-				callback(output)
+				rpcResult(output)
 			})
 			function errorEventHandler(event:Event):void {
 				delete REF[loader]
-				callback(event)
+				rpcResult(event)
 			}
 			loader.addEventListener(IOErrorEvent.IO_ERROR, errorEventHandler)
 			loader.addEventListener(

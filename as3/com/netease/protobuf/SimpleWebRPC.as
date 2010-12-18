@@ -16,7 +16,9 @@ package com.netease.protobuf {
 		public function SimpleWebRPC(urlPrefix:String) {
 			this.urlPrefix = urlPrefix;
 		}
+
 		private static const REF:Dictionary = new Dictionary();
+
 		public function send(qualifiedMethodName:String,
 							 input:IExternalizable,
 							 rpcResult:Function,
@@ -39,12 +41,16 @@ package com.netease.protobuf {
 			loader.addEventListener(
 					SecurityErrorEvent.SECURITY_ERROR, errorEventHandler)
 			const request:URLRequest = new URLRequest(
-				urlPrefix + qualifiedMethodName.replace(/\./g, "/"))
-			request.method = URLRequestMethod.POST
+				urlPrefix + qualifiedMethodName.replace(/\./g, "/").
+					replace(/^((com|org|net)\/\w+\/\w+\/)?(.*)$/, "$3"))
 			const requestContent:ByteArray = new ByteArray
 			input.writeExternal(requestContent)
-			request.data = requestContent
+			if (requestContent.length != 0)
+			{
+				request.data = requestContent
+			}
 			request.contentType = "application/x-protobuf"
+			request.method = URLRequestMethod.POST
 			loader.load(request)
 		}
 	}

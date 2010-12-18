@@ -13,12 +13,15 @@ package com.netease.protobuf {
 		var s:String = getQualifiedClassName(message) + "(\n"
 		const descriptor:XML = describeType(message)
 		for each (var getter:String in descriptor.accessor.(@access != "writeonly").@name) {
-			if (getter.search(/^has(.)(.*)$/) != -1) {
+			if (getter.search(/^has[A-Z]/) != -1) {
 				continue
 			}
 			s += fieldToString(message, descriptor, getter)
 		}
 		for each (var field:String in descriptor.variable.@name) {
+			if (field.search(/^_/) != -1) {
+				continue
+			}
 			s += fieldToString(message, descriptor, field)
 		}
 		for (var k:* in message) {

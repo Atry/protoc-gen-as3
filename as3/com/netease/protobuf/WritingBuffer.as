@@ -11,6 +11,9 @@ package com.netease.protobuf {
 	import flash.errors.*;
 	import flash.utils.*;
 	public final class WritingBuffer extends ByteArray {
+		public function WritingBuffer() {
+			endian = Endian.LITTLE_ENDIAN
+		}
 		private const _slices:ByteArray = new ByteArray
 		public function beginBlock():uint {
 			_slices.writeUnsignedInt(position)

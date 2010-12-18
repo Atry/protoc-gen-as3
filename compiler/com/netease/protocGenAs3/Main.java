@@ -477,8 +477,9 @@ public final class Main {
 	private static void writeMessage(Scope<DescriptorProto> scope,
 			StringBuilder content, StringBuilder initializerContent) {
 		content.append("\timport com.netease.protobuf.*;\n");
-		content.append("\timport flash.utils.IExternalizable;\n");
+		content.append("\timport flash.utils.Endian;\n");
 		content.append("\timport flash.utils.IDataInput;\n");
+		content.append("\timport flash.utils.IExternalizable;\n");
 		content.append("\timport flash.errors.IOError;\n");
 		HashSet<String> importTypes = new HashSet<String>();
 		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
@@ -752,6 +753,7 @@ public final class Main {
 		}
 		content.append("\t\t}\n\n");
 		content.append("\t\tpublic function readExternal(input:IDataInput):void {\n");
+		content.append("\t\t\tinput.endian = flash.utils.Endian.LITTLE_ENDIAN;\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");

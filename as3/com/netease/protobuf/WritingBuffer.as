@@ -14,6 +14,9 @@ package com.netease.protobuf {
 	 * @private
 	 */
 	public final class WritingBuffer extends ByteArray {
+		public function WritingBuffer() {
+			endian = Endian.LITTLE_ENDIAN
+		}
 		private const _slices:ByteArray = new ByteArray
 		public function beginBlock():uint {
 			_slices.writeUnsignedInt(position)

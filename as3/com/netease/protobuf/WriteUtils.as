@@ -31,11 +31,9 @@ package com.netease.protobuf {
 			write_TYPE_UINT32(output, (number << 3) | wireType)
 		}
 		public static function write_TYPE_DOUBLE(output:WritingBuffer, value:Number):void {
-			output.endian = Endian.LITTLE_ENDIAN
 			output.writeDouble(value)
 		}
 		public static function write_TYPE_FLOAT(output:WritingBuffer, value:Number):void {
-			output.endian = Endian.LITTLE_ENDIAN
 			output.writeFloat(value)
 		}
 		public static function write_TYPE_INT64(output:WritingBuffer, value:Int64):void {
@@ -52,12 +50,10 @@ package com.netease.protobuf {
 			}
 		}
 		public static function write_TYPE_FIXED64(output:WritingBuffer, value:Int64):void {
-			output.endian = Endian.LITTLE_ENDIAN
 			output.writeUnsignedInt(value.low)
 			output.writeInt(value.high)
 		}
 		public static function write_TYPE_FIXED32(output:WritingBuffer, value:int):void {
-			output.endian = Endian.LITTLE_ENDIAN
 			output.writeInt(value)
 		}
 		public static function write_TYPE_BOOL(output:WritingBuffer, value:Boolean):void {
@@ -90,7 +86,6 @@ package com.netease.protobuf {
 			write_TYPE_FIXED32(output, ZigZag.encode32(value))
 		}
 		public static function write_TYPE_SFIXED64(output:WritingBuffer, value:Int64):void {
-			output.endian = Endian.LITTLE_ENDIAN
 			output.writeUnsignedInt(ZigZag.encode64low(value.low, value.high))
 			output.writeUnsignedInt(ZigZag.encode64high(value.low, value.high))
 		}

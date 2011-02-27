@@ -535,6 +535,7 @@ public final class Main {
 			content.append(";\n");
 			content.append("\t\t}\n\n");
 		}
+		int valueTypeCount = 0;
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -550,57 +551,81 @@ public final class Main {
 				content.append(";\n\n");
 
 				if (isValueType(fdp.getType())) {
-					content.append("\t\tprivate var ");
-					content.append(fdp.getName());
-					content.append("$hasField:Boolean = false;\n\n");
-				}
-				content.append("\t\tpublic function remove");
-				appendUpperCamelCase(content, fdp.getName());
-				content.append("():void {\n");
-				if (isValueType(fdp.getType())) {
-					content.append("\t\t\t");
-					content.append(fdp.getName());
-					content.append("$hasField = false;\n");
+					final int valueTypeId = valueTypeCount++;
+					final int valueTypeField = valueTypeId / 32;
+					final int valueTypeBit = valueTypeId % 32;
+					if (valueTypeBit == 0) {
+						content.append("\t\tprivate var hasField$");
+						content.append(valueTypeField);
+						content.append(":uint = 0;\n\n");
+					}
+					content.append("\t\tpublic function remove");
+					appendUpperCamelCase(content, fdp.getName());
+					content.append("():void {\n");
+					content.append("\t\t\thasField$");
+					content.append(valueTypeField);
+					content.append(" &= 0x");
+					content.append(Integer.toHexString(~(1 << valueTypeBit)));
+					content.append(";\n");
+
 					content.append("\t\t\t");
 					content.append(fdp.getName());
 					content.append("$field = new ");
 					content.append(getActionScript3Type(scope, fdp));
 					content.append("();\n");
+					content.append("\t\t}\n\n");
+
+					content.append("\t\tpublic function get has");
+					appendUpperCamelCase(content, fdp.getName());
+					content.append("():Boolean {\n");
+					content.append("\t\t\treturn (hasField$");
+					content.append(valueTypeField);
+					content.append(" & 0x");
+					content.append(Integer.toHexString(1 << valueTypeBit));
+					content.append(") != 0;\n");
+					content.append("\t\t}\n\n");
+
+					content.append("\t\tpublic function set ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append("(value:");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append("):void {\n");
+					content.append("\t\t\t hasField$");
+					content.append(valueTypeField);
+					content.append(" |= 0x");
+					content.append(Integer.toHexString(1 << valueTypeBit));
+					content.append(";\n");
+					content.append("\t\t\t");
+					content.append(fdp.getName());
+					content.append("$field = value;\n");
+					content.append("\t\t}\n\n");
 				} else {
+					content.append("\t\tpublic function remove");
+					appendUpperCamelCase(content, fdp.getName());
+					content.append("():void {\n");
 					content.append("\t\t\t");
 					content.append(fdp.getName());
 					content.append("$field = null;\n");
-				}
-				content.append("\t\t}\n\n");
+					content.append("\t\t}\n\n");
 
-				content.append("\t\tpublic function get has");
-				appendUpperCamelCase(content, fdp.getName());
-				content.append("():Boolean {\n");
-				if (isValueType(fdp.getType())) {
+					content.append("\t\tpublic function get has");
+					appendUpperCamelCase(content, fdp.getName());
+					content.append("():Boolean {\n");
 					content.append("\t\t\treturn ");
 					content.append(fdp.getName());
-					content.append("$hasField;\n");
-				} else {
-					content.append("\t\t\treturn null != ");
-					content.append(fdp.getName());
-					content.append("$field;\n");
-				}
-				content.append("\t\t}\n\n");
+					content.append("$field != null;\n");
+					content.append("\t\t}\n\n");
 
-				content.append("\t\tpublic function set ");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append("(value:");
-				content.append(getActionScript3Type(scope, fdp));
-				content.append("):void {\n");
-				if (isValueType(fdp.getType())) {
+					content.append("\t\tpublic function set ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append("(value:");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append("):void {\n");
 					content.append("\t\t\t");
 					content.append(fdp.getName());
-					content.append("$hasField = true;\n");
+					content.append("$field = value;\n");
+					content.append("\t\t}\n\n");
 				}
-				content.append("\t\t\t");
-				content.append(fdp.getName());
-				content.append("$field = value;\n");
-				content.append("\t\t}\n\n");
 
 				content.append("\t\tpublic function get ");
 				appendLowerCamelCase(content, fdp.getName());

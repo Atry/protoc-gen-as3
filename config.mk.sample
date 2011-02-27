@@ -1,4 +1,5 @@
-PROTOBUF_DIR=../protobuf-2.4.0a
+PROTOBUF_VERSION=2.4.0a
+PROTOBUF_DIR=../protobuf-$(PROTOBUF_VERSION)
 ifeq ($(OS), Windows_NT)
 BAT=.bat
 EXE=.exe
@@ -6,7 +7,6 @@ PATH_SEPARATOR=;
 else
 PATH_SEPARATOR=:
 endif
-PROTOC=protoc$(EXE)
 COMPC=compc$(EXE)
 MXMLC=mxmlc$(EXE)
 FDB=fdb$(EXE)

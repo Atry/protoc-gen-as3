@@ -1,4 +1,4 @@
-PROTOBUF_DIR=../protobuf-2.3.0
+PROTOBUF_DIR=../protobuf-2.4.0a
 ifeq ($(OS), Windows_NT)
 BAT=.bat
 EXE=.exe

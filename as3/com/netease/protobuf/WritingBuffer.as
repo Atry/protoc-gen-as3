@@ -14,45 +14,45 @@ package com.netease.protobuf {
 		public function WritingBuffer() {
 			endian = Endian.LITTLE_ENDIAN
 		}
-		private const _slices:ByteArray = new ByteArray
+		private const slices:ByteArray = new ByteArray
 		public function beginBlock():uint {
-			_slices.writeUnsignedInt(position)
-			const beginSliceIndex:uint = _slices.length
+			slices.writeUnsignedInt(position)
+			const beginSliceIndex:uint = slices.length
 			if (beginSliceIndex % 8 != 4) {
 				throw new IllegalOperationError
 			}
-			_slices.writeDouble(0)
-			_slices.writeUnsignedInt(position)
+			slices.writeDouble(0)
+			slices.writeUnsignedInt(position)
 			return beginSliceIndex
 		}
 		public function endBlock(beginSliceIndex:uint):void {
-			if (_slices.length % 8 != 0) {
+			if (slices.length % 8 != 0) {
 				throw new IllegalOperationError
 			}
-			_slices.writeUnsignedInt(position)
-			_slices.position = beginSliceIndex + 8
-			const beginPosition:uint = _slices.readUnsignedInt()
-			_slices.position = beginSliceIndex
-			_slices.writeUnsignedInt(position)
-			WriteUtils.write_TYPE_UINT32(this, position - beginPosition)
-			_slices.writeUnsignedInt(position)
-			_slices.position = _slices.length
-			_slices.writeUnsignedInt(position)
+			slices.writeUnsignedInt(position)
+			slices.position = beginSliceIndex + 8
+			const beginPosition:uint = slices.readUnsignedInt()
+			slices.position = beginSliceIndex
+			slices.writeUnsignedInt(position)
+			WriteUtils.write$TYPE_UINT32(this, position - beginPosition)
+			slices.writeUnsignedInt(position)
+			slices.position = slices.length
+			slices.writeUnsignedInt(position)
 		}
 		public function toNormal(output:IDataOutput):void {
-			if (_slices.length % 8 != 0) {
+			if (slices.length % 8 != 0) {
 				throw new IllegalOperationError
 			}
-			_slices.position = 0
+			slices.position = 0
 			var begin:uint = 0
-			while (_slices.bytesAvailable > 0) {
-				var end:uint = _slices.readUnsignedInt()
+			while (slices.bytesAvailable > 0) {
+				var end:uint = slices.readUnsignedInt()
 				if (end > begin) {
 					output.writeBytes(this, begin, end - begin)
 				} else if (end < begin) {
 					throw new IllegalOperationError
 				}
-				begin = _slices.readUnsignedInt()
+				begin = slices.readUnsignedInt()
 			}
 			if (begin < length) {
 				output.writeBytes(this, begin)

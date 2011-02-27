@@ -10,6 +10,16 @@
 public function toString():String {
 	return messageToString(this)
 }
+import flash.utils.IDataInput
+public function readFromSlice(input:IDataInput, bytesAfterSlice:uint):void {
+	import flash.errors.IllegalOperationError
+	throw new IllegalOperationError("Not implemented.")
+}
+public final function readExternal(input:IDataInput):void {
+	import flash.utils.Endian;
+	input.endian = Endian.LITTLE_ENDIAN;
+	readFromSlice(input, 0)
+}
 public function writeToBuffer(output:WritingBuffer):void {
 	import flash.errors.IllegalOperationError
 	throw new IllegalOperationError("Not implemented.")

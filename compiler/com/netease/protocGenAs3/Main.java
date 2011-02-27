@@ -302,7 +302,7 @@ public final class Main {
 			}
 			break;
 		}
-		content.append("WriteUtils.write_");
+		content.append("WriteUtils.write$");
 		content.append(fdp.getType().name());
 		content.append(")");
 	}
@@ -330,29 +330,10 @@ public final class Main {
 				content.append("Extension.readFunction(");
 				break;
 			case LABEL_REPEATED:
-				switch (fdp.getType()) {
-					case TYPE_DOUBLE:
-					case TYPE_FLOAT:
-					case TYPE_BOOL:
-					case TYPE_INT32:
-					case TYPE_FIXED32:
-					case TYPE_UINT32:
-					case TYPE_SFIXED32:
-					case TYPE_SINT32:
-					case TYPE_INT64:
-					case TYPE_FIXED64:
-					case TYPE_UINT64:
-					case TYPE_SFIXED64:
-					case TYPE_SINT64:
-					case TYPE_ENUM:
-					content.append("Extension.packedRepeatedReadFunction(");
-					break;
-					default:
-					content.append("Extension.repeatedReadFunction(");
-				}
+				content.append("Extension.repeatedReadFunction(");
 				break;
 			}
-			content.append("ReadUtils.read_");
+			content.append("ReadUtils.read$");
 			content.append(fdp.getType().name());
 			content.append(")");
 		}
@@ -562,33 +543,33 @@ public final class Main {
 			assert(fdp.hasLabel());
 			switch (fdp.getLabel()) {
 			case LABEL_OPTIONAL:
-				content.append("\t\tprivate var _");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append(":");
+				content.append("\t\tprivate var ");
+				content.append(fdp.getName());
+				content.append("$field:");
 				content.append(getActionScript3Type(scope, fdp));
 				content.append(";\n\n");
 
 				if (isValueType(fdp.getType())) {
-					content.append("\t\tprivate var _has");
-					appendUpperCamelCase(content, fdp.getName());
-					content.append(":Boolean = false;\n\n");
+					content.append("\t\tprivate var ");
+					content.append(fdp.getName());
+					content.append("$hasField:Boolean = false;\n\n");
 				}
 				content.append("\t\tpublic function remove");
 				appendUpperCamelCase(content, fdp.getName());
 				content.append("():void {\n");
 				if (isValueType(fdp.getType())) {
-					content.append("\t\t\t_has");
-					appendUpperCamelCase(content, fdp.getName());
-					content.append(" = false;\n");
-					content.append("\t\t\t_");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append(" = new ");
+					content.append("\t\t\t");
+					content.append(fdp.getName());
+					content.append("$hasField = false;\n");
+					content.append("\t\t\t");
+					content.append(fdp.getName());
+					content.append("$field = new ");
 					content.append(getActionScript3Type(scope, fdp));
 					content.append("();\n");
 				} else {
-					content.append("\t\t\t_");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append(" = null;\n");
+					content.append("\t\t\t");
+					content.append(fdp.getName());
+					content.append("$field = null;\n");
 				}
 				content.append("\t\t}\n\n");
 
@@ -596,13 +577,13 @@ public final class Main {
 				appendUpperCamelCase(content, fdp.getName());
 				content.append("():Boolean {\n");
 				if (isValueType(fdp.getType())) {
-					content.append("\t\t\treturn _has");
-					appendUpperCamelCase(content, fdp.getName());
-					content.append(";\n");
+					content.append("\t\t\treturn ");
+					content.append(fdp.getName());
+					content.append("$hasField;\n");
 				} else {
-					content.append("\t\t\treturn null != _");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append(";\n");
+					content.append("\t\t\treturn null != ");
+					content.append(fdp.getName());
+					content.append("$field;\n");
 				}
 				content.append("\t\t}\n\n");
 
@@ -612,13 +593,13 @@ public final class Main {
 				content.append(getActionScript3Type(scope, fdp));
 				content.append("):void {\n");
 				if (isValueType(fdp.getType())) {
-					content.append("\t\t\t_has");
-					appendUpperCamelCase(content, fdp.getName());
-					content.append(" = true;\n");
+					content.append("\t\t\t");
+					content.append(fdp.getName());
+					content.append("$hasField = true;\n");
 				}
-				content.append("\t\t\t_");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append(" = value;\n");
+				content.append("\t\t\t");
+				content.append(fdp.getName());
+				content.append("$field = value;\n");
 				content.append("\t\t}\n\n");
 
 				content.append("\t\tpublic function get ");
@@ -635,9 +616,9 @@ public final class Main {
 					content.append(";\n");
 					content.append("\t\t\t}\n");
 				}
-				content.append("\t\t\treturn _");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append(";\n");
+				content.append("\t\t\treturn ");
+				content.append(fdp.getName());
+				content.append("$field;\n");
 				content.append("\t\t}\n\n");
 				break;
 			case LABEL_REQUIRED:
@@ -663,7 +644,7 @@ public final class Main {
 				throw new IllegalArgumentException();
 			}
 		}
-		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\tpublic override function writeToBuffer(output:WritingBuffer):void {\n");
+		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\toverride public final function writeToBuffer(output:WritingBuffer):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -680,11 +661,11 @@ public final class Main {
 				content.append(", ");
 				content.append(Integer.toString(fdp.getNumber()));
 				content.append(");\n");
-				content.append("\t\t\t\tWriteUtils.write_");
+				content.append("\t\t\t\tWriteUtils.write$");
 				content.append(fdp.getType().name());
-				content.append("(output, _");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append(");\n");
+				content.append("(output, ");
+				content.append(fdp.getName());
+				content.append("$field);\n");
 				content.append("\t\t\t}\n");
 				break;
 			case LABEL_REQUIRED:
@@ -693,7 +674,7 @@ public final class Main {
 				content.append(", ");
 				content.append(Integer.toString(fdp.getNumber()));
 				content.append(");\n");
-				content.append("\t\t\tWriteUtils.write_");
+				content.append("\t\t\tWriteUtils.write$");
 				content.append(fdp.getType().name());
 				content.append("(output, ");
 				appendLowerCamelCase(content, fdp.getName());
@@ -709,7 +690,7 @@ public final class Main {
 					content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, ");
 					content.append(Integer.toString(fdp.getNumber()));
 					content.append(");\n");
-					content.append("\t\t\t\tWriteUtils.writePackedRepeated(output, WriteUtils.write_");
+					content.append("\t\t\t\tWriteUtils.writePackedRepeated(output, WriteUtils.write$");
 					content.append(fdp.getType().name());
 					content.append(", ");
 					appendLowerCamelCase(content, fdp.getName());
@@ -730,7 +711,7 @@ public final class Main {
 					content.append(", ");
 					content.append(Integer.toString(fdp.getNumber()));
 					content.append(");\n");
-					content.append("\t\t\t\tWriteUtils.write_");
+					content.append("\t\t\t\tWriteUtils.write$");
 					content.append(fdp.getType().name());
 					content.append("(output, ");
 					appendLowerCamelCase(content, fdp.getName());
@@ -752,8 +733,8 @@ public final class Main {
 			content.append("\t\t\t}\n");
 		}
 		content.append("\t\t}\n\n");
-		content.append("\t\tpublic function readExternal(input:IDataInput):void {\n");
-		content.append("\t\t\tinput.endian = flash.utils.Endian.LITTLE_ENDIAN;\n");
+		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
+		content.append("\t\toverride public final function readFromSlice(input:IDataInput, bytesAfterSlice:uint):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -763,14 +744,14 @@ public final class Main {
 			case LABEL_OPTIONAL:
 			case LABEL_REQUIRED:
 				content.append("\t\t\tvar ");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append("Count:uint = 0;\n");
+				content.append(fdp.getName());
+				content.append("$count:uint = 0;\n");
 				break;
 			}
 		}
-		content.append("\t\t\twhile (input.bytesAvailable != 0) {\n");
-		content.append("\t\t\t\tvar tag:Tag = ReadUtils.readTag(input);\n");
-		content.append("\t\t\t\tswitch (tag.number) {\n");
+		content.append("\t\t\twhile (input.bytesAvailable > bytesAfterSlice) {\n");
+		content.append("\t\t\t\tvar tag:uint = ReadUtils.read$TYPE_UINT32(input);\n");
+		content.append("\t\t\t\tswitch (tag >>> 3) {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -783,8 +764,8 @@ public final class Main {
 			case LABEL_OPTIONAL:
 			case LABEL_REQUIRED:
 				content.append("\t\t\t\t\tif (");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append("Count != 0) {\n");
+				content.append(fdp.getName());
+				content.append("$count != 0) {\n");
 				content.append("\t\t\t\t\t\tthrow new IOError('Bad data format: ");
 				content.append(scope.proto.getName());
 				content.append('.');
@@ -792,21 +773,21 @@ public final class Main {
 				content.append(" cannot be set twice.');\n");
 				content.append("\t\t\t\t\t}\n");
 				content.append("\t\t\t\t\t++");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append("Count;\n");
+				content.append(fdp.getName());
+				content.append("$count;\n");
 				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
 					content.append("\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(" = new ");
 					content.append(getActionScript3Type(scope, fdp));
-					content.append(";\n");
-					content.append("\t\t\t\t\tReadUtils.read_TYPE_MESSAGE(input, ");
+					content.append("();\n");
+					content.append("\t\t\t\t\tReadUtils.read$TYPE_MESSAGE(input, ");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(");\n");
 				} else {
 					content.append("\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append(" = ReadUtils.read_");
+					content.append(" = ReadUtils.read$");
 					content.append(fdp.getType().name());
 					content.append("(input);\n");
 				}
@@ -827,8 +808,8 @@ public final class Main {
 					case TYPE_SFIXED64:
 					case TYPE_SINT64:
 					case TYPE_ENUM:
-					content.append("\t\t\t\t\tif (tag.wireType == WireType.LENGTH_DELIMITED) {\n");
-					content.append("\t\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read_");
+					content.append("\t\t\t\t\tif ((tag & 7) == WireType.LENGTH_DELIMITED) {\n");
+					content.append("\t\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read$");
 					content.append(fdp.getType().name());
 					content.append(", ");
 					appendLowerCamelCase(content, fdp.getName());
@@ -836,29 +817,41 @@ public final class Main {
 					content.append("\t\t\t\t\t\tbreak;\n");
 					content.append("\t\t\t\t\t}\n");
 				}
-				content.append("\t\t\t\t\t");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append(".push(ReadUtils.read_");
-				content.append(fdp.getType().name());
-				content.append("(input");
 				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
-					content.append(", new ");
+					content.append("\t\t\t\t\tconst ");
+					content.append(fdp.getName());
+					content.append("$element:");
 					content.append(getActionScript3Type(scope, fdp));
+					content.append(" = new ");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append("();\n\t\t\t\t\t");
+					content.append("ReadUtils.read$TYPE_MESSAGE(input, ");
+					content.append(fdp.getName());
+					content.append("$element);\n\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(".push(");
+					content.append(fdp.getName());
+					content.append("$element);\n");
+				} else {
+					content.append("\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(".push(ReadUtils.read$");
+					content.append(fdp.getType().name());
+					content.append("(input));");
 				}
-				content.append("));\n");
 				break;
 			}
 			content.append("\t\t\t\t\tbreak;\n");
 		}
 		content.append("\t\t\t\tdefault:\n");
 		if (scope.proto.getExtensionRangeCount() > 0) {
-			content.append("\t\t\t\t\tvar readFunction:Function = extensionReadFunctions[tag.number];\n");
+			content.append("\t\t\t\t\tvar readFunction:Function = extensionReadFunctions[tag >>> 3];\n");
 			content.append("\t\t\t\t\tif (readFunction != null) {\n");
 			content.append("\t\t\t\t\t\treadFunction(input, this, tag);\n");
 			content.append("\t\t\t\t\t\tbreak;\n");
 			content.append("\t\t\t\t\t}\n");
 		}
-		content.append("\t\t\t\t\tReadUtils.skip(input, tag.wireType);\n");
+		content.append("\t\t\t\t\tReadUtils.skip(input, tag & 7);\n");
 		content.append("\t\t\t\t}\n");
 		content.append("\t\t\t}\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
@@ -869,8 +862,8 @@ public final class Main {
 			switch (fdp.getLabel()) {
 			case LABEL_REQUIRED:
 				content.append("\t\t\tif (");
-				appendLowerCamelCase(content, fdp.getName());
-				content.append("Count != 1) {\n");
+				content.append(fdp.getName());
+				content.append("$count != 1) {\n");
 				content.append("\t\t\t\tthrow new IOError('Bad data format: ");
 				content.append(scope.proto.getName());
 				content.append('.');

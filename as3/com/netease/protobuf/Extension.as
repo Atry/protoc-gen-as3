@@ -12,55 +12,44 @@ package com.netease.protobuf {
 	public final class Extension {
 		public static function repeatedReadFunction(f:Function):Function {
 			return function (input:IDataInput,
-					object:Array, tag:Tag):void {
-				var a:Array = object[tag.number]
+					object:Array, tag:uint):void {
+				var a:Array = object[tag >>> 3]
 				if (a == null) {
 					a = []
-					object[tag.number] = a
+					object[tag >>> 3] = a
 				}
-				a.push(f(input))
-			}
-		}
-		public static function readFunction(f:Function):Function {
-			return function (input:IDataInput,
-					object:Array, tag:Tag):void {
-				object[tag.number] = f(input)
-			}
-		}
-		public static function packedRepeatedReadFunction(f:Function):Function {
-			return function (input:IDataInput,
-					object:Array, tag:Tag):void {
-				var a:Array = object[tag.number]
-				if (a == null) {
-					a = []
-					object[tag.number] = a
-				}
-				if (tag.wireType == WireType.LENGTH_DELIMITED) {
+				if ((tag & 7) == WireType.LENGTH_DELIMITED) {
 					ReadUtils.readPackedRepeated(input, f, a)
 				} else {
 					a.push(f(input))
 				}
 			}
 		}
+		public static function readFunction(f:Function):Function {
+			return function (input:IDataInput,
+					object:Array, tag:uint):void {
+				object[tag >>> 3] = f(input)
+			}
+		}
 		public static function repeatedMessageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
-					object:Array, tag:Tag):void {
-				var a:Array = object[tag.number]
+					object:Array, tag:uint):void {
+				var a:Array = object[tag >>> 3]
 				if (a == null) {
 					a = []
-					object[tag.number] = a
+					object[tag >>> 3] = a
 				}
 				const m:IMessage = new c
-				ReadUtils.read_TYPE_MESSAGE(input, m)
+				ReadUtils.read$TYPE_MESSAGE(input, m)
 				a.push(m)
 			}
 		}
 		public static function messageReadFunction(c:Class):Function {
 			return function (input:IDataInput,
-					object:Array, tag:Tag):void {
+					object:Array, tag:uint):void {
 				const m:IMessage = new c
-				ReadUtils.read_TYPE_MESSAGE(input, m)
-				object[tag.number] = m
+				ReadUtils.read$TYPE_MESSAGE(input, m)
+				object[tag >>> 3] = m
 			}
 		}
 		public static function writeFunction(wireType:uint, f:Function):Function {

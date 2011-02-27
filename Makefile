@@ -14,7 +14,7 @@ endif
 
 ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
 	dist/protobuf.swc dist/README dist/options.proto\
-	dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar
+	dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar
 
 all: $(ALL)
 
@@ -22,10 +22,10 @@ classes/com/netease/protocGenAs3/Main.class: \
 	plugin.proto.java/google/protobuf/compiler/Plugin.java \
 	options.proto.java/com \
 	compiler/com/netease/protocGenAs3/Main.java \
-	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \
+	$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar \
 	| classes
 	$(JAVAC) -encoding UTF-8 -Xlint:all -d classes \
-	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar" \
+	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar" \
 	-sourcepath "plugin.proto.java$(PATH_SEPARATOR)compiler$(PATH_SEPARATOR)options.proto.java" \
 	compiler/com/netease/protocGenAs3/Main.java
 
@@ -44,13 +44,13 @@ dist/README: README | dist
 dist/options.proto: options.proto | dist
 	cp $< $@
 
-dist/protoc-gen-as3: dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar \
+dist/protoc-gen-as3: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar \
 	| dist
 	(echo '#!/bin/sh';\
 	echo 'cd `dirname "$$0"` && java -jar protoc-gen-as3.jar') > $@
 	chmod +x $@
 
-dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-2.3.0.jar \
+dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar \
 	| dist
 	(echo '@cd %~dp0';\
 	echo '@java -jar protoc-gen-as3.jar') > $@
@@ -60,12 +60,15 @@ dist/protobuf.swc: descriptor.proto.as3/google \
 	$(wildcard as3/com/netease/protobuf/*.as) | dist
 	$(COMPC) -include-sources+=as3,descriptor.proto.as3 -output=$@
 
+MANIFEST.MF:
+	echo Class-Path: protobuf-java-$(PROTOBUF_VERSION).jar > $@
+
 dist/protoc-gen-as3.jar: classes/com/netease/protocGenAs3/Main.class \
 	MANIFEST.MF | dist
-	$(JAR) mcf MANIFEST.MF $@ -C classes .
+	$(JAR) cemf com/netease/protocGenAs3/Main MANIFEST.MF $@ -C classes .
 
-dist/protobuf-java-2.3.0.jar: \
-	$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar \
+dist/protobuf-java-$(PROTOBUF_VERSION).jar: \
+	$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar \
 	| dist
 	cp $< $@
 
@@ -73,10 +76,10 @@ options.proto.java descriptor.proto.as3 classes plugin.proto.java unittest.proto
 	mkdir $@
 
 ifndef PROTOC
-PROTO=$(PROTOBUF_DIR)/src/protoc$(EXE)
+PROTOC=$(PROTOBUF_DIR)/src/protoc$(EXE)
 PROTODEPS=$(PROTOC)
-$(PROTOC):
-	$(MAKE) $(PROTOBUF_DIR)/Makefile && cd $(PROTOBUF_DIR) && make
+$(PROTOC): $(PROTOBUF_DIR)/Makefile 
+	cd $(PROTOBUF_DIR) && $(MAKE)
 
 $(PROTOBUF_DIR)/Makefile: $(PROTOBUF_DIR)/configure
 	cd $(PROTOBUF_DIR) && ./configure
@@ -84,7 +87,9 @@ $(PROTOBUF_DIR)/Makefile: $(PROTOBUF_DIR)/configure
 $(PROTOBUF_DIR)/configure:
 	cd $(PROTOBUF_DIR) && ./autogen.sh
 
-$(PROTOBUF_DIR)/java/target/protobuf-java-2.3.0.jar: $(PROTOBUF_DIR)/src
+$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
+	$(PROTOBUF_DIR)/src \
+	$(PROTOC)
 	cd $(PROTOBUF_DIR)/java && $(MVN) package
 endif
 

@@ -1031,14 +1031,14 @@ public final class Main {
 		content.append("\tpublic final class ");
 		content.append(scope.proto.getName());
 		content.append(" {\n");
-		content.append("\t\tpublic var send:Function;\n\n");
+		content.append("\t\tpublic var sendFunction:Function;\n\n");
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 			content.append("\t\tpublic function ");
 			appendLowerCamelCase(content, mdp.getName());
 			content.append("(input:");
 			content.append(scope.find(mdp.getInputType()).fullName);
 			content.append(", rpcResult:Function):void {\n");
-			content.append("\t\t\tsend(\"");
+			content.append("\t\t\tsendFunction(\"");
 			content.append(scope.fullName);
 			content.append(".");
 			content.append(mdp.getName());

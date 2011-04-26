@@ -1,4 +1,4 @@
-// vim: tabstop=4 shiftwidth=4
+// vim: fileencoding=utf-8 tabstop=4 shiftwidth=4
 
 // Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
 //
@@ -25,7 +25,8 @@ public final class Main {
 		"with"
 	};
 	private static final class Scope<Proto> {
-		// 如果 proto instanceOf Scope ，则这个 Scope 对另一 Scope 的引用�?		public final String fullName;
+		// 如果 proto instanceOf Scope ，则这个 Scope 对另一 Scope 的引用
+		public final String fullName;
 		public final Scope<?> parent;
 		public final Proto proto;
 		public final boolean export;
@@ -287,15 +288,15 @@ public final class Main {
 		case LABEL_REQUIRED:
 			throw new IllegalArgumentException();
 		case LABEL_OPTIONAL:
-			content.append("Extension.writeFunction(com.netease.protobuf.WireType.");
+			content.append("com.netease.protobuf.Extension.writeFunction(com.netease.protobuf.WireType.");
 			content.append(getActionScript3WireType(fdp.getType()));
 			content.append(", ");
 			break;
 		case LABEL_REPEATED:
 			if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
-				content.append("Extension.packedRepeatedWriteFunction(");
+				content.append("com.netease.protobuf.Extension.packedRepeatedWriteFunction(");
 			} else {
-				content.append("Extension.repeatedWriteFunction(com.netease.protobuf.WireType.");
+				content.append("com.netease.protobuf.Extension.repeatedWriteFunction(com.netease.protobuf.WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));
 				content.append(", ");
 			}
@@ -312,11 +313,11 @@ public final class Main {
 			case LABEL_REQUIRED:
 				throw new IllegalArgumentException();
 			case LABEL_OPTIONAL:
-				content.append("Extension.messageReadFunction(");
+				content.append("com.netease.protobuf.Extension.messageReadFunction(");
 				break;
 			case LABEL_REPEATED:
 				assert(!(fdp.hasOptions() && fdp.getOptions().getPacked()));
-				content.append("Extension.repeatedMessageReadFunction(");
+				content.append("com.netease.protobuf.Extension.repeatedMessageReadFunction(");
 				break;
 			}
 			content.append(getActionScript3Type(scope, fdp));
@@ -326,10 +327,10 @@ public final class Main {
 			case LABEL_REQUIRED:
 				throw new IllegalArgumentException();
 			case LABEL_OPTIONAL:
-				content.append("Extension.readFunction(");
+				content.append("com.netease.protobuf.Extension.readFunction(");
 				break;
 			case LABEL_REPEATED:
-				content.append("Extension.repeatedReadFunction(");
+				content.append("com.netease.protobuf.Extension.repeatedReadFunction(");
 				break;
 			}
 			content.append("com.netease.protobuf.ReadUtils.read$");
@@ -1076,7 +1077,8 @@ public final class Main {
 			writeFiles(root, responseBuilder);
 			response = responseBuilder.build();
 		} catch (Exception e) {
-			// 出错，报告给 protoc ，然后退出�?			StringWriter sw = new StringWriter();
+			// 出错，报告给 protoc ，然后退出
+			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			pw.flush();

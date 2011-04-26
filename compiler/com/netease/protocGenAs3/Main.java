@@ -393,8 +393,16 @@ public final class Main {
 				case '\"':
 				case '\\':
 					sb.append('\\');
+					sb.append(c);
+					break;
+				default:
+					if (c >= 128 || Character.isISOControl(c)) {
+						sb.append("\\u");
+						sb.append(String.format("%04X", new Integer(c)));
+					} else {
+						sb.append(c);
+					}
 				}
-				sb.append(c);
 			}
 			sb.append('\"');
 			break;

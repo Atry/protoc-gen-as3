@@ -10,6 +10,8 @@ import "options.proto";
 import "issue12.proto";
 message AAA {
 	option (as3_bindable) = true;
+	optional bytes b = 1 [ default = "\x01\x02\x80\xFF\x7F\0\x34" ];
+	optional string s = 2 [ default = "汉字测试\0\x34" ];
 }
 message BBB {
 	option (as3_bindable) = true;

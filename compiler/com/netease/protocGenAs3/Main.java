@@ -25,8 +25,7 @@ public final class Main {
 		"with"
 	};
 	private static final class Scope<Proto> {
-		// 如果 proto instanceOf Scope ，则这个 Scope 对另一 Scope 的引用。
-		public final String fullName;
+		// 如果 proto instanceOf Scope ，则这个 Scope 对另一 Scope 的引用�?		public final String fullName;
 		public final Scope<?> parent;
 		public final Proto proto;
 		public final boolean export;
@@ -288,7 +287,7 @@ public final class Main {
 		case LABEL_REQUIRED:
 			throw new IllegalArgumentException();
 		case LABEL_OPTIONAL:
-			content.append("Extension.writeFunction(WireType.");
+			content.append("Extension.writeFunction(com.netease.protobuf.WireType.");
 			content.append(getActionScript3WireType(fdp.getType()));
 			content.append(", ");
 			break;
@@ -296,13 +295,13 @@ public final class Main {
 			if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
 				content.append("Extension.packedRepeatedWriteFunction(");
 			} else {
-				content.append("Extension.repeatedWriteFunction(WireType.");
+				content.append("Extension.repeatedWriteFunction(com.netease.protobuf.WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));
 				content.append(", ");
 			}
 			break;
 		}
-		content.append("WriteUtils.write$");
+		content.append("com.netease.protobuf.WriteUtils.write$");
 		content.append(fdp.getType().name());
 		content.append(")");
 	}
@@ -333,7 +332,7 @@ public final class Main {
 				content.append("Extension.repeatedReadFunction(");
 				break;
 			}
-			content.append("ReadUtils.read$");
+			content.append("com.netease.protobuf.ReadUtils.read$");
 			content.append(fdp.getType().name());
 			content.append(")");
 		}
@@ -460,6 +459,7 @@ public final class Main {
 		content.append("\timport com.netease.protobuf.*;\n");
 		content.append("\timport flash.utils.Endian;\n");
 		content.append("\timport flash.utils.IDataInput;\n");
+		content.append("\timport flash.utils.IDataOutput;\n");
 		content.append("\timport flash.utils.IExternalizable;\n");
 		content.append("\timport flash.errors.IOError;\n");
 		HashSet<String> importTypes = new HashSet<String>();
@@ -493,7 +493,7 @@ public final class Main {
 		if (scope.proto.getExtensionRangeCount() > 0) {
 			content.append("\tpublic dynamic final class ");
 			content.append(scope.proto.getName());
-			content.append(" extends com.netease.protobuf.ExtensibleMessage implements flash.utils.IExternalizable {\n");
+			content.append(" extends Array implements flash.utils.IExternalizable, com.netease.protobuf.IMessage {\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
 			content.append("\t\tpublic static const extensionWriteFunctions:Array = [];\n\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
@@ -501,7 +501,7 @@ public final class Main {
 		} else {
 			content.append("\tpublic final class ");
 			content.append(scope.proto.getName());
-			content.append(" extends com.netease.protobuf.Message implements flash.utils.IExternalizable {\n");
+			content.append(" implements flash.utils.IExternalizable, com.netease.protobuf.IMessage {\n");
 		}
 		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
 			initializerContent.append("import ");
@@ -590,7 +590,7 @@ public final class Main {
 					content.append("(value:");
 					content.append(getActionScript3Type(scope, fdp));
 					content.append("):void {\n");
-					content.append("\t\t\t hasField$");
+					content.append("\t\t\thasField$");
 					content.append(valueTypeField);
 					content.append(" |= 0x");
 					content.append(Integer.toHexString(1 << valueTypeBit));
@@ -669,7 +669,7 @@ public final class Main {
 				throw new IllegalArgumentException();
 			}
 		}
-		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\toverride public final function writeToBuffer(output:WritingBuffer):void {\n");
+		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\tpublic final function writeToBuffer(output:com.netease.protobuf.WritingBuffer):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -681,12 +681,12 @@ public final class Main {
 				content.append("has");
 				appendUpperCamelCase(content, fdp.getName());
 				content.append(") {\n");
-				content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.");
+				content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.writeTag(output, com.netease.protobuf.WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));
 				content.append(", ");
 				content.append(Integer.toString(fdp.getNumber()));
 				content.append(");\n");
-				content.append("\t\t\t\tWriteUtils.write$");
+				content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.write$");
 				content.append(fdp.getType().name());
 				content.append("(output, ");
 				content.append(fdp.getName());
@@ -694,12 +694,12 @@ public final class Main {
 				content.append("\t\t\t}\n");
 				break;
 			case LABEL_REQUIRED:
-				content.append("\t\t\tWriteUtils.writeTag(output, WireType.");
+				content.append("\t\t\tcom.netease.protobuf.WriteUtils.writeTag(output, com.netease.protobuf.WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));
 				content.append(", ");
 				content.append(Integer.toString(fdp.getNumber()));
 				content.append(");\n");
-				content.append("\t\t\tWriteUtils.write$");
+				content.append("\t\t\tcom.netease.protobuf.WriteUtils.write$");
 				content.append(fdp.getType().name());
 				content.append("(output, ");
 				appendLowerCamelCase(content, fdp.getName());
@@ -712,10 +712,10 @@ public final class Main {
 					content.append(" != null && ");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(".length > 0) {\n");
-					content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, ");
+					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.writeTag(output, com.netease.protobuf.WireType.LENGTH_DELIMITED, ");
 					content.append(Integer.toString(fdp.getNumber()));
 					content.append(");\n");
-					content.append("\t\t\t\tWriteUtils.writePackedRepeated(output, WriteUtils.write$");
+					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.writePackedRepeated(output, com.netease.protobuf.WriteUtils.write$");
 					content.append(fdp.getType().name());
 					content.append(", ");
 					appendLowerCamelCase(content, fdp.getName());
@@ -731,12 +731,12 @@ public final class Main {
 					content.append(".length; ++");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append("Index) {\n");
-					content.append("\t\t\t\tWriteUtils.writeTag(output, WireType.");
+					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.writeTag(output, com.netease.protobuf.WireType.");
 					content.append(getActionScript3WireType(fdp.getType()));
 					content.append(", ");
 					content.append(Integer.toString(fdp.getNumber()));
 					content.append(");\n");
-					content.append("\t\t\t\tWriteUtils.write$");
+					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.write$");
 					content.append(fdp.getType().name());
 					content.append("(output, ");
 					appendLowerCamelCase(content, fdp.getName());
@@ -752,14 +752,19 @@ public final class Main {
 			content.append("\t\t\tfor (var tagNumber:* in this) {\n");
 			content.append("\t\t\t\tvar writeFunction:Function = extensionWriteFunctions[tagNumber];\n");
 			content.append("\t\t\t\tif (writeFunction == null) {\n");
-			content.append("\t\t\t\t\tthrow new IOError('Attemp to write an unknown field.')\n");
+			content.append("\t\t\t\t\tthrow new flash.errors.IOError('Attemp to write an unknown field.')\n");
 			content.append("\t\t\t\t}\n");
 			content.append("\t\t\t\twriteFunction(output, this, tagNumber);\n");
 			content.append("\t\t\t}\n");
 		}
 		content.append("\t\t}\n\n");
+		content.append("\t\tpublic final function writeExternal(output:flash.utils.IDataOutput):void {\n");
+		content.append("\t\t\tconst buffer:com.netease.protobuf.WritingBuffer = new com.netease.protobuf.WritingBuffer();\n");
+		content.append("\t\t\twriteToBuffer(buffer);\n");
+		content.append("\t\t\tbuffer.toNormal(output);\n");
+		content.append("\t\t}\n\n");
 		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
-		content.append("\t\toverride public final function readFromSlice(input:IDataInput, bytesAfterSlice:uint):void {\n");
+		content.append("\t\tpublic final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -775,7 +780,7 @@ public final class Main {
 			}
 		}
 		content.append("\t\t\twhile (input.bytesAvailable > bytesAfterSlice) {\n");
-		content.append("\t\t\t\tvar tag:uint = ReadUtils.read$TYPE_UINT32(input);\n");
+		content.append("\t\t\t\tvar tag:uint = com.netease.protobuf.ReadUtils.read$TYPE_UINT32(input);\n");
 		content.append("\t\t\t\tswitch (tag >>> 3) {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
@@ -791,7 +796,7 @@ public final class Main {
 				content.append("\t\t\t\t\tif (");
 				content.append(fdp.getName());
 				content.append("$count != 0) {\n");
-				content.append("\t\t\t\t\t\tthrow new IOError('Bad data format: ");
+				content.append("\t\t\t\t\t\tthrow new flash.errors.IOError('Bad data format: ");
 				content.append(scope.proto.getName());
 				content.append('.');
 				appendLowerCamelCase(content, fdp.getName());
@@ -806,13 +811,13 @@ public final class Main {
 					content.append(" = new ");
 					content.append(getActionScript3Type(scope, fdp));
 					content.append("();\n");
-					content.append("\t\t\t\t\tReadUtils.read$TYPE_MESSAGE(input, ");
+					content.append("\t\t\t\t\tcom.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(");\n");
 				} else {
 					content.append("\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append(" = ReadUtils.read$");
+					content.append(" = com.netease.protobuf.ReadUtils.read$");
 					content.append(fdp.getType().name());
 					content.append("(input);\n");
 				}
@@ -833,14 +838,14 @@ public final class Main {
 					case TYPE_SFIXED64:
 					case TYPE_SINT64:
 					case TYPE_ENUM:
-					content.append("\t\t\t\t\tif ((tag & 7) == WireType.LENGTH_DELIMITED) {\n");
-					content.append("\t\t\t\t\t\tReadUtils.readPackedRepeated(input, ReadUtils.read$");
-					content.append(fdp.getType().name());
-					content.append(", ");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append(");\n");
-					content.append("\t\t\t\t\t\tbreak;\n");
-					content.append("\t\t\t\t\t}\n");
+						content.append("\t\t\t\t\tif ((tag & 7) == com.netease.protobuf.WireType.LENGTH_DELIMITED) {\n");
+						content.append("\t\t\t\t\t\tcom.netease.protobuf.ReadUtils.readPackedRepeated(input, com.netease.protobuf.ReadUtils.read$");
+						content.append(fdp.getType().name());
+						content.append(", ");
+						appendLowerCamelCase(content, fdp.getName());
+						content.append(");\n");
+						content.append("\t\t\t\t\t\tbreak;\n");
+						content.append("\t\t\t\t\t}\n");
 				}
 				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
 					content.append("\t\t\t\t\tconst ");
@@ -850,7 +855,7 @@ public final class Main {
 					content.append(" = new ");
 					content.append(getActionScript3Type(scope, fdp));
 					content.append("();\n\t\t\t\t\t");
-					content.append("ReadUtils.read$TYPE_MESSAGE(input, ");
+					content.append("com.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
 					content.append(fdp.getName());
 					content.append("$element);\n\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());
@@ -860,7 +865,7 @@ public final class Main {
 				} else {
 					content.append("\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append(".push(ReadUtils.read$");
+					content.append(".push(com.netease.protobuf.ReadUtils.read$");
 					content.append(fdp.getType().name());
 					content.append("(input));");
 				}
@@ -876,7 +881,7 @@ public final class Main {
 			content.append("\t\t\t\t\t\tbreak;\n");
 			content.append("\t\t\t\t\t}\n");
 		}
-		content.append("\t\t\t\t\tReadUtils.skip(input, tag & 7);\n");
+		content.append("\t\t\t\t\tcom.netease.protobuf.ReadUtils.skip(input, tag & 7);\n");
 		content.append("\t\t\t\t}\n");
 		content.append("\t\t\t}\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
@@ -889,7 +894,7 @@ public final class Main {
 				content.append("\t\t\tif (");
 				content.append(fdp.getName());
 				content.append("$count != 1) {\n");
-				content.append("\t\t\t\tthrow new IOError('Bad data format: ");
+				content.append("\t\t\t\tthrow new flash.errors.IOError('Bad data format: ");
 				content.append(scope.proto.getName());
 				content.append('.');
 				appendLowerCamelCase(content, fdp.getName());
@@ -898,6 +903,13 @@ public final class Main {
 				break;
 			}
 		}
+		content.append("\t\t}\n\n");
+		content.append("\t\tpublic final function readExternal(input:IDataInput):void {\n");
+		content.append("\t\t\tinput.endian = flash.utils.Endian.LITTLE_ENDIAN;\n");
+		content.append("\t\t\treadFromSlice(input, 0);\n");
+		content.append("\t\t}\n\n");
+		content.append("\t\tpublic function toString():String {\n");
+		content.append("\t\t	return messageToString(this);\n");
 		content.append("\t\t}\n\n");
 		content.append("\t}\n");
 	}
@@ -1064,8 +1076,7 @@ public final class Main {
 			writeFiles(root, responseBuilder);
 			response = responseBuilder.build();
 		} catch (Exception e) {
-			// 出错，报告给 protoc ，然后退出。
-			StringWriter sw = new StringWriter();
+			// 出错，报告给 protoc ，然后退出�?			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			pw.flush();

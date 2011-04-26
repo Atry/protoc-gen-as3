@@ -9,7 +9,10 @@
 
 package com.netease.protobuf {
 	import flash.utils.IDataInput
-	internal interface IMessage {
+	/**
+	 *  @private
+	 */
+	public interface IMessage {
 		/**
 		 *  @private
 		 */

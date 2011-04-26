@@ -14,10 +14,10 @@ package com.netease.protobuf {
 	public final class SimpleWebRPC {
 		private var urlPrefix:String
 		public function SimpleWebRPC(urlPrefix:String) {
-			this.urlPrefix = urlPrefix;
+			this.urlPrefix = urlPrefix
 		}
 
-		private static const REF:Dictionary = new Dictionary();
+		private static const REF:Dictionary = new Dictionary
 
 		public function send(qualifiedMethodName:String,
 							 input:IExternalizable,

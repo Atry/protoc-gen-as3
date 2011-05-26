@@ -8,5 +8,7 @@ import "google/protobuf/descriptor.proto";
 option java_package="com.netease.protocGenAs3";
 extend google.protobuf.MessageOptions {
   optional bool as3_bindable = 9393[default = false];
+  optional string as3_amf_alias = 9394;
+  optional bool as3_amf_auto_alias = 9395[default = false];
 }
 

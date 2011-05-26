@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
+<!-- vim: tabstop=4 shiftwidth=4 -->
+
+<!-- Copyright (c) 2010 , NetEase.com,Inc. All rights reserved. -->
+
+<!-- Author: Yang Bo (pop.atry@gmail.com) -->
+
+<!-- Use, modification and distribution are subject to the "New BSD License" as
+     listed at <url: http://www.opensource.org/licenses/bsd-license.php >. -->
+	<mx:Script source="../unittest.proto.as3/initializer.as.inc"/>
+	<mx:Script>
+		<![CDATA[
+			import protobuf_unittest.*
+			import protobuf_unittest.TestAllTypes.*
+			import test.*
+			import flash.display.*
+			import flash.utils.*
+			import flash.system.*
+			import com.netease.protobuf.*
+			private static function assert(b:Boolean,
+					errorMessage:String = "Assertion failed.",
+					errorId:int = 0):void {
+				if (!b) {
+					throw new Error(errorMessage, errorId)
+				}
+			}
+			private static function assertSame(l:*, r:*, name:String = ""):void {
+				if (typeof(l) == "object") {
+					assert(getQualifiedClassName(l) ==
+							getQualifiedClassName(r))
+					var k:*
+					for(k in l) {
+						assertSame(l[k], r[k], name + "." + k)
+					}
+					for(k in r) {
+						assertSame(l[k], r[k], name + "." + k)
+					}
+					const description:XML = describeType(l)
+					for each(var getter:XML in description..accessor.(@access != "writeonly")) {
+						assertSame(l[getter.@name], r[getter.@name], name + "." + getter.@name)
+					}
+					for each(var field:XML in description..variable) {
+						assertSame(l[field.@name], r[field.@name], name + "." + field.@name)
+					}
+				} else {
+					assert(l === r || (isNaN(l) && isNaN(r)), name + " not equal.")
+				}
+			}
+			private static const HEX_CHARS:String = "0123456789ABCDEF"
+			private static function testAmf(input:*):void {
+				const ba:ByteArray = new ByteArray
+				ba.writeObject(input)
+				var s:String = ""
+				for (var i:uint = 0; i < ba.length; i++) {
+					s += HEX_CHARS.charAt(ba[i] / 16)
+					s += HEX_CHARS.charAt(ba[i] % 16)
+					s += " "
+				}
+				trace(s)
+				trace(input)
+				ba.position = 0
+				const output:* = ba.readObject()
+				assertSame(input, output)
+			}
+			private static function test(input:IExternalizable):void {
+				const ba:ByteArray = new ByteArray
+				input.writeExternal(ba)
+				var s:String = ""
+				for (var i:uint = 0; i < ba.length; i++) {
+					s += HEX_CHARS.charAt(ba[i] / 16)
+					s += HEX_CHARS.charAt(ba[i] % 16)
+					s += " "
+				}
+				trace(s)
+				trace(input)
+				ba.position = 0
+				const output:IExternalizable = new (Object(input).constructor)
+				output.readExternal(ba)
+				assertSame(input, output)
+			}
+		]]>
+	</mx:Script>
+	<mx:applicationComplete>
+		<![CDATA[
+			const t1:TestPackedTypes = new TestPackedTypes
+			t1.packedDouble = [1.23424353, 2.12]
+			t1.packedEnum = [ForeignEnum.FOREIGN_BAZ, ForeignEnum.FOREIGN_FOO,
+					ForeignEnum.FOREIGN_FOO, ForeignEnum.FOREIGN_BAR]
+			test(t1)
+
+			const t2:TestPackedExtensions = new TestPackedExtensions
+			t2[packedDoubleExtension] = [324.234, 1.23424353, 2.12]
+			t2[packedEnumExtension] =[ForeignEnum.FOREIGN_BAZ,
+					ForeignEnum.FOREIGN_FOO, ForeignEnum.FOREIGN_FOO] 
+			test(t2)
+
+			const t3:TestAllTypes = new TestAllTypes
+			t3.optionalString = "111foo"
+			t3.defaultNestedEnum = NestedEnum.FOO
+			t3.repeatedNestedMessage.push(new NestedMessage)
+			t3.repeatedNestedMessage.push(new NestedMessage)
+			t3.repeatedNestedMessage[1].bb = 123
+			t3.optionalInt32 = -23412413
+			t3.optionalDouble = 123.456
+			t3.repeatedNestedEnum.push(NestedEnum.FOO)
+			t3.repeatedNestedEnum.push(NestedEnum.BAR)
+			t3.optionalNestedMessage = new NestedMessage
+			t3.optionalNestedMessage.bb = 234
+			t3.optionalSint32 = -3
+			t3.optionalSint64 = new Int64(199999999, 199999999)
+			test(t3)
+			const t4:TestPackedTypes = new TestPackedTypes
+			t4.packedDouble = [1]
+			test(t4)
+			const t5:TestAllTypes = new TestAllTypes
+			t5.optionalSint32 = -199999999
+			test(t5)
+			const t6:TestAllTypes = new TestAllTypes
+			t6.optionalInt64 = new Int64(uint(-185754567), -198741265)
+			test(t6)
+			const t7:TestAllTypes = new TestAllTypes
+			const s64:Int64 = new Int64(uint(-171754567), -198741265)
+			t7.optionalInt64 = new Int64(ZigZag.encode64low(s64.low, s64.high),
+										 ZigZag.encode64high(s64.low, s64.high))
+			test(t7)
+			const t8:TestAllTypes = new TestAllTypes
+			t8.optionalInt32 = -1
+			test(t8)
+			const t9:TestAllTypes = new TestAllTypes
+			t9.optionalSint64 = new Int64(uint(-171754567), -198741265)
+			test(t9)
+			const t10:AAA = new AAA
+			t10.s = "xxxx"
+			testAmf(t10)
+			const t11:BBB = new BBB
+			t11.aaa = new AAA
+			t11.aaa.s = "1234xxx"
+			t11.i = 1234
+			testAmf(t11)
+
+			trace("All tests pass.")
+			fscommand("quit")
+		]]>
+	</mx:applicationComplete>
+</mx:Application>

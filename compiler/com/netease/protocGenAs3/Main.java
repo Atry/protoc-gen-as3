@@ -338,6 +338,27 @@ public final class Main {
 			content.append(")");
 		}
 	}
+	private static void appendQuotedString(StringBuilder sb, String value) {
+		sb.append('\"');
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			switch(c) {
+			case '\"':
+			case '\\':
+				sb.append('\\');
+				sb.append(c);
+				break;
+			default:
+				if (c >= 128 || Character.isISOControl(c)) {
+					sb.append("\\u");
+					sb.append(String.format("%04X", new Integer(c)));
+				} else {
+					sb.append(c);
+				}
+			}
+		}
+		sb.append('\"');
+	}
 	private static void appendDefaultValue(StringBuilder sb, Scope<?> scope,
 			FieldDescriptorProto fdp) {
 		String value = fdp.getDefaultValue();
@@ -386,25 +407,7 @@ public final class Main {
 			sb.append(value);
 			break;
 		case TYPE_STRING:
-			sb.append('\"');
-			for (int i = 0; i < value.length(); i++) {
-				char c = value.charAt(i);
-				switch(c) {
-				case '\"':
-				case '\\':
-					sb.append('\\');
-					sb.append(c);
-					break;
-				default:
-					if (c >= 128 || Character.isISOControl(c)) {
-						sb.append("\\u");
-						sb.append(String.format("%04X", new Integer(c)));
-					} else {
-						sb.append(c);
-					}
-				}
-			}
-			sb.append('\"');
+			appendQuotedString(sb, value);
 			break;
 		case TYPE_ENUM:
 			sb.append(scope.find(fdp.getTypeName()).
@@ -494,9 +497,23 @@ public final class Main {
 			content.append(";\n");
 		}
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
-		if (scope.proto.hasOptions() &&
-				scope.proto.getOptions().getExtension(Options.as3Bindable)) {
-			content.append("\t[Bindable]\n");
+		if (scope.proto.hasOptions()) {
+			String remoteClassAlias;
+			if (scope.proto.getOptions().hasExtension(Options.as3AmfAlias)) {
+				remoteClassAlias = scope.proto.getOptions().getExtension(Options.as3AmfAlias);
+			} else if (scope.proto.getOptions().getExtension(Options.as3AmfAutoAlias)) {
+				remoteClassAlias = scope.fullName;
+			} else {
+				remoteClassAlias = null;
+			}
+			if (remoteClassAlias != null) {
+				content.append("\t[RemoteClass(alias=");
+				appendQuotedString(content, remoteClassAlias);
+				content.append(")]\n");
+			}
+			if (scope.proto.getOptions().getExtension(Options.as3Bindable)) {
+				content.append("\t[Bindable]\n");
+			}
 		}
 		content.append("\t// @@protoc_insertion_point(class_metadata)\n");
 		if (scope.proto.getExtensionRangeCount() > 0) {

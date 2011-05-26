@@ -105,11 +105,12 @@ clean:
 	$(RM) -r options.proto.java
 
 test: test.swf
-	echo c | $(FDB) $<
+	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<
 
-test.swf: test.swc test/Test.as dist/protobuf.swc
+test.swf: test.swc test/Test.mxml dist/protobuf.swc
 	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \
-	-source-path+=test test/Test.as -debug
+	-source-path+=test test/Test.mxml -debug \
+	-static-link-runtime-shared-libraries=true
 
 test.swc: unittest.proto.as3/protobuf_unittest dist/protobuf.swc
 	$(COMPC) -include-sources+=unittest.proto.as3 \

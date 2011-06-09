@@ -56,9 +56,8 @@ dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_V
 	echo '@java -jar protoc-gen-as3.jar') > $@
 	chmod +x $@
 
-dist/protobuf.swc: descriptor.proto.as3/google \
-	$(wildcard as3/com/netease/protobuf/*.as) | dist
-	$(COMPC) -include-sources+=as3,descriptor.proto.as3 -output=$@
+dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*.as) | dist
+	$(COMPC) -include-sources+=as3 -output=$@
 
 MANIFEST.MF:
 	echo Class-Path: protobuf-java-$(PROTOBUF_VERSION).jar > $@

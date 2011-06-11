@@ -19,10 +19,22 @@ package com.netease.protobuf {
 					object[tag >>> 3] = a
 				}
 				if ((tag & 7) == WireType.LENGTH_DELIMITED) {
-					ReadUtils.readPackedRepeated(input, f, a)
-				} else {
-					a.push(f(input))
+					switch (f)
+					{
+						case ReadUtils.read$TYPE_STRING:
+						case ReadUtils.read$TYPE_BYTES:
+						{
+							break;
+						}
+
+						default:
+						{
+							ReadUtils.readPackedRepeated(input, f, a)
+							return;
+						}
+					}
 				}
+				a.push(f(input))
 			}
 		}
 		public static function readFunction(f:Function):Function {

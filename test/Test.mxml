@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
-<!-- vim: tabstop=4 shiftwidth=4 -->
+<!--
+  vim: tabstop=4 shiftwidth=4
+-->
 
 <!-- Copyright (c) 2010 , NetEase.com,Inc. All rights reserved. -->
 
@@ -83,6 +85,38 @@
 	</mx:Script>
 	<mx:applicationComplete>
 		<![CDATA[
+			const int64:Int64 = new Int64(0x12345678, 0x91abcde1)
+			assertSame(int64.toString(), "-7950034350635723144")
+			assertSame(Int64.parseInt64(int64.toString()), int64)
+
+			const int64_2:Int64 = new Int64(0x12345678, 0xb)
+			assertSame(int64_2.toString(), "47550060152")
+			assertSame(Int64.parseInt64(int64_2.toString()), int64_2)
+
+			const int64_3:Int64 = new Int64(0x12345678, 0xabcdef12)
+			assertSame(int64_3.toString(), "-6066930262104320392")
+			assertSame(Int64.parseInt64(int64_3.toString()), int64_3)
+
+			const int64_4:Int64 = new Int64(0x12345678, 0xbb)
+			assertSame(int64_4.toString(), "803464304248")
+			assertSame(Int64.parseInt64(int64_4.toString()), int64_4)
+
+			const uint64:UInt64 = new UInt64(0x12345678, 0)
+			assertSame(uint64.toString(), "305419896")
+			assertSame(UInt64.parseUInt64(uint64.toString()), uint64)
+
+			const uint64_2:UInt64 = new UInt64(0x12345678, 0xb)
+			assertSame(uint64_2.toString(), "47550060152")
+			assertSame(UInt64.parseUInt64(uint64_2.toString()), uint64_2)
+
+			const uint64_3:UInt64 = new UInt64(0x12345678, 0xabcdef12)
+			assertSame(uint64_3.toString(), "12379813811605231224")
+			assertSame(UInt64.parseUInt64(uint64_3.toString()), uint64_3)
+
+			const uint64_4:UInt64 = new UInt64(0x12345678, 0xbb)
+			assertSame(uint64_4.toString(), "803464304248")
+			assertSame(UInt64.parseUInt64(uint64_4.toString()), uint64_4)
+
 			const t1:TestPackedTypes = new TestPackedTypes
 			t1.packedDouble = [1.23424353, 2.12]
 			t1.packedEnum = [ForeignEnum.FOREIGN_BAZ, ForeignEnum.FOREIGN_FOO,

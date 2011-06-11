@@ -10,13 +10,14 @@
 package com.netease.protobuf {
 	import flash.utils.*
 	public final class Extension {
-		public static function repeatedReadFunction(f:Function):Function {
+		public static function repeatedReadFunction(fieldName:String,
+				f:Function):Function {
 			return function (input:IDataInput,
-					object:Array, tag:uint):void {
-				var a:Array = object[tag >>> 3]
+					message:IMessage, tag:uint):void {
+				var a:Array = message[fieldName]
 				if (a == null) {
 					a = []
-					object[tag >>> 3] = a
+					message[fieldName] = a
 				}
 				if ((tag & 7) == WireType.LENGTH_DELIMITED) {
 					switch (f)
@@ -37,53 +38,55 @@ package com.netease.protobuf {
 				a.push(f(input))
 			}
 		}
-		public static function readFunction(f:Function):Function {
-			return function (input:IDataInput,
-					object:Array, tag:uint):void {
-				object[tag >>> 3] = f(input)
+		public static function readFunction(fieldName:String,
+				f:Function):Function {
+			return function (input:IDataInput, message:IMessage, tag:uint):void {
+				message[fieldName] = f(input)
 			}
 		}
-		public static function repeatedMessageReadFunction(c:Class):Function {
+		public static function repeatedMessageReadFunction(fieldName:String,
+				c:Class):Function {
 			return function (input:IDataInput,
-					object:Array, tag:uint):void {
-				var a:Array = object[tag >>> 3]
+					message:IMessage, tag:uint):void {
+				var a:Array = message[fieldName]
 				if (a == null) {
 					a = []
-					object[tag >>> 3] = a
+					message[fieldName] = a
 				}
 				const m:IMessage = new c
 				ReadUtils.read$TYPE_MESSAGE(input, m)
 				a.push(m)
 			}
 		}
-		public static function messageReadFunction(c:Class):Function {
+		public static function messageReadFunction(fieldName:String,
+				c:Class):Function {
 			return function (input:IDataInput,
-					object:Array, tag:uint):void {
+					message:IMessage, tag:uint):void {
 				const m:IMessage = new c
 				ReadUtils.read$TYPE_MESSAGE(input, m)
-				object[tag >>> 3] = m
+				message[fieldName] = m
 			}
 		}
-		public static function writeFunction(wireType:uint, f:Function):Function {
+		public static function writeFunction(tag:uint, f:Function):Function {
 			return function (output:WritingBuffer,
-					object:Array, fieldNumber:uint):void {
-				WriteUtils.writeTag(output, wireType, fieldNumber)
-				f(output, object[fieldNumber])
+					message:IMessage, fieldName:String):void {
+				WriteUtils.write$TYPE_UINT32(output, tag)
+				f(output, message[fieldName])
 			}
 		}
-		public static function packedRepeatedWriteFunction(f:Function):Function {
+		public static function packedRepeatedWriteFunction(tag:uint, f:Function):Function {
 			return function (output:WritingBuffer,
-					object:Array, fieldNumber:uint):void {
-				WriteUtils.writeTag(output, WireType.LENGTH_DELIMITED, fieldNumber)
-				WriteUtils.writePackedRepeated(output, f, object[fieldNumber])
+					message:IMessage, fieldName:String):void {
+				WriteUtils.write$TYPE_UINT32(output, tag)
+				WriteUtils.writePackedRepeated(output, f, message[fieldName])
 			}
 		}
-		public static function repeatedWriteFunction(wireType:uint, f:Function):Function {
+		public static function repeatedWriteFunction(tag:uint, f:Function):Function {
 			return function (output:WritingBuffer,
-					object:Array, fieldNumber:uint):void {
-				const field:Array = object[fieldNumber]
+					message:IMessage, fieldName:String):void {
+				const field:Array = message[fieldName]
 				for (var i:uint = 0; i < field.length; i++) {
-					WriteUtils.writeTag(output, wireType, fieldNumber)
+					WriteUtils.write$TYPE_UINT32(output, tag)
 					f(output, field[i])
 				}
 			}

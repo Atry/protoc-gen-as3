@@ -17,7 +17,7 @@ message Message {
 
 message ChatMessage {
     extend Message {
-        optional ChatMessage type = 100;
+        optional ChatMessage my_type = 100;
     }
     optional string text = 1;
 }

@@ -288,21 +288,26 @@ public final class Main {
 		case LABEL_REQUIRED:
 			throw new IllegalArgumentException();
 		case LABEL_OPTIONAL:
-			content.append("com.netease.protobuf.Extension.writeFunction(com.netease.protobuf.WireType.");
+			content.append("com.netease.protobuf.Extension.writeFunction((");
+			content.append(Integer.toString(fdp.getNumber()));
+			content.append(" << 3) | com.netease.protobuf.WireType.");
 			content.append(getActionScript3WireType(fdp.getType()));
-			content.append(", ");
+			content.append(", com.netease.protobuf.WriteUtils.write$");
 			break;
 		case LABEL_REPEATED:
 			if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
-				content.append("com.netease.protobuf.Extension.packedRepeatedWriteFunction(");
+				content.append("com.netease.protobuf.Extension.packedRepeatedWriteFunction((");
+				content.append(Integer.toString(fdp.getNumber()));
+				content.append(" << 3) | com.netease.protobuf.WireType.LENGTH_DELIMITED, com.netease.protobuf.WriteUtils.write$");
 			} else {
-				content.append("com.netease.protobuf.Extension.repeatedWriteFunction(com.netease.protobuf.WireType.");
+				content.append("com.netease.protobuf.Extension.repeatedWriteFunction((");
+				content.append(Integer.toString(fdp.getNumber()));
+				content.append(" << 3) | com.netease.protobuf.WireType.");
 				content.append(getActionScript3WireType(fdp.getType()));
-				content.append(", ");
+				content.append(", com.netease.protobuf.WriteUtils.write$");
 			}
 			break;
 		}
-		content.append("com.netease.protobuf.WriteUtils.write$");
 		content.append(fdp.getType().name());
 		content.append(")");
 	}
@@ -320,6 +325,8 @@ public final class Main {
 				content.append("com.netease.protobuf.Extension.repeatedMessageReadFunction(");
 				break;
 			}
+			appendQuotedString(content, scope.fullName + '.' + fdp.getName());
+			content.append(", ");
 			content.append(getActionScript3Type(scope, fdp));
 			content.append(")");
 		} else {
@@ -333,7 +340,8 @@ public final class Main {
 				content.append("com.netease.protobuf.Extension.repeatedReadFunction(");
 				break;
 			}
-			content.append("com.netease.protobuf.ReadUtils.read$");
+			appendQuotedString(content, scope.fullName + '.' + fdp.getName());
+			content.append(", com.netease.protobuf.ReadUtils.read$");
 			content.append(fdp.getType().name());
 			content.append(")");
 		}
@@ -519,9 +527,9 @@ public final class Main {
 		if (scope.proto.getExtensionRangeCount() > 0) {
 			content.append("\tpublic dynamic final class ");
 			content.append(scope.proto.getName());
-			content.append(" extends Array implements flash.utils.IExternalizable, com.netease.protobuf.IMessage {\n");
+			content.append(" implements flash.utils.IExternalizable, com.netease.protobuf.IMessage {\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
-			content.append("\t\tpublic static const extensionWriteFunctions:Array = [];\n\n");
+			content.append("\t\tpublic static const extensionWriteFunctions:Object = {};\n\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
 			content.append("\t\tpublic static const extensionReadFunctions:Array = [];\n\n");
 		} else {
@@ -541,14 +549,14 @@ public final class Main {
 			String extendee = scope.find(efdp.getExtendee()).fullName;
 			content.append("\t\tpublic static const ");
 			appendLowerCamelCase(content, efdp.getName());
-			content.append(":uint = ");
-			content.append(efdp.getNumber());
+			content.append(":String = ");
+			appendQuotedString(content, scope.fullName + '.' + efdp.getName());
 			content.append(";\n\n");
 			content.append("\t\t{\n");
 			content.append("\t\t\t");
 			content.append(extendee);
 			content.append(".extensionReadFunctions[");
-			appendLowerCamelCase(content, efdp.getName());
+			content.append(Integer.toString(efdp.getNumber()));
 			content.append("] = ");
 			appendReadFunction(content, scope, efdp);
 			content.append(";\n");
@@ -960,14 +968,15 @@ public final class Main {
 		content.append(";\n");
 		content.append("\tpublic const ");
 		appendLowerCamelCase(content, scope.proto.getName());
-		content.append(":uint = ");
-		content.append(scope.proto.getNumber());
+		content.append(":String = ");
+		appendQuotedString(content,
+				scope.parent.fullName + '.' + scope.proto.getName());
 		content.append(";\n");
 		content.append("\t{\n");
 		content.append("\t\t");
 		content.append(extendee);
 		content.append(".extensionReadFunctions[");
-		appendLowerCamelCase(content, scope.proto.getName());
+		content.append(Integer.toString(scope.proto.getNumber()));
 		content.append("] = ");
 		appendReadFunction(content, scope.parent, scope.proto);
 		content.append(";\n");

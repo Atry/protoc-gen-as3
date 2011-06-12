@@ -22,8 +22,8 @@ package com.netease.protobuf {
 			if (radix < 2 || radix > 36) {
 				throw new ArgumentError
 			}
-			if (low == 0 && high == 0) {
-				return "0"
+			if (high == 0) {
+				return low.toString(radix)
 			}
 			const digitChars:Array = [];
 			const copyOfThis:UInt64 = new UInt64(low, high);

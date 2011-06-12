@@ -22,6 +22,22 @@ package com.netease.protobuf {
 			if (radix < 2 || radix > 36) {
 				throw new ArgumentError
 			}
+			switch (high) {
+				case 0:
+				{
+					return low.toString(radix)
+				}
+
+				case -1:
+				{
+					return int(low).toString(radix)
+				}
+
+				default:
+				{
+					break;
+				}
+			}
 			if (low == 0 && high == 0) {
 				return "0"
 			}

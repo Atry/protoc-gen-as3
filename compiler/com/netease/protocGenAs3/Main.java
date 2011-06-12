@@ -325,7 +325,7 @@ public final class Main {
 				content.append("com.netease.protobuf.Extension.repeatedMessageReadFunction(");
 				break;
 			}
-			appendQuotedString(content, scope.fullName + '.' + fdp.getName());
+			appendLowerCamelCase(content, fdp.getName());
 			content.append(", ");
 			content.append(getActionScript3Type(scope, fdp));
 			content.append(")");
@@ -340,7 +340,7 @@ public final class Main {
 				content.append("com.netease.protobuf.Extension.repeatedReadFunction(");
 				break;
 			}
-			appendQuotedString(content, scope.fullName + '.' + fdp.getName());
+			appendLowerCamelCase(content, fdp.getName());
 			content.append(", com.netease.protobuf.ReadUtils.read$");
 			content.append(fdp.getType().name());
 			content.append(")");
@@ -550,7 +550,7 @@ public final class Main {
 			content.append("\t\tpublic static const ");
 			appendLowerCamelCase(content, efdp.getName());
 			content.append(":String = ");
-			appendQuotedString(content, scope.fullName + '.' + efdp.getName());
+			appendQuotedString(content, scope.fullName + '.' + efdp.getName() + '@' + efdp.getNumber());
 			content.append(";\n\n");
 			content.append("\t\t{\n");
 			content.append("\t\t\t");
@@ -969,8 +969,7 @@ public final class Main {
 		content.append("\tpublic const ");
 		appendLowerCamelCase(content, scope.proto.getName());
 		content.append(":String = ");
-		appendQuotedString(content,
-				scope.parent.fullName + '.' + scope.proto.getName());
+		appendQuotedString(content, scope.parent.fullName + '.' + scope.proto.getName() + '@' + scope.proto.getNumber());
 		content.append(";\n");
 		content.append("\t{\n");
 		content.append("\t\t");

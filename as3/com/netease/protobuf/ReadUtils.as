@@ -187,7 +187,7 @@ package com.netease.protobuf {
 			return result
 		}
 		public static function read$TYPE_MESSAGE(input:IDataInput,
-				message:IMessage):IMessage {
+				message:Message):Message {
 			const length:uint = read$TYPE_UINT32(input)
 			if (input.bytesAvailable < length) {
 				throw new IOError("Invalid message length: " + length)

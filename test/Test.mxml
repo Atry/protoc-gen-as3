@@ -65,9 +65,9 @@
 				const output:* = ba.readObject()
 				assertSame(input, output)
 			}
-			private static function test(input:IExternalizable):void {
+			private static function test(input:Message):void {
 				const ba:ByteArray = new ByteArray
-				input.writeExternal(ba)
+				input.writeTo(ba)
 				var s:String = ""
 				for (var i:uint = 0; i < ba.length; i++) {
 					s += HEX_CHARS.charAt(ba[i] / 16)
@@ -77,8 +77,8 @@
 				trace(s)
 				trace(input)
 				ba.position = 0
-				const output:IExternalizable = new (Object(input).constructor)
-				output.readExternal(ba)
+				const output:Message = new (Object(input).constructor)
+				output.mergeFrom(ba)
 				assertSame(input, output)
 			}
 		]]>
@@ -165,12 +165,15 @@
 			test(t9)
 			const t10:AAA = new AAA
 			t10.s = "xxxx"
+			test(t10)
 			testAmf(t10)
 			const t11:BBB = new BBB
 			t11.aaa = new AAA
 			t11.aaa.s = "1234xxx"
 			t11.i = 1234
+			test(t11)
 			testAmf(t11)
+			testAmf([t10, t11, t10])
 
 			const t12:TestAllExtensions = new TestAllExtensions
 			t12[repeatedStringExtension] = ["aaaa", "bbb"]

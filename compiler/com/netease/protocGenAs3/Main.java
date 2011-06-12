@@ -518,8 +518,8 @@ public final class Main {
 			content.append(";\n");
 		}
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
+		String remoteClassAlias;
 		if (scope.proto.hasOptions()) {
-			String remoteClassAlias;
 			if (scope.proto.getOptions().hasExtension(Options.as3AmfAlias)) {
 				remoteClassAlias = scope.proto.getOptions().getExtension(Options.as3AmfAlias);
 			} else if (scope.proto.getOptions().getExtension(Options.as3AmfAutoAlias)) {
@@ -535,22 +535,31 @@ public final class Main {
 			if (scope.proto.getOptions().getExtension(Options.as3Bindable)) {
 				content.append("\t[Bindable]\n");
 			}
+		} else {
+			remoteClassAlias = null;
 		}
 		content.append("\t// @@protoc_insertion_point(class_metadata)\n");
+		content.append("\tpublic dynamic final class ");
+		content.append(scope.proto.getName());
+		content.append(" extends com.netease.protobuf.Message");
+		if (remoteClassAlias != null) {
+			content.append(" implements flash.utils.IExternalizable {\n");
+			content.append("\t\tpublic final function writeExternal(output:flash.utils.IDataOutput):void {\n");
+			content.append("\t\t\twriteDelimitedTo(output);\n");
+			content.append("\t\t}\n\n");
+			content.append("\t\tpublic final function readExternal(input:flash.utils.IDataInput):void {\n");
+			content.append("\t\t\tmergeDelimitedFrom(input);\n");
+			content.append("\t\t}\n\n");
+		} else {
+			content.append(" {\n");
+		}
 		if (scope.proto.getExtensionRangeCount() > 0) {
-			content.append("\tpublic dynamic final class ");
-			content.append(scope.proto.getName());
-			content.append(" implements flash.utils.IExternalizable, com.netease.protobuf.IMessage {\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
 			content.append("\t\tpublic static const extensionWriteFunctions:Object = {};\n\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
 			content.append("\t\tpublic static const extensionReadFunctions:Array = [];\n\n");
 			content.append("\t\t[ArrayElementType(\"Class\")]\n");
 			content.append("\t\tpublic static const extensionTypes:Object = {};\n\n");
-		} else {
-			content.append("\tpublic final class ");
-			content.append(scope.proto.getName());
-			content.append(" implements flash.utils.IExternalizable, com.netease.protobuf.IMessage {\n");
 		}
 		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
 			initializerContent.append("import ");
@@ -729,7 +738,7 @@ public final class Main {
 				throw new IllegalArgumentException();
 			}
 		}
-		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\tpublic final function writeToBuffer(output:com.netease.protobuf.WritingBuffer):void {\n");
+		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\toverride public final function writeToBuffer(output:com.netease.protobuf.WritingBuffer):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -818,13 +827,8 @@ public final class Main {
 			content.append("\t\t\t}\n");
 		}
 		content.append("\t\t}\n\n");
-		content.append("\t\tpublic final function writeExternal(output:flash.utils.IDataOutput):void {\n");
-		content.append("\t\t\tconst buffer:com.netease.protobuf.WritingBuffer = new com.netease.protobuf.WritingBuffer();\n");
-		content.append("\t\t\twriteToBuffer(buffer);\n");
-		content.append("\t\t\tbuffer.toNormal(output);\n");
-		content.append("\t\t}\n\n");
 		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
-		content.append("\t\tpublic final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
+		content.append("\t\toverride public final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -964,10 +968,6 @@ public final class Main {
 			}
 		}
 		content.append("\t\t}\n\n");
-		content.append("\t\tpublic final function readExternal(input:IDataInput):void {\n");
-		content.append("\t\t\tinput.endian = flash.utils.Endian.LITTLE_ENDIAN;\n");
-		content.append("\t\t\treadFromSlice(input, 0);\n");
-		content.append("\t\t}\n\n");
 		content.append("\t\tpublic function toString():String {\n");
 		content.append("\t\t	return messageToString(this);\n");
 		content.append("\t\t}\n\n");
@@ -998,7 +998,7 @@ public final class Main {
 		content.append("\tpublic const ");
 		appendLowerCamelCase(content, scope.proto.getName());
 		content.append(":String = ");
-		appendQuotedString(content, scope.parent.fullName + '.' + scope.proto.getName() + '@' + scope.proto.getNumber());
+		appendQuotedString(content, scope.parent.fullName + '.' + scope.proto.getName() + '(' + scope.proto.getNumber() + ')');
 		content.append(";\n\n");
 		content.append("\t");
 		content.append(extendee);

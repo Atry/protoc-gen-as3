@@ -50,11 +50,16 @@ package com.netease.protobuf {
 			do {
 				const digit:uint = copyOfThis.div(radix);
 				digitChars.push((digit < 10 ? '0' : 'a').charCodeAt() + digit)
-			} while (copyOfThis.low != 0 || copyOfThis.high != 0)
+			} while (copyOfThis.high != 0)
 			if (high < 0) {
-				digitChars.push('-'.charCodeAt())
+				return '-' + copyOfThis.low.toString(radix) +
+						String.fromCharCode.apply(
+						String, digitChars.reverse())
+			} else {
+				return copyOfThis.low.toString(radix) +
+						String.fromCharCode.apply(
+						String, digitChars.reverse())
 			}
-			return String.fromCharCode.apply(String, digitChars.reverse())
 		}
 		public static function parseInt64(str:String, radix:uint = 0):Int64 {
 			const negative:Boolean = str.search(/^\-/) == 0

@@ -18,7 +18,7 @@ package com.netease.protobuf {
 		public function UInt64(low:uint = 0, high:uint = 0) {
 			super(low, high)
 		}
-		public function toString(radix:uint = 10):String {
+    	public function toString(radix:uint = 10):String {
 			if (radix < 2 || radix > 36) {
 				throw new ArgumentError
 			}
@@ -30,8 +30,10 @@ package com.netease.protobuf {
 			do {
 				const digit:uint = copyOfThis.div(radix);
 				digitChars.push((digit < 10 ? '0' : 'a').charCodeAt() + digit)
-			} while (copyOfThis.low != 0 || copyOfThis.high != 0)
-			return String.fromCharCode.apply(String, digitChars.reverse())
+			} while (copyOfThis.high != 0)
+			return copyOfThis.low.toString(radix) +
+					String.fromCharCode.apply(
+					String, digitChars.reverse())
 		}
 		public static function parseUInt64(str:String, radix:uint = 0):UInt64 {
 			var i:uint = 0

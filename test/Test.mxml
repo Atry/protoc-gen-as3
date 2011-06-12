@@ -101,6 +101,10 @@
 			assertSame(int64_4.toString(), "803464304248")
 			assertSame(Int64.parseInt64(int64_4.toString()), int64_4)
 
+			const int64_5:Int64 = new Int64(0, 0)
+			assertSame(int64_5.toString(), "0")
+			assertSame(Int64.parseInt64(int64_5.toString()), int64_5)
+
 			const uint64:UInt64 = new UInt64(0x12345678, 0)
 			assertSame(uint64.toString(), "305419896")
 			assertSame(UInt64.parseUInt64(uint64.toString()), uint64)
@@ -116,6 +120,10 @@
 			const uint64_4:UInt64 = new UInt64(0x12345678, 0xbb)
 			assertSame(uint64_4.toString(), "803464304248")
 			assertSame(UInt64.parseUInt64(uint64_4.toString()), uint64_4)
+
+			const uint64_5:UInt64 = new UInt64(0, 0)
+			assertSame(uint64_5.toString(), "0")
+			assertSame(UInt64.parseUInt64(uint64_5.toString()), uint64_5)
 
 			const t1:TestPackedTypes = new TestPackedTypes
 			t1.packedDouble = [1.23424353, 2.12]
@@ -159,6 +167,11 @@
 			t7.optionalInt64 = new Int64(ZigZag.encode64low(s64.low, s64.high),
 										 ZigZag.encode64high(s64.low, s64.high))
 			t7.optionalInt32 = -1
+			t7[41192] = UInt64.parseUInt64("12343245732475923") // Unknown Varint
+			t7[631669] = 12345325 // Unknown Fixed32
+			t7[631677] = [234, 234, 123222, 12345325] // Unknown Fixed32
+			t7[1500930] = stringToByteArray("Hello\u00C4\u00C3xxx") // Unknown Length Delimited
+			t7[1500938] = [stringToByteArray("Hello"), stringToByteArray("World")] // Unknown Length Delimited
 			test(t7)
 			const t9:TestAllTypes = new TestAllTypes
 			t9.optionalSint64 = new Int64(uint(-171754567), -198741265)

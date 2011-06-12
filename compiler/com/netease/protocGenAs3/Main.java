@@ -817,15 +817,16 @@ public final class Main {
 				break;
 			}
 		}
+		content.append("\t\t\tfor (var fieldName:String in this) {\n");
 		if (scope.proto.getExtensionRangeCount() > 0) {
-			content.append("\t\t\tfor (var tagNumber:* in this) {\n");
-			content.append("\t\t\t\tvar writeFunction:Function = extensionWriteFunctions[tagNumber];\n");
-			content.append("\t\t\t\tif (writeFunction == null) {\n");
-			content.append("\t\t\t\t\tthrow new flash.errors.IOError('Attemp to write an unknown field.')\n");
+			content.append("\t\t\t\tvar writeFunction:Function = extensionWriteFunctions[fieldName];\n");
+			content.append("\t\t\t\tif (writeFunction != null) {\n");
+			content.append("\t\t\t\t\twriteFunction(output, this, fieldName);\n");
+			content.append("\t\t\t\t\tcontinue;\n");
 			content.append("\t\t\t\t}\n");
-			content.append("\t\t\t\twriteFunction(output, this, tagNumber);\n");
-			content.append("\t\t\t}\n");
 		}
+		content.append("\t\t\t\tsuper.writeUnknown(output, fieldName);\n");
+		content.append("\t\t\t}\n");
 		content.append("\t\t}\n\n");
 		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
 		content.append("\t\toverride public final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
@@ -942,10 +943,11 @@ public final class Main {
 			content.append("\t\t\t\t\tvar readFunction:Function = extensionReadFunctions[tag >>> 3];\n");
 			content.append("\t\t\t\t\tif (readFunction != null) {\n");
 			content.append("\t\t\t\t\t\treadFunction(input, this, tag);\n");
-			content.append("\t\t\t\t\t\tbreak;\n");
+			content.append("\t\t\t\t\t\tcontinue;\n");
 			content.append("\t\t\t\t\t}\n");
 		}
-		content.append("\t\t\t\t\tcom.netease.protobuf.ReadUtils.skip(input, tag & 7);\n");
+		content.append("\t\t\t\t\tsuper.readUnknown(input, tag);\n");
+		content.append("\t\t\t\t\tbreak;\n");
 		content.append("\t\t\t\t}\n");
 		content.append("\t\t\t}\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {

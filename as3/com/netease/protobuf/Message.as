@@ -10,6 +10,8 @@
 package com.netease.protobuf {
 	import flash.errors.IllegalOperationError
 	import flash.errors.IOError
+	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput
 	import flash.utils.IDataOutput
 
@@ -82,6 +84,17 @@ package com.netease.protobuf {
 				writeSingleUnknown(output, tag, value)
 			}
 		}
+		protected final function writeExtensionOrUnknown(output:WritingBuffer,
+				fieldName:String):void {
+			var fieldDescriptor:BaseFieldDescriptor
+			try {
+				fieldDescriptor = BaseFieldDescriptor.fromString(fieldName)
+			} catch (e:ReferenceError) {
+				writeUnknown(output, fieldName)
+				return
+			}
+			fieldDescriptor.write(output, this)
+		}
 		protected final function readUnknown(input:IDataInput, tag:uint):void {
 			var value:*
 			switch (tag & 7) {
@@ -107,6 +120,15 @@ package com.netease.protobuf {
 				currentValue.push(value)
 			} else {
 				this[tag] = [currentValue, value]
+			}
+		}
+		protected final function readExtensionOrUnknown(extensions:Array,
+				input:IDataInput, tag:uint):void {
+			var fieldDescriptor:BaseFieldDescriptor = extensions[tag >>> 3];
+			if (fieldDescriptor) {
+				fieldDescriptor.read(input, this, tag);
+			} else {
+				readUnknown(input, tag)
 			}
 		}
 	}

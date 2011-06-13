@@ -106,10 +106,11 @@ clean:
 test: test.swf
 	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<
 
-test.swf: test.swc test/Test.mxml dist/protobuf.swc
+test.swf: test.swc test/com/netease/protobuf/test/Test.mxml dist/protobuf.swc
 	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \
-	-source-path+=test test/Test.mxml -debug \
-	-static-link-runtime-shared-libraries=true
+	-source-path+=test test/com/netease/protobuf/test/Test.mxml -debug \
+	-static-link-runtime-shared-libraries=true \
+	-keep-as3-metadata+=ProtocolBuffersField
 
 test.swc: unittest.proto.as3/protobuf_unittest dist/protobuf.swc
 	$(COMPC) -include-sources+=unittest.proto.as3 \

@@ -10,7 +10,7 @@
 
 <!-- Use, modification and distribution are subject to the "New BSD License" as
      listed at <url: http://www.opensource.org/licenses/bsd-license.php >. -->
-	<mx:Script source="../unittest.proto.as3/initializer.as.inc"/>
+	<mx:Script source="../../../../../unittest.proto.as3/initializer.as.inc"/>
 	<mx:Script>
 		<![CDATA[
 			import protobuf_unittest.*
@@ -65,6 +65,13 @@
 				const output:* = ba.readObject()
 				assertSame(input, output)
 			}
+			private static function testText(input:Message):void {
+				const ba:ByteArray = new ByteArray
+				com.netease.protobuf.TextFormat.printToUTFBytes(ba, input)
+				ba.length = 0
+				const output:Message = com.netease.protobuf.TextFormat.readFromUTFBytes(ba)
+				assertSame(input, output)
+			}
 			private static function test(input:Message):void {
 				const ba:ByteArray = new ByteArray
 				input.writeTo(ba)
@@ -77,7 +84,8 @@
 				trace(s)
 				trace(input)
 				ba.position = 0
-				const output:Message = new (Object(input).constructor)
+				const output:Message = new (getDefinitionByName(
+						getQualifiedClassName(input)))
 				output.mergeFrom(ba)
 				assertSame(input, output)
 			}
@@ -185,6 +193,7 @@
 			t11.aaa.s = "1234xxx"
 			t11.i = 1234
 			test(t11)
+			testText(t11)
 			testAmf(t11)
 			testAmf([t10, t11, t10])
 

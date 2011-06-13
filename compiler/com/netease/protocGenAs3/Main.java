@@ -173,10 +173,15 @@ public final class Main {
 		}
 		return root;
 	}
+	@SuppressWarnings("fallthrough")
 	private static String getImportType(Scope<?> scope,
 			FieldDescriptorProto fdp) {
 		switch (fdp.getType()) {
 		case TYPE_ENUM:
+			if (!fdp.hasDefaultValue()) {
+				return null;
+			}
+			// fall-through
 		case TYPE_MESSAGE:
 			Scope<?> typeScope = scope.find(fdp.getTypeName());
 			if (typeScope == null) {
@@ -558,8 +563,10 @@ public final class Main {
 			content.append("\t\tpublic static const extensionWriteFunctions:Object = {};\n\n");
 			content.append("\t\t[ArrayElementType(\"Function\")]\n");
 			content.append("\t\tpublic static const extensionReadFunctions:Array = [];\n\n");
+			/*
 			content.append("\t\t[ArrayElementType(\"Class\")]\n");
 			content.append("\t\tpublic static const extensionTypes:Object = {};\n\n");
+			*/
 		}
 		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
 			initializerContent.append("import ");
@@ -571,18 +578,30 @@ public final class Main {
 			appendLowerCamelCase(initializerContent, efdp.getName());
 			initializerContent.append(");\n");
 			String extendee = scope.find(efdp.getExtendee()).fullName;
+			content.append("\t\t");
+			writeFieldMetaData(content, scope, efdp);
+			content.append("\n");
 			content.append("\t\tpublic static const ");
 			appendLowerCamelCase(content, efdp.getName());
 			content.append(":String = ");
-			appendQuotedString(content, scope.fullName + '.' + efdp.getName() + '@' + efdp.getNumber());
+			{
+				StringBuilder extensionFullName = new StringBuilder();
+				extensionFullName.append(content);
+				extensionFullName.append('.');
+				appendLowerCamelCase(extensionFullName, efdp.getName());
+				appendQuotedString(content, extensionFullName.toString());
+			}
 			content.append(";\n\n");
 			content.append("\t\t");
-			content.append(extendee);
-			content.append(".extensionTypes[");
-			appendLowerCamelCase(content, efdp.getName());
-			content.append("] = ");
-			content.append(getActionScript3LogicType(scope, efdp));
-			content.append(";\n");
+			if (efdp.hasDefaultValue()) {
+				content.append("\t\t");
+				content.append(extendee);
+				content.append(".prototype[");
+				appendLowerCamelCase(content, efdp.getName());
+				content.append("] = ");
+				appendDefaultValue(content, scope, efdp);
+				content.append(";\n");
+			}
 			content.append("\t\t");
 			content.append(extendee);
 			content.append(".extensionReadFunctions[");
@@ -622,11 +641,6 @@ public final class Main {
 						content.append(valueTypeField);
 						content.append(":uint = 0;\n\n");
 					}
-					content.append("\t\tpublic static const ");
-					appendLowerCamelCase(content, fdp.getName());
-					content.append("EnumType:Class = ");
-					content.append(getActionScript3LogicType(scope, fdp));
-					content.append(";\n\n");
 					
 					content.append("\t\tpublic function remove");
 					appendUpperCamelCase(content, fdp.getName());
@@ -696,6 +710,9 @@ public final class Main {
 					content.append("\t\t}\n\n");
 				}
 
+				content.append("\t\t");
+				writeFieldMetaData(content, scope, fdp);
+				content.append("\n");
 				content.append("\t\tpublic function get ");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append("():");
@@ -716,6 +733,9 @@ public final class Main {
 				content.append("\t\t}\n\n");
 				break;
 			case LABEL_REQUIRED:
+				content.append("\t\t");
+				writeFieldMetaData(content, scope, fdp);
+				content.append("\n");
 				content.append("\t\tpublic var ");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append(":");
@@ -727,6 +747,9 @@ public final class Main {
 				content.append(";\n\n");
 				break;
 			case LABEL_REPEATED:
+				content.append("\t\t");
+				writeFieldMetaData(content, scope, fdp);
+				content.append("\n");
 				content.append("\t\t[ArrayElementType(\"");
 				content.append(getActionScript3Type(scope, fdp));
 				content.append("\")]\n");
@@ -975,6 +998,17 @@ public final class Main {
 		content.append("\t\t}\n\n");
 		content.append("\t}\n");
 	}
+	private static void writeFieldMetaData(StringBuilder content,
+			Scope<?> scope,
+			FieldDescriptorProto fdp) {
+		content.append("[ProtocolBuffersField(name=");
+		appendQuotedString(content, fdp.getName());
+		if (fdp.getType() == FieldDescriptorProto.Type.TYPE_ENUM) {
+			content.append(",enumType=");
+			appendQuotedString(content, scope.find(fdp.getTypeName()).fullName);
+		}
+		content.append(")]");
+	}
 	private static void writeExtension(Scope<FieldDescriptorProto> scope,
 			StringBuilder content, StringBuilder initializerContent) {
 		initializerContent.append("import ");
@@ -983,7 +1017,7 @@ public final class Main {
 		initializerContent.append("void(");
 		initializerContent.append(scope.fullName);
 		initializerContent.append(");\n");
-		content.append("import com.netease.protobuf.*;\n");
+		content.append("\timport com.netease.protobuf.*;\n");
 		String importType = getImportType(scope.parent, scope.proto);
 		if (importType != null) {
 			content.append("\timport ");
@@ -997,18 +1031,23 @@ public final class Main {
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 
 		content.append("\t// @@protoc_insertion_point(constant_metadata)\n");
+		content.append('\t');
+		writeFieldMetaData(content, scope.parent, scope.proto);
+		content.append("\n");
 		content.append("\tpublic const ");
 		appendLowerCamelCase(content, scope.proto.getName());
 		content.append(":String = ");
-		appendQuotedString(content, scope.parent.fullName + '.' + scope.proto.getName() + '(' + scope.proto.getNumber() + ')');
+		appendQuotedString(content, scope.fullName);
 		content.append(";\n\n");
-		content.append("\t");
-		content.append(extendee);
-		content.append(".extensionTypes[");
-		appendLowerCamelCase(content, scope.proto.getName());
-		content.append("] = ");
-		content.append(getActionScript3LogicType(scope.parent, scope.proto));
-		content.append(";\n");
+		if (scope.proto.hasDefaultValue()) {
+			content.append("\t");
+			content.append(extendee);
+			content.append(".prototype[");
+			appendLowerCamelCase(content, scope.proto.getName());
+			content.append("] = ");
+			appendDefaultValue(content, scope.parent, scope.proto);
+			content.append(";\n");
+		}
 		content.append("\t");
 		content.append(extendee);
 		content.append(".extensionReadFunctions[");

@@ -1,6 +1,6 @@
 // vim: tabstop=4 shiftwidth=4
 
-// Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2011 , Yang Bo All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //

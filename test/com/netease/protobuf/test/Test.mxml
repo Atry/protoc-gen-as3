@@ -32,19 +32,26 @@
 				if (typeof(l) == "object") {
 					assert(getQualifiedClassName(l) ==
 							getQualifiedClassName(r))
-					var k:*
-					for(k in l) {
-						assertSame(l[k], r[k], name + "." + k)
-					}
-					for(k in r) {
-						assertSame(l[k], r[k], name + "." + k)
-					}
-					const description:XML = describeType(l)
-					for each(var getter:XML in description..accessor.(@access != "writeonly")) {
-						assertSame(l[getter.@name], r[getter.@name], name + "." + getter.@name)
-					}
-					for each(var field:XML in description..variable) {
-						assertSame(l[field.@name], r[field.@name], name + "." + field.@name)
+					if (l is Array || l is ByteArray) {
+						assertSame(l.length, r.length, name + ".length")
+						for (var i:int = 0; i < l.length; i++) {
+							assertSame(l[i], r[i], name + "[" + i + "]")
+						}
+					} else {
+						var k:*
+						for(k in l) {
+							assertSame(l[k], r[k], name + "[" + k + "]")
+						}
+						for(k in r) {
+							assertSame(l[k], r[k], name + "[" + k + "]")
+						}
+						const description:XML = describeType(l)
+						for each(var getter:XML in description..accessor.(@access != "writeonly")) {
+							assertSame(l[getter.@name], r[getter.@name], name + "." + getter.@name)
+						}
+						for each(var field:XML in description..variable) {
+							assertSame(l[field.@name], r[field.@name], name + "." + field.@name)
+						}
 					}
 				} else {
 					assert(l === r || (isNaN(l) && isNaN(r)), name + " not equal.")
@@ -60,18 +67,19 @@
 					s += HEX_CHARS.charAt(ba[i] % 16)
 					s += " "
 				}
-				trace(s)
 				trace(input)
+				trace(s)
 				ba.position = 0
 				const output:* = ba.readObject()
 				assertSame(input, output)
 			}
 			private static function testText(input:Message):void {
-				const ba:ByteArray = new ByteArray
-				com.netease.protobuf.TextFormat.printToUTFBytes(ba, input)
-				ba.length = 0
-				const output:com.netease.protobuf.Message =
-						com.netease.protobuf.TextFormat.readFromUTFBytes(ba)
+				const text:String =
+						com.netease.protobuf.TextFormat.printToString(input)
+				const output:Message =
+						new (getDefinitionByName(getQualifiedClassName(input)))
+				com.netease.protobuf.TextFormat.mergeFromString(text, output)
+				trace("input:", input, "output:", output)
 				assertSame(input, output)
 			}
 			private static function test(input:Message):void {
@@ -83,8 +91,6 @@
 					s += HEX_CHARS.charAt(ba[i] % 16)
 					s += " "
 				}
-				trace(s)
-				trace(input)
 				ba.position = 0
 				const output:Message = new (getDefinitionByName(
 						getQualifiedClassName(input)))
@@ -101,7 +107,8 @@
 			const UNITTEST_BIN:Class
 			const descriptors:FileDescriptorSet = new FileDescriptorSet
 			descriptors.mergeFrom(new UNITTEST_BIN)
-			trace(com.netease.protobuf.TextFormat.printToString(descriptors, false))
+			test(descriptors)
+			testText(descriptors)
 			
 			const int64:Int64 = new Int64(0x12345678, 0x91abcde1)
 			assertSame(int64.toString(), "-7950034350635723144")
@@ -148,12 +155,14 @@
 			t1.packedEnum = [ForeignEnum.FOREIGN_BAZ, ForeignEnum.FOREIGN_FOO,
 					ForeignEnum.FOREIGN_FOO, ForeignEnum.FOREIGN_BAR]
 			test(t1)
+			testText(t1)
 
 			const t2:TestPackedExtensions = new TestPackedExtensions
 			t2[PACKED_DOUBLE_EXTENSION] = [324.234, 1.23424353, 2.12]
 			t2[PACKED_ENUM_EXTENSION] =[ForeignEnum.FOREIGN_BAZ,
 					ForeignEnum.FOREIGN_FOO, ForeignEnum.FOREIGN_FOO] 
 			test(t2)
+			testText(t2)
 
 			const t3:TestAllTypes = new TestAllTypes
 			t3.optionalString = "111foo"
@@ -170,15 +179,19 @@
 			t3.optionalSint32 = -3
 			t3.optionalSint64 = new Int64(199999999, 199999999)
 			test(t3)
+			testText(t3)
 			const t4:TestPackedTypes = new TestPackedTypes
 			t4.packedDouble = [1]
 			test(t4)
+			testText(t4)
 			const t5:TestAllTypes = new TestAllTypes
 			t5.optionalSint32 = -199999999
 			test(t5)
+			testText(t5)
 			const t6:TestAllTypes = new TestAllTypes
 			t6.optionalInt64 = new Int64(uint(-185754567), -198741265)
 			test(t6)
+			testText(t6)
 			const t7:TestAllTypes = new TestAllTypes
 			const s64:Int64 = new Int64(uint(-171754567), -198741265)
 			t7.optionalSint64 = s64
@@ -190,13 +203,16 @@
 			t7[631677] = [234, 234, 123222, 12345325] // Unknown Fixed32
 			t7[1500930] = stringToByteArray("Hello\u00C4\u00C3xxx") // Unknown Length Delimited
 			t7[1500938] = [stringToByteArray("Hello"), stringToByteArray("World")] // Unknown Length Delimited
+			testText(t7)
 			test(t7)
 			const t9:TestAllTypes = new TestAllTypes
 			t9.optionalSint64 = new Int64(uint(-171754567), -198741265)
 			test(t9)
+			testText(t9)
 			const t10:AAA = new AAA
 			t10.s = "xxxx"
 			test(t10)
+			testText(t10)
 			testAmf(t10)
 			const t11:BBB = new BBB
 			t11.aaa = new AAA
@@ -210,6 +226,7 @@
 			const t12:TestAllExtensions = new TestAllExtensions
 			t12[REPEATED_STRING_EXTENSION] = ["aaaa", "bbb"]
 			test(t12)
+			testText(t12)
 
 			trace("All tests pass.")
 			fscommand("quit")

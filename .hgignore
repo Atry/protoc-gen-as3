@@ -11,3 +11,5 @@ glob:MANIFEST.MF
 glob:*~
 glob:*.swf
 glob:*.swc
+glob:unittest.bin
+glob:obj/

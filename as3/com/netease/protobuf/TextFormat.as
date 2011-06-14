@@ -1,6 +1,6 @@
 // vim: tabstop=4 shiftwidth=4
 
-// Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2011 , Yang Bo All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //
@@ -9,6 +9,7 @@
 
 package com.netease.protobuf {
 	import com.netease.protobuf.fieldDescriptors.*;
+	import flash.errors.IllegalOperationError;
 	import flash.errors.IOError;
 	import flash.utils.describeType
 	import flash.utils.getDefinitionByName;
@@ -18,7 +19,7 @@ package com.netease.protobuf {
 	public final class TextFormat {
 		private static function printHex(output:IDataOutput, value:uint):void {
 			const hexString:String = value.toString(16)
-			output.writeUTFBytes("00000000".substring(0, hexString.length))
+			output.writeUTFBytes("00000000".substring(0, 8 - hexString.length))
 			output.writeUTFBytes(hexString)
 		}
 		private static function printEnum(output:IDataOutput,
@@ -72,6 +73,21 @@ package com.netease.protobuf {
 		}
 		private static function printUnknownField(output:IDataOutput, tag:uint,
 				value:Object, newLine:uint, currentIndent:String):void {
+			const unknownArray:Array = value as Array
+			if (unknownArray) {
+				for (var k:int = 0; k < unknownArray.length; k++) {
+					printSingleUnknownField(output, tag, unknownArray[k],
+							newLine, currentIndent)
+				}
+			} else {
+				printSingleUnknownField(output, tag, value, newLine,
+						currentIndent)
+			}
+		}
+					
+		private static function printSingleUnknownField(output:IDataOutput,
+				tag:uint, value:Object, newLine:uint,
+				currentIndent:String):void {
 			output.writeUTFBytes(currentIndent)
 			output.writeUTFBytes(String(tag >>> 3))
 			output.writeUTFBytes(": ")
@@ -238,13 +254,397 @@ package com.netease.protobuf {
 			ba.position = 0
 			return ba.readUTFBytes(ba.length)
 		}
-
-		public static function readFromUTFBytes(input:IDataInput):Message {
+		
+		private static function skipWhitespace(source:ISource):void {
+			for (;; ) {
+				const b:int = source.read()
+				switch (b) {
+				case 0x20:/* space */
+				case 0x09:/* \t */
+				case 0x0a:/* \n */
+				case 0x0d:/* \r */
+					continue
+				case 0x23:/* # */
+					for (;;) {
+						switch (source.read()) {
+						case 0x0a:/* \n */
+						case 0x0d:/* \r */
+							break 
+						}
+					}
+					break
+				default:
+					source.unread(b)
+					return
+				}
+			}
+		}
+		private static function toHexDigit(b:int):int {
+			if (b >= 0x30 && b <= 0x39) {
+				return b - 0x30
+			} else if (b >= 0x61 && b <= 0x66) {
+				return b - 0x57
+			} else if (b >= 0x41 && b <= 0x46) {
+				return b - 0x37
+			} else {
+				throw new IOError("Expect hex, got " + String.fromCharCode(b))
+			}
+		}
+		private static function toOctalDigit(b:int):int {
+			if (b >= 0x30 && b <= 0x37) {
+				return b - 0x30
+			} else {
+				throw new IOError("Expect digit, got " + String.fromCharCode(b))
+			}
+		}
+		private static function tryConsumeBytes(source:ISource):ByteArray {
+			skipWhitespace(source)
+			const start:int = source.read()
+			switch (start) {
+			case 0x22 /* " */:
+			case 0x27 /* ' */:
+				const result:ByteArray = new ByteArray
+				for (;;) {
+					const b:int = source.read()
+					switch (b) {
+					case start:
+						return result
+					case 0x5c: /* \ */
+						const b0:int = source.read()
+						switch (b0) {
+						case 0x61 /* \a */: result.writeByte(7); break;
+						case 0x62 /* \b */: result.writeByte(8); break;
+						case 0x66 /* \f */: result.writeByte(12); break;
+						case 0x6e /* \n */: result.writeByte(10); break;
+						case 0x72 /* \r */: result.writeByte(13); break;
+						case 0x74 /* \t */: result.writeByte(9); break;
+						case 0x76 /* \v */: result.writeByte(11); break;
+						case 0x78 /* \xXX */:
+							const x0:int = source.read()
+							const x1:int = source.read()
+								result.writeByte(
+										toHexDigit(x0) * 0x10 +
+										toHexDigit(x1))
+							break
+						default:
+							if (b0 >= 0x30 && b0 <= 0x39) {
+								const b1:int = source.read()
+								const b2:int = source.read()
+								result.writeByte(
+										toOctalDigit(b0) * 64 +
+										toOctalDigit(b1) * 8 +
+										toOctalDigit(b2))
+							} else {
+								result.writeByte(b0)
+							}
+							continue
+						}
+					default:
+						result.writeByte(b)
+						break
+					}
+				}
+				break
+			default:
+				source.unread(start)
+				break
+			}
 			return null
 		}
 		
-		public static function readFromString(text:String):Message {
-			return null
+		private static function tryConsume(source:ISource,
+				expected:int):Boolean {
+			skipWhitespace(source)
+			const b:int = source.read()
+			if (b == expected) {
+				return true
+			} else {
+				source.unread(b)
+				return false
+			}
+		}
+		
+		private static function consume(source:ISource, expected:int):void {
+			skipWhitespace(source)
+			const b:int = source.read()
+			if (b != expected) {
+				throw new IOError("Expect " + String.fromCharCode(expected) + 
+					", got " + String.fromCharCode(b))
+			}
+		}
+		
+		private static function consumeIdentifier(source:ISource):String {
+			skipWhitespace(source)
+			const nameBuffer:ByteArray = new ByteArray
+			for (;; ) {
+				const b:int = source.read()
+				if (b >= 0x30 && b <= 0x39 || // 0-9
+						b >= 0x41 && b <= 0x5a || // A-Z
+						b >= 0x61 && b <= 0x7a || // a-z
+						b == 0x2e || b == 0x5f || b == 0x2d || b < 0) {
+					nameBuffer.writeByte(b)
+				} else {
+					if (nameBuffer.length == 0) {
+						throw new IOError("Expect Identifier, got " +
+								String.fromCharCode(b))
+					}
+					source.unread(b)
+					break
+				}
+			}
+			nameBuffer.position = 0
+			return nameBuffer.readUTFBytes(nameBuffer.length)
+		}
+		
+		private static function appendUnknown(message:Message, tag:uint,
+				value:*):void {
+			const oldValue:* = message[tag]
+			if (oldValue === undefined) {
+				message[tag] = value
+			} else {
+				const oldArray:Array = oldValue as Array
+				if (oldArray) {
+					oldArray.push(value)
+				} else {
+					message[tag] = [oldValue, value]
+				}
+			}
+		}
+		
+		private static function consumeUnknown(source:ISource,
+				message:Message, number:uint):void {
+			const bytes:ByteArray = tryConsumeBytes(source)
+			if (bytes) {
+				appendUnknown(message,
+						(number << 3) | WireType.LENGTH_DELIMITED,
+						bytes)
+				return
+			}
+			const identifier:String = consumeIdentifier(source)
+			const m:Array = identifier.match(
+					/^0[xX]([0-9a-fA-F]{16}|[0-9a-fA-F]{8})$/)
+			if (!m) {
+				appendUnknown(message,
+						(number << 3) | WireType.VARINT,
+						UInt64.parseUInt64(identifier))
+				return
+			}
+			const hex:String = m[1]
+			if (hex.length == 8) {
+				appendUnknown(message,
+						(number << 3) | WireType.FIXED_32_BIT,
+						uint(parseInt(hex, 16)))
+			} else {
+				appendUnknown(message,
+						(number << 3) | WireType.FIXED_64_BIT,
+						UInt64.parseUInt64(hex, 16))
+			}
+		}
+		
+		private static function consumeEnumFieldValue(source:ISource,
+				enumType:Class):int {
+			consume(source, 0x3a/* : */)
+			const enumName:String = consumeIdentifier(source)
+			const result:* = enumType[enumName]
+			if (result === undefined) {
+				throw new IOError("Invalid enum name " + enumName)
+			} else {
+				return result
+			}
+		}
+		
+		private static function consumeFieldValue(source:ISource,
+				type:Class):* {
+			switch (type) {
+				case ByteArray:
+					consume(source, 0x3a/* : */)
+					const bytes:ByteArray = tryConsumeBytes(source)
+					if (bytes) {
+						bytes.position = 0
+						return bytes
+					} else {
+						throw new IOError("Expect quoted bytes")
+					}
+				case String:
+					consume(source, 0x3a/* : */)
+					const binaryString:ByteArray = tryConsumeBytes(source)
+					if (binaryString) {
+						binaryString.position = 0
+						return binaryString.readUTFBytes(binaryString.length)
+					} else {
+						throw new IOError("Expect quoted string")
+					}
+				case Boolean:
+					consume(source, 0x3a/* : */)
+					const booleanString:String = consumeIdentifier(source)
+					switch (booleanString) {
+					case "true":
+						return true
+					case "false":
+						return false
+					default:
+						throw new IOError("Expect boolean, got " +
+								booleanString)
+					}
+					break
+				case Int64:
+					consume(source, 0x3a/* : */)
+					return Int64.parseInt64(consumeIdentifier(source))
+				case UInt64:
+					consume(source, 0x3a/* : */)
+					return UInt64.parseUInt64(consumeIdentifier(source))
+				case uint:
+					consume(source, 0x3a/* : */)
+					return uint(parseInt(consumeIdentifier(source)))
+				case int:
+					consume(source, 0x3a/* : */)
+					return int(parseInt(consumeIdentifier(source)))
+				case Number:
+					consume(source, 0x3a/* : */)
+					return parseFloat(consumeIdentifier(source))
+				default:
+					tryConsume(source, 0x3a/* : */)
+					consume(source, 0x7b/* { */)
+					const message:Message = new type
+					for (;; ) {
+						if (tryConsume(source, 0x7d/* } */)) {
+							break
+						}
+						consumeField(source, message)
+					}
+					return message
+			}
+		}
+		
+		private static function consumeField(source:ISource,
+				message:Message):void {
+			const isExtension:Boolean = tryConsume(source, 0x5b /* [ */)
+			const name:String = consumeIdentifier(source)
+			if (isExtension) {
+				consume(source, 0x5d /* ] */)
+			}
+			var fieldDescriptor:BaseFieldDescriptor
+			if (isExtension) {
+				const lastDotPosition:int = name.lastIndexOf('.')
+				const scope:String = name.substring(0, lastDotPosition)
+				const localName:String = name.substring(lastDotPosition + 1)
+				try {
+					fieldDescriptor = getDefinitionByName(scope)[
+							localName.toUpperCase()]
+				} catch (e:ReferenceError) {
+					fieldDescriptor = BaseFieldDescriptor(
+							getDefinitionByName(scope + '.' +
+							localName.toUpperCase()))
+				}
+			} else {
+				if (name.search(/[0-9]+/) == 0) {
+					consume(source, 0x3a/* : */)
+					consumeUnknown(source, message, uint(name))
+					return
+				} else {
+					fieldDescriptor = Object(message).constructor[
+							name.toUpperCase()]
+				}
+			}
+			const repeatedFieldDescriptor:RepeatedFieldDescriptor =
+					fieldDescriptor as RepeatedFieldDescriptor
+			if (repeatedFieldDescriptor) {
+				const destination:Array =
+						message[fieldDescriptor.name] ||
+						(message[fieldDescriptor.name] = [])
+				const enumRepeatedFieldDescriptor:
+						RepeatedFieldDescriptor$TYPE_ENUM =
+						repeatedFieldDescriptor as
+						RepeatedFieldDescriptor$TYPE_ENUM
+				destination.push(enumRepeatedFieldDescriptor ?
+						consumeEnumFieldValue(source,
+						enumRepeatedFieldDescriptor.enumType) :
+						consumeFieldValue(source,
+						repeatedFieldDescriptor.elementType))
+			} else {
+				const enumFieldDescriptor:FieldDescriptor$TYPE_ENUM =
+						fieldDescriptor as FieldDescriptor$TYPE_ENUM
+				message[fieldDescriptor.name] = enumFieldDescriptor ?
+						consumeEnumFieldValue(source,
+						enumFieldDescriptor.enumType) :
+						consumeFieldValue(source,
+						fieldDescriptor.type)
+			}
+		}
+		
+		private static function mergeFromSource(source:ISource,
+				message:Message):void {
+			for (;; ) {
+				if (tryConsume(source, 0/* EOF */)) {
+					break
+				}
+				consumeField(source, message)
+			}
+		}
+		
+		public static function mergeFromUTFBytes(input:IDataInput,
+				message:Message):void {
+			mergeFromSource(new WrappedSource(input), message)
+		}
+		
+		public static function mergeFromString(text:String, message:Message):void {
+			const source:BufferedSource = new BufferedSource
+			source.writeUTFBytes(text)
+			source.position = 0
+			mergeFromSource(source, message)
+		}
+	}
+}
+import flash.errors.IOError;
+import flash.utils.IDataInput;
+import flash.utils.ByteArray;
+import flash.errors.EOFError
+
+
+interface ISource {
+	function read():int
+	function unread(b:int):void
+}
+
+class BufferedSource extends ByteArray implements ISource {
+	public function unread(value:int):void {
+		if (value == 0 && bytesAvailable == 0) {
+			return
+		}
+		position--
+	}
+	public function read():int {
+		if (bytesAvailable > 0) {
+			return readByte()
+		} else {
+			return 0
+		}
+	}
+}
+
+class WrappedSource implements ISource {
+	private var input:IDataInput
+	private var temp:int
+	public function WrappedSource(input:IDataInput) {
+		this.input = input
+	}
+	public function unread(value:int):void {
+		if (temp) {
+			throw new IOError("Cannot unread twice!")
+		}
+		temp = value
+	}
+	public function read():int {
+		if (temp) {
+			const result:int = temp
+			temp = 0
+			return result
+		} else {
+			try {
+				return input.readByte()
+			} catch (e: EOFError) {
+			}
+			return 0
 		}
 	}
 }

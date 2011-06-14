@@ -1,6 +1,6 @@
 // vim: tabstop=4 shiftwidth=4
 
-// Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2011 , Yang Bo All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //
@@ -36,21 +36,24 @@ package com.netease.protobuf {
 				throw new IOError("Invalid packed destination data")
 			}
 		}
+		public function get nonPackedWireType():int {
+			throw new IllegalOperationError("Not Implemented!")
+		}
 		override public final function write(output:WritingBuffer,
 				message:Message):void {
 			const source:Array = message[name]
-			if ((tag & 7) == WireType.LENGTH_DELIMITED) {
+			if ((tag & 7) == nonPackedWireType) {
+				for (var k:uint = 0; k < source.length; k++) {
+					WriteUtils.write$TYPE_UINT32(output, tag)
+					writeSingleField(output, source[k])
+				}
+			} else {
 				WriteUtils.write$TYPE_UINT32(output, tag)
 				const i:uint = output.beginBlock()
 				for (var j:uint = 0; j < source.length; j++) {
 					writeSingleField(output, source[j])
 				}
 				output.endBlock(i)
-			} else {
-				for (var k:uint = 0; k < source.length; k++) {
-					WriteUtils.write$TYPE_UINT32(output, tag)
-					writeSingleField(output, source[k])
-				}
 			}
 		}
 

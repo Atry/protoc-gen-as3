@@ -1,6 +1,6 @@
 // vim: tabstop=4 shiftwidth=4
 
-// Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2011 , Yang Bo All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //
@@ -17,6 +17,9 @@ package com.netease.protobuf.fieldDescriptors {
 			this.fullName = fullName
 			this.name = name
 			this.tag = tag
+		}
+		override public function get nonPackedWireType():int {
+			return WireType.FIXED_64_BIT
 		}
 		override public function get type():Class {
 			return Array

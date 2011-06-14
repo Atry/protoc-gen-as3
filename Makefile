@@ -56,8 +56,7 @@ dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_V
 	echo '@java -jar protoc-gen-as3.jar') > $@
 	chmod +x $@
 
-dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as) \
-	$(as3/com/netease/protobuf/*.as) | dist
+dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) | dist
 	$(COMPC) -include-sources+=as3 -output=$@
 
 MANIFEST.MF:
@@ -108,7 +107,7 @@ test: test.swf
 	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<
 
 test.swf: test.swc test/com/netease/protobuf/test/Test.mxml dist/protobuf.swc \
-	descriptor.proto.as3/google
+	descriptor.proto.as3/google unittest.bin
 	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \
 	-source-path+=descriptor.proto.as3,test test/com/netease/protobuf/test/Test.mxml -debug \
 	-static-link-runtime-shared-libraries=true

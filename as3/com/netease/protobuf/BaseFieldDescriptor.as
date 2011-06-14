@@ -11,6 +11,7 @@ package com.netease.protobuf {
 	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput
 	public class BaseFieldDescriptor {
+		public var fullName:String
 		public var name:String
 		public var tag:uint
 		public function get type():Class {
@@ -20,9 +21,6 @@ package com.netease.protobuf {
 			throw new IllegalOperationError("Not Implemented!")
 		}
 		public function writeSingleField(output:WritingBuffer, value:*):void {
-			throw new IllegalOperationError("Not Implemented!")
-		}
-		public function read(source:IDataInput, destination:Message, tag:uint):void {
 			throw new IllegalOperationError("Not Implemented!")
 		}
 		public function write(destination:WritingBuffer, source:Message):void {
@@ -45,36 +43,20 @@ package com.netease.protobuf {
 			"typeof" : true,	"use" : true,		"var" : true,
 			"void" : true,		"while" : true,		"with" : true
 		}
-
-		public static function toLowerCamelCase(origin:String):String {
-			if (origin in ACTIONSCRIPT_KEYWORDS) {
-				return "__" + origin
-			}
-			return origin.replace(/_[a-z]/g, regexToUpperCase)
-		}
 		
-		public function get fieldName():String {
-			return toLowerCamelCase(name.substr(name.lastIndexOf('.') + 1))
-		}
-		
-		public function get scope():String {
-			return name.substr(0, name.lastIndexOf('.'))
-		}
-		
-		public static function fromString(name:String):BaseFieldDescriptor {
-			try {
+		public static function getExtensionByName(
+				name:String):BaseFieldDescriptor {
+			const fieldPosition:int = name.lastIndexOf('/')
+			if (fieldPosition == -1) {
 				return BaseFieldDescriptor(getDefinitionByName(name))
-			} catch (e:ReferenceError) {
+			} else {
+				return getDefinitionByName(name.substring(0, fieldPosition))[
+						name.substring(fieldPosition + 1)]
 			}
-			const lastDotPosition:int = name.lastIndexOf('.')
-			return getDefinitionByName(name.substr(0, lastDotPosition))[
-					name.substr(lastDotPosition + 1)]
 		}
-		
-		private var toStringCache:String
 
 		public function toString():String {
-			return toStringCache || (toStringCache = scope + '.' + fieldName)
+			return name
 		}
 		
 	}

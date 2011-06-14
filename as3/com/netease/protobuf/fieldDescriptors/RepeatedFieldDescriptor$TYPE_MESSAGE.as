@@ -14,10 +14,14 @@ package com.netease.protobuf.fieldDescriptors {
 			RepeatedFieldDescriptor {
 		public var messageType:Class
 		public function RepeatedFieldDescriptor$TYPE_MESSAGE(
-				name:String, tag:uint, messageType:Class) {
+				fullName:String, name:String, tag:uint, messageType:Class) {
+			this.fullName = fullName
 			this.name = name
 			this.tag = tag
 			this.messageType = messageType
+		}
+		override public function get type():Class {
+			return Array
 		}
 		override public function get elementType():Class {
 			return messageType

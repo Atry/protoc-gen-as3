@@ -13,7 +13,8 @@ package com.netease.protobuf.fieldDescriptors {
 	public final class FieldDescriptor$TYPE_SINT64 extends
 			FieldDescriptor {
 		public function FieldDescriptor$TYPE_SINT64(
-				name:String, tag:uint) {
+				fullName:String, name:String, tag:uint) {
+			this.fullName = fullName
 			this.name = name
 			this.tag = tag
 		}

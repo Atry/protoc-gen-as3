@@ -14,7 +14,8 @@ package com.netease.protobuf.fieldDescriptors {
 			FieldDescriptor {
 		public var enumType:Class
 		public function FieldDescriptor$TYPE_ENUM(
-				name:String, tag:uint, enumType:Class) {
+				fullName:String, name:String, tag:uint, enumType:Class) {
+			this.fullName = fullName
 			this.name = name
 			this.tag = tag
 			this.enumType = enumType

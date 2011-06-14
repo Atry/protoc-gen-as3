@@ -49,12 +49,12 @@ package com.netease.protobuf {
 				write$TYPE_UINT32(output, value)
 			}
 		}
-		public static function write$TYPE_FIXED64(output:WritingBuffer, value:Int64):void {
+		public static function write$TYPE_FIXED64(output:WritingBuffer, value:UInt64):void {
 			output.writeUnsignedInt(value.low)
-			output.writeInt(value.high)
+			output.writeUnsignedInt(value.high)
 		}
-		public static function write$TYPE_FIXED32(output:WritingBuffer, value:int):void {
-			output.writeInt(value)
+		public static function write$TYPE_FIXED32(output:WritingBuffer, value:uint):void {
+			output.writeUnsignedInt(value)
 		}
 		public static function write$TYPE_BOOL(output:WritingBuffer, value:Boolean):void {
 			output.writeByte(value ? 1 : 0)
@@ -83,11 +83,11 @@ package com.netease.protobuf {
 			write$TYPE_INT32(output, value)
 		}
 		public static function write$TYPE_SFIXED32(output:WritingBuffer, value:int):void {
-			write$TYPE_FIXED32(output, ZigZag.encode32(value))
+			output.writeInt(value)
 		}
 		public static function write$TYPE_SFIXED64(output:WritingBuffer, value:Int64):void {
-			output.writeUnsignedInt(ZigZag.encode64low(value.low, value.high))
-			output.writeUnsignedInt(ZigZag.encode64high(value.low, value.high))
+			output.writeUnsignedInt(value.low)
+			output.writeInt(value.high)
 		}
 		public static function write$TYPE_SINT32(output:WritingBuffer, value:int):void {
 			write$TYPE_UINT32(output, ZigZag.encode32(value))

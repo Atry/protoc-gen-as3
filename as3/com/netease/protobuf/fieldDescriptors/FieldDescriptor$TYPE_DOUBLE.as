@@ -13,7 +13,8 @@ package com.netease.protobuf.fieldDescriptors {
 	public final class FieldDescriptor$TYPE_DOUBLE extends
 			FieldDescriptor {
 		public function FieldDescriptor$TYPE_DOUBLE(
-				name:String, tag:uint) {
+				fullName:String, name:String, tag:uint) {
+			this.fullName = fullName
 			this.name = name
 			this.tag = tag
 		}

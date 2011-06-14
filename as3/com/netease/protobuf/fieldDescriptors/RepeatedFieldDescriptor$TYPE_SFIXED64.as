@@ -13,9 +13,13 @@ package com.netease.protobuf.fieldDescriptors {
 	public final class RepeatedFieldDescriptor$TYPE_SFIXED64 extends
 			RepeatedFieldDescriptor {
 		public function RepeatedFieldDescriptor$TYPE_SFIXED64(
-				name:String, tag:uint) {
+				fullName:String, name:String, tag:uint) {
+			this.fullName = fullName
 			this.name = name
 			this.tag = tag
+		}
+		override public function get type():Class {
+			return Array
 		}
 		override public function get elementType():Class {
 			return Int64

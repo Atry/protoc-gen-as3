@@ -14,10 +14,14 @@ package com.netease.protobuf.fieldDescriptors {
 			RepeatedFieldDescriptor {
 		public var enumType:Class
 		public function RepeatedFieldDescriptor$TYPE_ENUM(
-				name:String, tag:uint, enumType:Class) {
+				fullName:String, name:String, tag:uint, enumType:Class) {
+			this.fullName = fullName
 			this.name = name
 			this.tag = tag
 			this.enumType = enumType
+		}
+		override public function get type():Class {
+			return Array
 		}
 		override public function get elementType():Class {
 			return int

@@ -14,7 +14,8 @@ package com.netease.protobuf.fieldDescriptors {
 			FieldDescriptor {
 		public var messageType:Class
 		public function FieldDescriptor$TYPE_MESSAGE(
-				name:String, tag:uint, messageType:Class) {
+				fullName:String, name:String, tag:uint, messageType:Class) {
+			this.fullName = fullName
 			this.name = name
 			this.tag = tag
 			this.messageType = messageType

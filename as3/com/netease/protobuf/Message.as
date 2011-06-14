@@ -88,7 +88,8 @@ package com.netease.protobuf {
 				fieldName:String):void {
 			var fieldDescriptor:BaseFieldDescriptor
 			try {
-				fieldDescriptor = BaseFieldDescriptor.fromString(fieldName)
+				fieldDescriptor =
+						BaseFieldDescriptor.getExtensionByName(fieldName)
 			} catch (e:ReferenceError) {
 				writeUnknown(output, fieldName)
 				return
@@ -124,12 +125,15 @@ package com.netease.protobuf {
 		}
 		protected final function readExtensionOrUnknown(extensions:Array,
 				input:IDataInput, tag:uint):void {
-			var fieldDescriptor:BaseFieldDescriptor = extensions[tag >>> 3];
-			if (fieldDescriptor) {
-				fieldDescriptor.read(input, this, tag);
+			var readFunction:Function = extensions[tag];
+			if (readFunction != null) {
+				readFunction(input, this);
 			} else {
 				readUnknown(input, tag)
 			}
+		}
+		public function toString():String {
+			return TextFormat.printToString(this)
 		}
 	}
 }

@@ -119,14 +119,14 @@ package com.netease.protobuf {
 		public static function read$TYPE_INT32(input:IDataInput):int {
 			return int(read$TYPE_UINT32(input))
 		}
-		public static function read$TYPE_FIXED64(input:IDataInput):Int64 {
-			const result:Int64 = new Int64
+		public static function read$TYPE_FIXED64(input:IDataInput):UInt64 {
+			const result:UInt64 = new UInt64
 			result.low = input.readUnsignedInt()
-			result.high = input.readInt()
+			result.high = input.readUnsignedInt()
 			return result
 		}
-		public static function read$TYPE_FIXED32(input:IDataInput):int {
-			return input.readInt()
+		public static function read$TYPE_FIXED32(input:IDataInput):uint {
+			return input.readUnsignedInt()
 		}
 		public static function read$TYPE_BOOL(input:IDataInput):Boolean {
 			return read$TYPE_UINT32(input) != 0
@@ -165,14 +165,12 @@ package com.netease.protobuf {
 			return read$TYPE_INT32(input)
 		}
 		public static function read$TYPE_SFIXED32(input:IDataInput):int {
-			return ZigZag.decode32(input.readInt())
+			return input.readInt()
 		}
 		public static function read$TYPE_SFIXED64(input:IDataInput):Int64 {
-			const result:Int64 = read$TYPE_FIXED64(input)
-			const low:uint = result.low
-			const high:uint = result.high
-			result.low = ZigZag.decode64low(low, high)
-			result.high = ZigZag.decode64high(low, high)
+			const result:Int64 = new Int64
+			result.low = input.readUnsignedInt()
+			result.high = input.readInt()
 			return result
 		}
 		public static function read$TYPE_SINT32(input:IDataInput):int {
@@ -199,20 +197,5 @@ package com.netease.protobuf {
 			}
 			return message
 		}
-		public static function readPackedRepeated(input:IDataInput,
-				readFuntion:Function, value:Array):void {
-			const length:uint = read$TYPE_UINT32(input)
-			if (input.bytesAvailable < length) {
-				throw new IOError("Invalid message length: " + length)
-			}
-			const bytesAfterSlice:uint = input.bytesAvailable - length
-			while (input.bytesAvailable > bytesAfterSlice) {
-				value.push(readFuntion(input))
-			}
-			if (input.bytesAvailable != bytesAfterSlice) {
-				throw new IOError("Invalid packed repeated data")
-			}
-		}
-		
 	}
 }

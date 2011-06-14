@@ -11,14 +11,14 @@ package com.netease.protobuf {
 	import flash.errors.IllegalOperationError;
 	import flash.utils.IDataInput
 	public class FieldDescriptor extends BaseFieldDescriptor {
-		override public final function read(input:IDataInput,
-				message:Message, tag:uint):void {
-			message[this] = readSingleField(input)
+		public final function read(input:IDataInput,
+				message:Message):void {
+			message[name] = readSingleField(input)
 		}
 		override public final function write(output:WritingBuffer,
 				message:Message):void {
 			WriteUtils.write$TYPE_UINT32(output, tag)
-			writeSingleField(output, message[this])
+			writeSingleField(output, message[name])
 		}
 	}
 }

@@ -13,6 +13,7 @@
 	<mx:Script source="../../../../../unittest.proto.as3/initializer.as.inc"/>
 	<mx:Script>
 		<![CDATA[
+			import google.protobuf.FileDescriptorSet;
 			import protobuf_unittest.*
 			import protobuf_unittest.TestAllTypes.*
 			import test.*
@@ -69,7 +70,8 @@
 				const ba:ByteArray = new ByteArray
 				com.netease.protobuf.TextFormat.printToUTFBytes(ba, input)
 				ba.length = 0
-				const output:Message = com.netease.protobuf.TextFormat.readFromUTFBytes(ba)
+				const output:com.netease.protobuf.Message =
+						com.netease.protobuf.TextFormat.readFromUTFBytes(ba)
 				assertSame(input, output)
 			}
 			private static function test(input:Message):void {
@@ -89,10 +91,18 @@
 				output.mergeFrom(ba)
 				assertSame(input, output)
 			}
+			
 		]]>
 	</mx:Script>
 	<mx:applicationComplete>
 		<![CDATA[
+			[Embed(source = "../../../../../unittest.bin",
+					mimeType="application/octet-stream")]
+			const UNITTEST_BIN:Class
+			const descriptors:FileDescriptorSet = new FileDescriptorSet
+			descriptors.mergeFrom(new UNITTEST_BIN)
+			trace(com.netease.protobuf.TextFormat.printToString(descriptors, false))
+			
 			const int64:Int64 = new Int64(0x12345678, 0x91abcde1)
 			assertSame(int64.toString(), "-7950034350635723144")
 			assertSame(Int64.parseInt64(int64.toString()), int64)
@@ -140,8 +150,8 @@
 			test(t1)
 
 			const t2:TestPackedExtensions = new TestPackedExtensions
-			t2[packedDoubleExtension] = [324.234, 1.23424353, 2.12]
-			t2[packedEnumExtension] =[ForeignEnum.FOREIGN_BAZ,
+			t2[PACKED_DOUBLE_EXTENSION] = [324.234, 1.23424353, 2.12]
+			t2[PACKED_ENUM_EXTENSION] =[ForeignEnum.FOREIGN_BAZ,
 					ForeignEnum.FOREIGN_FOO, ForeignEnum.FOREIGN_FOO] 
 			test(t2)
 
@@ -198,7 +208,7 @@
 			testAmf([t10, t11, t10])
 
 			const t12:TestAllExtensions = new TestAllExtensions
-			t12[repeatedStringExtension] = ["aaaa", "bbb"]
+			t12[REPEATED_STRING_EXTENSION] = ["aaaa", "bbb"]
 			test(t12)
 
 			trace("All tests pass.")

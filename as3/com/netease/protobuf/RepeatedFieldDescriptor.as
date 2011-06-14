@@ -16,36 +16,29 @@ package com.netease.protobuf {
 		public function get elementType():Class {
 			throw new IllegalOperationError("Not Implemented!")
 		}
-		override public final function read(input:IDataInput,
-				message:Message, tag:uint):void {
-			const destination:Array = message[this] || (message[this] = [])
-			if ((tag & 7) == WireType.LENGTH_DELIMITED) {
-				switch (elementType) {
-				case String:
-				case ByteArray:
-					destination.push(readSingleField(input))
-					break;
-				default:
-					const length:uint = ReadUtils.read$TYPE_UINT32(input)
-					if (input.bytesAvailable < length) {
-						throw new IOError("Invalid message length: " + length)
-					}
-					const bytesAfterSlice:uint = input.bytesAvailable - length
-					while (input.bytesAvailable > bytesAfterSlice) {
-						destination.push(readSingleField(input))
-					}
-					if (input.bytesAvailable != bytesAfterSlice) {
-						throw new IOError("Invalid packed destination data")
-					}
-					break;
-				}
-			} else {
+		public final function readNonPacked(input:IDataInput,
+				message:Message):void {
+			const destination:Array = message[name] || (message[name] = [])
+			destination.push(readSingleField(input))
+		}
+		public final function readPacked(input:IDataInput,
+				message:Message):void {
+			const destination:Array = message[name] || (message[name] = [])
+			const length:uint = ReadUtils.read$TYPE_UINT32(input)
+			if (input.bytesAvailable < length) {
+				throw new IOError("Invalid message length: " + length)
+			}
+			const bytesAfterSlice:uint = input.bytesAvailable - length
+			while (input.bytesAvailable > bytesAfterSlice) {
 				destination.push(readSingleField(input))
+			}
+			if (input.bytesAvailable != bytesAfterSlice) {
+				throw new IOError("Invalid packed destination data")
 			}
 		}
 		override public final function write(output:WritingBuffer,
 				message:Message):void {
-			const source:Array = message[this]
+			const source:Array = message[name]
 			if ((tag & 7) == WireType.LENGTH_DELIMITED) {
 				WriteUtils.write$TYPE_UINT32(output, tag)
 				const i:uint = output.beginBlock()

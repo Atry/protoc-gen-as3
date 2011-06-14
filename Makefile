@@ -56,7 +56,8 @@ dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_V
 	echo '@java -jar protoc-gen-as3.jar') > $@
 	chmod +x $@
 
-dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*.as) | dist
+dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as) \
+	$(as3/com/netease/protobuf/*.as) | dist
 	$(COMPC) -include-sources+=as3 -output=$@
 
 MANIFEST.MF:
@@ -76,7 +77,7 @@ options.proto.java descriptor.proto.as3 classes plugin.proto.java unittest.proto
 
 ifndef PROTOC
 PROTOC=$(PROTOBUF_DIR)/src/protoc$(EXE)
-PROTODEPS=$(PROTOC)
+PROTOCDEPS=$(PROTOC)
 $(PROTOC): $(PROTOBUF_DIR)/Makefile 
 	cd $(PROTOBUF_DIR) && $(MAKE)
 
@@ -93,24 +94,24 @@ $(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
 endif
 
 clean:
-	$(RM) -r dist
-	$(RM) -r dist.tar.gz
-	$(RM) -r classes
-	$(RM) -r unittest.proto.as3
-	$(RM) -r descriptor.proto.as3
-	$(RM) -r plugin.proto.java
-	$(RM) -r test.swc
-	$(RM) -r test.swf
-	$(RM) -r options.proto.java
+	-$(RM) -r dist
+	-$(RM) -r dist.tar.gz
+	-$(RM) -r classes
+	-$(RM) -r unittest.proto.as3
+	-$(RM) -r descriptor.proto.as3
+	-$(RM) -r plugin.proto.java
+	-$(RM) -r test.swc
+	-$(RM) -r test.swf
+	-$(RM) -r options.proto.java
 
 test: test.swf
 	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<
 
-test.swf: test.swc test/com/netease/protobuf/test/Test.mxml dist/protobuf.swc
+test.swf: test.swc test/com/netease/protobuf/test/Test.mxml dist/protobuf.swc \
+	descriptor.proto.as3/google
 	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \
-	-source-path+=test test/com/netease/protobuf/test/Test.mxml -debug \
-	-static-link-runtime-shared-libraries=true \
-	-keep-as3-metadata+=ProtocolBuffersField
+	-source-path+=descriptor.proto.as3,test test/com/netease/protobuf/test/Test.mxml -debug \
+	-static-link-runtime-shared-libraries=true
 
 test.swc: unittest.proto.as3/protobuf_unittest dist/protobuf.swc
 	$(COMPC) -include-sources+=unittest.proto.as3 \
@@ -137,6 +138,15 @@ descriptor.proto.as3/google: \
 	"$(PROTOBUF_DIR)/src/google/protobuf/descriptor.proto"
 	touch $@
 
+unittest.bin: $(PROTOCDEPS) $(wildcard test/*.proto)
+	$(PROTOC) \
+	--proto_path=test --proto_path=. \
+	"--proto_path=$(PROTOBUF_DIR)/src" \
+	--descriptor_set_out=$@ \
+	$(PROTOBUF_DIR)/src/google/protobuf/unittest.proto \
+	$(PROTOBUF_DIR)/src/google/protobuf/unittest_import.proto \
+	test/*.proto
+
 unittest.proto.as3/protobuf_unittest: \
 	$(PROTOCDEPS) \
 	dist/protoc-gen-as3$(BAT) \
@@ -149,8 +159,7 @@ unittest.proto.as3/protobuf_unittest: \
 	--as3_out=unittest.proto.as3 \
 	$(PROTOBUF_DIR)/src/google/protobuf/unittest.proto \
 	$(PROTOBUF_DIR)/src/google/protobuf/unittest_import.proto \
-	test/issue12.proto \
-	test/test.proto 
+	test/*.proto
 	touch $@
 
 .PHONY: plugin all clean test

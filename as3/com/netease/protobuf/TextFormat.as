@@ -312,20 +312,20 @@ package com.netease.protobuf {
 					case 0x5c: /* \ */
 						const b0:int = source.read()
 						switch (b0) {
-						case 0x61 /* \a */: result.writeByte(7); break;
-						case 0x62 /* \b */: result.writeByte(8); break;
-						case 0x66 /* \f */: result.writeByte(12); break;
-						case 0x6e /* \n */: result.writeByte(10); break;
-						case 0x72 /* \r */: result.writeByte(13); break;
-						case 0x74 /* \t */: result.writeByte(9); break;
-						case 0x76 /* \v */: result.writeByte(11); break;
+						case 0x61 /* \a */: result.writeByte(7); continue;
+						case 0x62 /* \b */: result.writeByte(8); continue;
+						case 0x66 /* \f */: result.writeByte(12); continue;
+						case 0x6e /* \n */: result.writeByte(10); continue;
+						case 0x72 /* \r */: result.writeByte(13); continue;
+						case 0x74 /* \t */: result.writeByte(9); continue;
+						case 0x76 /* \v */: result.writeByte(11); continue;
 						case 0x78 /* \xXX */:
 							const x0:int = source.read()
 							const x1:int = source.read()
 								result.writeByte(
 										toHexDigit(x0) * 0x10 +
 										toHexDigit(x1))
-							break
+							continue
 						default:
 							if (b0 >= 0x30 && b0 <= 0x39) {
 								const b1:int = source.read()

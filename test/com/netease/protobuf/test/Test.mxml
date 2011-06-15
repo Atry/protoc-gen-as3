@@ -102,13 +102,6 @@
 	</mx:Script>
 	<mx:applicationComplete>
 		<![CDATA[
-			[Embed(source = "../../../../../unittest.bin",
-					mimeType="application/octet-stream")]
-			const UNITTEST_BIN:Class
-			const descriptors:FileDescriptorSet = new FileDescriptorSet
-			descriptors.mergeFrom(new UNITTEST_BIN)
-			test(descriptors)
-			testText(descriptors)
 			
 			const int64:Int64 = new Int64(0x12345678, 0x91abcde1)
 			assertSame(int64.toString(), "-7950034350635723144")
@@ -150,6 +143,11 @@
 			assertSame(uint64_5.toString(), "0")
 			assertSame(UInt64.parseUInt64(uint64_5.toString()), uint64_5)
 
+			const t0:TestAllTypes = new TestAllTypes
+			t0[1500938] = stringToByteArray('\n')
+			test(t0)
+			testText(t0)
+			
 			const t1:TestPackedTypes = new TestPackedTypes
 			t1.packedDouble = [1.23424353, 2.12]
 			t1.packedEnum = [ForeignEnum.FOREIGN_BAZ, ForeignEnum.FOREIGN_FOO,
@@ -226,8 +224,16 @@
 			const t12:TestAllExtensions = new TestAllExtensions
 			t12[REPEATED_STRING_EXTENSION] = ["aaaa", "bbb"]
 			test(t12)
-			testText(t12)
+			testText(t12);
 
+			[Embed(source = "../../../../../unittest.bin",
+					mimeType="application/octet-stream")]
+			const UNITTEST_BIN:Class
+			const descriptors:FileDescriptorSet = new FileDescriptorSet
+			descriptors.mergeFrom(new UNITTEST_BIN)
+			test(descriptors)
+			testText(descriptors)
+			
 			trace("All tests pass.")
 			fscommand("quit")
 		]]>

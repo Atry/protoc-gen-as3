@@ -787,50 +787,113 @@ public final class Main {
 		content.append("\t\t}\n\n");
 		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
 		content.append("\t\toverride public final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
-		content.append("\t\t\twhile (input.bytesAvailable > bytesAfterSlice) {\n");
-		content.append("\t\t\t\tvar tag:uint = com.netease.protobuf.ReadUtils.read$TYPE_UINT32(input);\n");
-		content.append("\t\t\t\tswitch (tag) {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
 				continue;
 			}
 			switch (fdp.getLabel()) {
-			case LABEL_REQUIRED:
 			case LABEL_OPTIONAL:
-				content.append("\t\t\t\tcase ");
-				content.append(Integer.toString((fdp.getNumber() << 3) | getWireType(fdp.getType())));
-				content.append(":\n");
-				content.append("\t\t\t\t\t");
-				content.append(fdp.getName().toUpperCase());
-				content.append(".read(input, this);\n");
-				content.append("\t\t\t\t\tbreak;\n");
+			case LABEL_REQUIRED:
+				content.append("\t\t\tvar ");
+				content.append(fdp.getName());
+				content.append("$count:uint = 0;\n");
+				break;
+			}
+		}
+		content.append("\t\t\twhile (input.bytesAvailable > bytesAfterSlice) {\n");
+		content.append("\t\t\t\tvar tag:uint = com.netease.protobuf.ReadUtils.read$TYPE_UINT32(input);\n");
+		content.append("\t\t\t\tswitch (tag >> 3) {\n");
+		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
+			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+				continue;
+			}
+			content.append("\t\t\t\tcase ");
+			content.append(Integer.toString(fdp.getNumber()));
+			content.append(":\n");
+			switch (fdp.getLabel()) {
+			case LABEL_OPTIONAL:
+			case LABEL_REQUIRED:
+				content.append("\t\t\t\t\tif (");
+				content.append(fdp.getName());
+				content.append("$count != 0) {\n");
+				content.append("\t\t\t\t\t\tthrow new flash.errors.IOError('Bad data format: ");
+				content.append(scope.proto.getName());
+				content.append('.');
+				appendLowerCamelCase(content, fdp.getName());
+				content.append(" cannot be set twice.');\n");
+				content.append("\t\t\t\t\t}\n");
+				content.append("\t\t\t\t\t++");
+				content.append(fdp.getName());
+				content.append("$count;\n");
+				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+					content.append("\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(" = new ");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append("();\n");
+					content.append("\t\t\t\t\tcom.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(");\n");
+				} else {
+					content.append("\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(" = com.netease.protobuf.ReadUtils.read$");
+					content.append(fdp.getType().name());
+					content.append("(input);\n");
+				}
 				break;
 			case LABEL_REPEATED:
-				content.append("\t\t\t\tcase ");
-				content.append(Integer.toString((fdp.getNumber() << 3) | getWireType(fdp.getType())));
-				content.append(":\n");
-				content.append("\t\t\t\t\t");
-				content.append(fdp.getName().toUpperCase());
-				content.append(".readNonPacked(input, this);\n");
-				content.append("\t\t\t\t\tbreak;\n");
 				switch (fdp.getType()) {
-				case TYPE_MESSAGE:
-				case TYPE_BYTES:
-				case TYPE_STRING:
-					break;
-				default:
-					content.append("\t\t\t\tcase ");
-					content.append(Integer.toString((fdp.getNumber() << 3) | LENGTH_DELIMITED));
-					content.append(":\n");
+					case TYPE_DOUBLE:
+					case TYPE_FLOAT:
+					case TYPE_BOOL:
+					case TYPE_INT32:
+					case TYPE_FIXED32:
+					case TYPE_UINT32:
+					case TYPE_SFIXED32:
+					case TYPE_SINT32:
+					case TYPE_INT64:
+					case TYPE_FIXED64:
+					case TYPE_UINT64:
+					case TYPE_SFIXED64:
+					case TYPE_SINT64:
+					case TYPE_ENUM:
+						content.append("\t\t\t\t\tif ((tag & 7) == com.netease.protobuf.WireType.LENGTH_DELIMITED) {\n");
+						content.append("\t\t\t\t\t\tcom.netease.protobuf.ReadUtils.readPackedRepeated(input, com.netease.protobuf.ReadUtils.read$");
+						content.append(fdp.getType().name());
+						content.append(", ");
+						appendLowerCamelCase(content, fdp.getName());
+						content.append(");\n");
+						content.append("\t\t\t\t\t\tbreak;\n");
+						content.append("\t\t\t\t\t}\n");
+				}
+				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
+					content.append("\t\t\t\t\tconst ");
+					content.append(fdp.getName());
+					content.append("$element:");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append(" = new ");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append("();\n\t\t\t\t\t");
+					content.append("com.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
+					content.append(fdp.getName());
+					content.append("$element);\n\t\t\t\t\t");
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(".push(");
+					content.append(fdp.getName());
+					content.append("$element);\n");
+				} else {
 					content.append("\t\t\t\t\t");
-					content.append(fdp.getName().toUpperCase());
-					content.append(".readPacked(input, this);\n");
-					content.append("\t\t\t\t\tbreak;\n");
-					break;
+					appendLowerCamelCase(content, fdp.getName());
+					content.append(".push(com.netease.protobuf.ReadUtils.read$");
+					content.append(fdp.getType().name());
+					content.append("(input));\n");
 				}
 				break;
 			}
+			content.append("\t\t\t\t\tbreak;\n");
 		}
 		content.append("\t\t\t\tdefault:\n");
 		if (scope.proto.getExtensionRangeCount() > 0) {

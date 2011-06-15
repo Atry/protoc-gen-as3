@@ -197,5 +197,19 @@ package com.netease.protobuf {
 			}
 			return message
 		}
+		public static function readPackedRepeated(input:IDataInput,
+				readFuntion:Function, value:Array):void {
+			const length:uint = read$TYPE_UINT32(input)
+			if (input.bytesAvailable < length) {
+				throw new IOError("Invalid message length: " + length)
+			}
+			const bytesAfterSlice:uint = input.bytesAvailable - length
+			while (input.bytesAvailable > bytesAfterSlice) {
+				value.push(readFuntion(input))
+			}
+			if (input.bytesAvailable != bytesAfterSlice) {
+				throw new IOError("Invalid packed repeated data")
+			}
+		}
 	}
 }

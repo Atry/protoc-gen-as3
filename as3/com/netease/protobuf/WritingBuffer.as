@@ -17,49 +17,44 @@ package com.netease.protobuf {
 		public function WritingBuffer() {
 			endian = Endian.LITTLE_ENDIAN
 		}
-		private const slices:ByteArray = new ByteArray
+		/*
+			// for Flash Player 9
+			[ArrayElementType("uint")]
+			private const slices:Array = []
+		/*/
+			// for Flash Player 10
+			private const slices:Vector.<uint> = new Vector.<uint>
+		//*/
 		public function beginBlock():uint {
-			slices.writeUnsignedInt(position)
+			slices.push(position)
 			const beginSliceIndex:uint = slices.length
-			if (beginSliceIndex % 8 != 4) {
-				throw new IllegalOperationError
-			}
-			slices.writeDouble(0)
-			slices.writeUnsignedInt(position)
+			slices.length += 2
+			slices.push(position)
 			return beginSliceIndex
 		}
 		public function endBlock(beginSliceIndex:uint):void {
-			if (slices.length % 8 != 0) {
-				throw new IllegalOperationError
-			}
-			slices.writeUnsignedInt(position)
-			slices.position = beginSliceIndex + 8
-			const beginPosition:uint = slices.readUnsignedInt()
-			slices.position = beginSliceIndex
-			slices.writeUnsignedInt(position)
+			slices.push(position)
+			const beginPosition:uint = slices[beginSliceIndex + 2]
+			slices[beginSliceIndex] = position
 			WriteUtils.write$TYPE_UINT32(this, position - beginPosition)
-			slices.writeUnsignedInt(position)
-			slices.position = slices.length
-			slices.writeUnsignedInt(position)
+			slices[beginSliceIndex + 1] = position
+			slices.push(position)
 		}
 		public function toNormal(output:IDataOutput):void {
-			if (slices.length % 8 != 0) {
-				throw new IllegalOperationError
-			}
-			slices.position = 0
+			var i:uint = 0
 			var begin:uint = 0
-			while (slices.bytesAvailable > 0) {
-				var end:uint = slices.readUnsignedInt()
+			while (i < slices.length) {
+				var end:uint = slices[i]
+				++i
 				if (end > begin) {
 					output.writeBytes(this, begin, end - begin)
 				} else if (end < begin) {
 					throw new IllegalOperationError
 				}
-				begin = slices.readUnsignedInt()
+				begin = slices[i]
+				++i
 			}
-			if (begin < length) {
-				output.writeBytes(this, begin)
-			}
+			output.writeBytes(this, begin)
 		}
 	}
 }

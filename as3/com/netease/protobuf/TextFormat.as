@@ -25,7 +25,9 @@ package com.netease.protobuf {
 		private static function printEnum(output:IDataOutput,
 				value:int, enumType:Class):void {
 			const enumTypeDescription:XML = describeType(enumType)
-			for each(var name:String in enumTypeDescription.constant.@name) {
+			// Not enumTypeDescription.*.@name,
+			// because haXe will replace constant to variable, WTF!
+			for each(var name:String in enumTypeDescription.*.@name) {
 				if (enumType[name] === value) {
 					output.writeUTFBytes(name)
 					return
@@ -116,9 +118,11 @@ package com.netease.protobuf {
 				newLine:uint,
 				indentChars:String = "",
 				currentIndent:String = ""):void {
-						const type:Class = Object(message).constructor
+			const type:Class = Object(message).constructor
 			const description:XML = describeType(type)
-			for each (var fieldDescriptorName:String in description.constant.
+			// Not description.constant,
+			// because haXe will replace constant to variable, WTF!
+			for each (var fieldDescriptorName:String in description.*.
 					(0 == String(@type).search(
 					/^com.netease.protobuf.fieldDescriptors::(Repeated)?FieldDescriptor\$/)
 					).@name) {
@@ -244,7 +248,7 @@ package com.netease.protobuf {
 				singleLineMode:Boolean = true):void {
 			printMessageFields(output, message,
 					(singleLineMode ? ' ' : '\n').charCodeAt(),
-					singleLineMode ? "" : "  ")
+					singleLineMode ? "" : "	")
 		}
 		
 		public static function printToString(message:Message,

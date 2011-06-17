@@ -1,0 +1,2 @@
+test.AAA.$listener : Dynamic -> Void;
+test.BBB.$listener : Dynamic -> Void;

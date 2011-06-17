@@ -13,3 +13,4 @@ FDB=fdb$(EXE)
 MVN=mvn
 JAVAC=javac
 JAR=jar
+HAXE=haxe

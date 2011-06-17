@@ -106,7 +106,24 @@ clean:
 test: test.swf
 	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<
 
-test.swf: test.swc test/com/netease/protobuf/test/Test.mxml dist/protobuf.swc \
+haxe-test: haxe-test.swf
+	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<
+
+haxe-test.swc: test/com/netease/protobuf/test/TestAll.as \
+	dist/protobuf.swc test.swc descriptor.proto.as3/google unittest.bin
+	$(RM) -r $@
+	$(COMPC) -directory -include-sources+=$< \
+	-source-path+=descriptor.proto.as3 \
+	-library-path+=test.swc,dist/protobuf.swc \
+	-output=$@
+
+haxe-test.swf: haxe-test.swc test/com/netease/protobuf/test/HaxeTest.hx test.swf
+	$(HAXE) -cp test -main com.netease.protobuf.test.HaxeTest \
+	-debug -D fdb --macro 'patchTypes("haxe-test.patch")' \
+	-swf $@ -swf-version 10 -swf-lib $</library.swf
+
+test.swf: test.swc test/com/netease/protobuf/test/TestAll.as \
+	test/com/netease/protobuf/test/Test.mxml dist/protobuf.swc \
 	descriptor.proto.as3/google unittest.bin
 	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \
 	-source-path+=descriptor.proto.as3,test test/com/netease/protobuf/test/Test.mxml -debug \

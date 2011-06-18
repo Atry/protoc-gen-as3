@@ -1,0 +1,4 @@
+See http://code.google.com/p/protoc-gen-as3/wiki/FAQ .
+
+Usage:
+protoc --plugin=protoc-gen-as3="path/to/protoc-gen-as3[.bat]" --as3_out=output-path your.proto

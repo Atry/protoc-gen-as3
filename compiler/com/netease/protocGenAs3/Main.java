@@ -414,8 +414,9 @@ public final class Main {
 		if (Arrays.binarySearch(ACTIONSCRIPT_KEYWORDS, s) >= 0) {
 			sb.append("__");
 		}
+		sb.append(Character.toLowerCase(s.charAt(0)));
 		boolean upper = false;
-		for (int i = 0; i < s.length(); i++) {
+		for (int i = 1; i < s.length(); i++) {
 			char c = s.charAt(i);
 			if (upper) {
 				if (Character.isLowerCase(c)) {

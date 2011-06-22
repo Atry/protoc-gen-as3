@@ -71,11 +71,11 @@ package com.netease.protobuf.test {
 		}
 		private static function testText(input:Message):void {
 			const text:String =
-					com.netease.protobuf.TextFormat.printToString(input)
+					com.netease.protobuf.TextFormat.printToString(input, false)
 			const output:Message =
 					new (getDefinitionByName(getQualifiedClassName(input)))
 			com.netease.protobuf.TextFormat.mergeFromString(text, output)
-			trace("input:", input, "output:", output)
+			trace("input:", input, "output:", output, "text:", text)
 			assertSame(input, output)
 		}
 		private static function test(input:Message):void {

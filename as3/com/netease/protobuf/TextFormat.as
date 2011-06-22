@@ -74,25 +74,31 @@ package com.netease.protobuf {
 			printBytes(output, buffer)
 		}
 		private static function printUnknownField(output:IDataOutput, tag:uint,
-				value:Object, newLine:uint, currentIndent:String):void {
+				value:Object, printSetting:PrintSetting, currentIndent:String):void {
 			const unknownArray:Array = value as Array
 			if (unknownArray) {
-				for (var k:int = 0; k < unknownArray.length; k++) {
+				if (unknownArray.length > 0) {
 					printSingleUnknownField(output, tag, unknownArray[k],
-							newLine, currentIndent)
+							printSetting, currentIndent)
+					for (var k:int = 1; k < unknownArray.length; k++) {
+						output.writeByte(printSetting.newLine)
+						printSingleUnknownField(output, tag, unknownArray[k],
+								printSetting, currentIndent)
+					}
 				}
 			} else {
-				printSingleUnknownField(output, tag, value, newLine,
+				printSingleUnknownField(
+						output, tag, value, printSetting,
 						currentIndent)
 			}
 		}
 					
 		private static function printSingleUnknownField(output:IDataOutput,
-				tag:uint, value:Object, newLine:uint,
+				tag:uint, value:Object, printSetting:PrintSetting,
 				currentIndent:String):void {
 			output.writeUTFBytes(currentIndent)
 			output.writeUTFBytes(String(tag >>> 3))
-			output.writeUTFBytes(": ")
+			output.writeUTFBytes(printSetting.simpleFieldSeperator)
 			switch (tag & 7) {
 			case WireType.VARINT:
 				output.writeUTFBytes(UInt64(value).toString())
@@ -111,13 +117,12 @@ package com.netease.protobuf {
 				printBytes(output, ByteArray(value))
 				break
 			}
-			output.writeByte(newLine)
 		}
 		private static function printMessageFields(output:IDataOutput,
 				message:Message,
-				newLine:uint,
-				indentChars:String = "",
+				printSetting:PrintSetting,
 				currentIndent:String = ""):void {
+			var isFirst:Boolean = true
 			const type:Class = Object(message).constructor
 			const description:XML = describeType(type)
 			// Not description.constant,
@@ -139,10 +144,15 @@ package com.netease.protobuf {
 					const fieldValues:Array = message[fieldDescriptor.name]
 					if (fieldValues) {
 						for (var i:int = 0; i < fieldValues.length; i++) {
+							if (isFirst) {
+								isFirst = false
+							} else {
+								output.writeByte(printSetting.newLine)
+							}
 							output.writeUTFBytes(currentIndent)
 							output.writeUTFBytes(shortName)
 							printValue(output, fieldDescriptor, fieldValues[i],
-									newLine, indentChars, currentIndent)
+									printSetting, currentIndent)
 						}
 					}
 				} else {
@@ -158,10 +168,15 @@ package com.netease.protobuf {
 					} catch (e:ReferenceError) {
 						// required
 					}
+					if (isFirst) {
+						isFirst = false
+					} else {
+						output.writeByte(printSetting.newLine)
+					}
 					output.writeUTFBytes(currentIndent)
 					output.writeUTFBytes(shortName)
 					printValue(output, fieldDescriptor,
-							message[fieldDescriptor.name], newLine, indentChars,
+							message[fieldDescriptor.name], printSetting,
 							currentIndent)
 				}
 			}
@@ -172,8 +187,13 @@ package com.netease.protobuf {
 				} catch (e:ReferenceError) {
 					if (key.search(/^[0-9]+$/) == 0) {
 						// unknown field
+						if (isFirst) {
+							isFirst = false
+						} else {
+							output.writeByte(printSetting.newLine)
+						}
 						printUnknownField(output, uint(key), message[key],
-								newLine, currentIndent)
+								printSetting, currentIndent)
 					} else {
 						throw new IOError("Bad unknown field " + key)
 					}
@@ -182,21 +202,31 @@ package com.netease.protobuf {
 				if (extension.type == Array) {
 					const extensionFieldValues:Array = message[key]
 					for (var j:int = 0; j < extensionFieldValues.length; j++) {
+						if (isFirst) {
+							isFirst = false
+						} else {
+							output.writeByte(printSetting.newLine)
+						}
 						output.writeUTFBytes(currentIndent)
 						output.writeUTFBytes("[")
 						output.writeUTFBytes(extension.fullName)
 						output.writeUTFBytes("]")
 						printValue(output, extension,
-								extensionFieldValues[j], newLine, indentChars,
+								extensionFieldValues[j], printSetting,
 								currentIndent)
 					}
 				} else {
+					if (isFirst) {
+						isFirst = false
+					} else {
+						output.writeByte(printSetting.newLine)
+					}
 					output.writeUTFBytes(currentIndent)
 					output.writeUTFBytes("[")
 					output.writeUTFBytes(extension.fullName)
 					output.writeUTFBytes("]")
-					printValue(output, extension, message[key], newLine,
-							indentChars, currentIndent)
+					printValue(output, extension, message[key], printSetting,
+							currentIndent)
 				}
 			}
 		}
@@ -204,19 +234,26 @@ package com.netease.protobuf {
 		private static function printValue(output:IDataOutput,
 				fieldDescriptor:BaseFieldDescriptor,
 				value:Object,
-				newLine:uint,
-				indentChars:String = "",
+				printSetting:PrintSetting,
 				currentIndent:String = ""):void {
 			const message:Message = value as Message
 			if (message) {
-				output.writeUTFBytes(" {")
-				output.writeByte(newLine)
-				printMessageFields(output, message, newLine, indentChars,
-						indentChars + currentIndent)
-				output.writeUTFBytes(currentIndent)
-				output.writeUTFBytes("}")
+				if (printSetting == SINGLELINE_MODE) {
+					output.writeUTFBytes("{")
+				} else {
+					output.writeUTFBytes(" {\n")
+				}
+				printMessageFields(output, message, printSetting,
+						printSetting.indentChars + currentIndent)
+				if (printSetting == SINGLELINE_MODE) {
+					output.writeUTFBytes("}")
+				} else {
+					output.writeByte(printSetting.newLine)
+					output.writeUTFBytes(currentIndent)
+					output.writeUTFBytes("}")
+				}
 			} else {
-				output.writeUTFBytes(": ")
+				output.writeUTFBytes(printSetting.simpleFieldSeperator)
 				const stringValue:String = value as String
 				if (stringValue) {
 					printString(output, stringValue)
@@ -240,15 +277,13 @@ package com.netease.protobuf {
 					}
 				}
 			}
-			output.writeByte(newLine)
 		}	
 		
 		public static function printToUTFBytes(output:IDataOutput,
 				message:Message,
 				singleLineMode:Boolean = true):void {
 			printMessageFields(output, message,
-					(singleLineMode ? ' ' : '\n').charCodeAt(),
-					singleLineMode ? "" : "	")
+				singleLineMode ? SINGLELINE_MODE : MULTILINE_MODE)
 		}
 		
 		public static function printToString(message:Message,
@@ -652,3 +687,19 @@ class WrappedSource implements ISource {
 		}
 	}
 }
+
+class PrintSetting {
+	public var newLine:uint
+	public var indentChars:String
+	public var simpleFieldSeperator:String
+}
+
+const SINGLELINE_MODE:PrintSetting = new PrintSetting
+SINGLELINE_MODE.newLine = ' '.charCodeAt()
+SINGLELINE_MODE.indentChars = ""
+SINGLELINE_MODE.simpleFieldSeperator = ":"
+
+const MULTILINE_MODE:PrintSetting = new PrintSetting
+MULTILINE_MODE.newLine = '\n'.charCodeAt()
+MULTILINE_MODE.indentChars = "  "
+MULTILINE_MODE.simpleFieldSeperator = ": "

@@ -871,20 +871,13 @@ public final class Main {
 						content.append("\t\t\t\t\t}\n");
 				}
 				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
-					content.append("\t\t\t\t\tconst ");
-					content.append(fdp.getName());
-					content.append("$element:");
-					content.append(getActionScript3Type(scope, fdp));
-					content.append(" = new ");
-					content.append(getActionScript3Type(scope, fdp));
-					content.append("();\n\t\t\t\t\t");
-					content.append("com.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
-					content.append(fdp.getName());
-					content.append("$element);\n\t\t\t\t\t");
+					content.append("\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(".push(");
-					content.append(fdp.getName());
-					content.append("$element);\n");
+					content.append("com.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
+					content.append("new ");
+					content.append(getActionScript3Type(scope, fdp));
+					content.append("()));\n");
 				} else {
 					content.append("\t\t\t\t\t");
 					appendLowerCamelCase(content, fdp.getName());

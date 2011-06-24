@@ -545,7 +545,6 @@ public final class Main {
 			content.append(" = ");
 			appendFieldDescriptor(content, scope, efdp);
 			content.append(";\n\n");
-			content.append("\t\t");
 			if (efdp.hasDefaultValue()) {
 				content.append("\t\t");
 				content.append(extendee);

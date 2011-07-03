@@ -12,6 +12,7 @@ package com.netease.protobuf {
 	import flash.errors.IllegalOperationError;
 	import flash.errors.IOError;
 	import flash.utils.describeType
+	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput
 	import flash.utils.IDataOutput
@@ -22,19 +23,29 @@ package com.netease.protobuf {
 			output.writeUTFBytes("00000000".substring(0, 8 - hexString.length))
 			output.writeUTFBytes(hexString)
 		}
+		private static const allEnumValues:Dictionary = new Dictionary
 		private static function printEnum(output:IDataOutput,
 				value:int, enumType:Class):void {
-			const enumTypeDescription:XML = describeType(enumType)
-			// Not enumTypeDescription.*.@name,
-			// because haXe will replace constant to variable, WTF!
-			for each(var name:String in enumTypeDescription.*.@name) {
-				if (enumType[name] === value) {
-					output.writeUTFBytes(name)
-					return
+			var enumValues:Array
+			if (enumType in allEnumValues) {
+				enumValues = allEnumValues[enumType]
+			} else {
+				const enumTypeDescription:XML = describeType(enumType)
+				// Not enumTypeDescription.*.@name,
+				// because haXe will replace all constants to variables, WTF!
+				const xmlNames:XMLList = enumTypeDescription.*.@name
+				enumValues = []
+				for each(var name:String in xmlNames) {
+					enumValues[enumType[name]] = name
 				}
+				allEnumValues[enumType] = enumValues
 			}
-			throw new IOError(value + " is invalid for " +
-					enumTypeDescription.@name)
+			if (value in enumValues) {
+				output.writeUTFBytes(enumValues[value])
+			} else {
+				throw new IOError(value + " is invalid for " +
+						enumTypeDescription.@name)
+			}
 		}
 		private static function printBytes(output:IDataOutput,
 				value:ByteArray):void {
@@ -118,26 +129,33 @@ package com.netease.protobuf {
 				break
 			}
 		}
+		private static const allMessageFields:Dictionary = new Dictionary
 		private static function printMessageFields(output:IDataOutput,
 				message:Message,
 				printSetting:PrintSetting,
 				currentIndent:String = ""):void {
 			var isFirst:Boolean = true
 			const type:Class = Object(message).constructor
-			const description:XML = describeType(type)
+			var messageFields:XMLList
+			if (type in allMessageFields) {
+				messageFields = allMessageFields[type]
+			} else {
+				// TODO
+				const description:XML = describeType(type)
+				messageFields = description.*.
+					(0 == String(@type).search(
+						/^com.netease.protobuf.fieldDescriptors::(Repeated)?FieldDescriptor\$/) &&
+						BaseFieldDescriptor(type[@name]).name.
+								search(/^\./) == -1// Not extension
+					).@name
+				allMessageFields[type] = messageFields
+			}
+			
 			// Not description.constant,
 			// because haXe will replace constant to variable, WTF!
-			for each (var fieldDescriptorName:String in description.*.
-					(0 == String(@type).search(
-					/^com.netease.protobuf.fieldDescriptors::(Repeated)?FieldDescriptor\$/)
-					).@name) {
+			for each (var fieldDescriptorName:String in messageFields) {
 				const fieldDescriptor:BaseFieldDescriptor =
 						type[fieldDescriptorName]
-				if (fieldDescriptor.name.search(/\/\./) != -1) {
-					// extend on other message
-					continue
-				}
-		
 				const shortName:String = fieldDescriptor.fullName.substring(
 						fieldDescriptor.fullName.lastIndexOf('.') + 1)
 				if (fieldDescriptor.type == Array) {

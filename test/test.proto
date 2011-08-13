@@ -20,6 +20,9 @@ message BBB {
 	optional AAA aaa = 1;
 	optional int32 i = 2;
 }
+message CCC {
+	required string ccc = 1;
+}
 service Foo {
 	rpc Search (BBB) returns (AAA);
 }

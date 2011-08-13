@@ -57,7 +57,8 @@ dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_V
 	chmod +x $@
 
 dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) | dist
-	$(COMPC) -include-sources+=as3 -output=$@
+	$(COMPC) -target-player=10 \
+	-include-sources+=as3 -output=$@
 
 MANIFEST.MF:
 	echo Class-Path: protobuf-java-$(PROTOBUF_VERSION).jar > $@
@@ -112,7 +113,8 @@ haxe-test: haxe-test.swf
 haxe-test.swc: test/com/netease/protobuf/test/TestAll.as \
 	dist/protobuf.swc test.swc descriptor.proto.as3/google unittest.bin
 	$(RM) -r $@
-	$(COMPC) -directory -include-sources+=$< \
+	$(COMPC) -target-player=10 \
+	-directory -include-sources+=$< \
 	-source-path+=descriptor.proto.as3 \
 	-library-path+=test.swc,dist/protobuf.swc \
 	-output=$@
@@ -125,12 +127,14 @@ haxe-test.swf: haxe-test.swc test/com/netease/protobuf/test/HaxeTest.hx test.swf
 test.swf: test.swc test/com/netease/protobuf/test/TestAll.as \
 	test/com/netease/protobuf/test/Test.mxml dist/protobuf.swc \
 	descriptor.proto.as3/google unittest.bin
-	$(MXMLC) -library-path+=test.swc,dist/protobuf.swc -output=$@ \
+	$(MXMLC) -target-player=10 \
+	-library-path+=test.swc,dist/protobuf.swc -output=$@ \
 	-source-path+=descriptor.proto.as3,test test/com/netease/protobuf/test/Test.mxml -debug \
 	-static-link-runtime-shared-libraries=true
 
 test.swc: unittest.proto.as3/protobuf_unittest dist/protobuf.swc
-	$(COMPC) -include-sources+=unittest.proto.as3 \
+	$(COMPC) -target-player=10 \
+	-include-sources+=unittest.proto.as3 \
 	-external-library-path+=dist/protobuf.swc -output=$@
 
 options.proto.java/com: \

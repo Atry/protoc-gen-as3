@@ -232,6 +232,10 @@ package com.netease.protobuf.test {
 			descriptors.mergeFrom(new UNITTEST_BIN)
 			test(descriptors)
 			testText(descriptors)
+
+			const t13:CCC = new CCC
+			t13.ccc = "我爱北京天安门"
+			testText(t13)
 			
 			trace("All tests pass.")
 			fscommand("quit")

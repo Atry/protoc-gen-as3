@@ -180,7 +180,8 @@ package com.netease.protobuf {
 					m[2] = m[2].toUpperCase()
 					const hasField:String = m.join("")
 					try {
-						if (!message[hasField]) {
+						// optional and does not have that field.
+						if (false === message[hasField]) {
 							continue
 						}
 					} catch (e:ReferenceError) {

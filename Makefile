@@ -64,6 +64,8 @@ doc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) |
 	$(ASDOC) -target-player=10 \
 	-doc-sources+=as3 -output=$@
 
+doc.tar.gz: doc
+	tar -acf $@ $<
 
 MANIFEST.MF:
 	echo Class-Path: protobuf-java-$(PROTOBUF_VERSION).jar > $@
@@ -99,14 +101,16 @@ $(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
 endif
 
 clean:
+	-$(RM) -r doc
+	-$(RM) doc.tar.gz
 	-$(RM) -r dist
-	-$(RM) -r dist.tar.gz
+	-$(RM) dist.tar.gz
 	-$(RM) -r classes
 	-$(RM) -r unittest.proto.as3
 	-$(RM) -r descriptor.proto.as3
 	-$(RM) -r plugin.proto.java
-	-$(RM) -r test.swc
-	-$(RM) -r test.swf
+	-$(RM) test.swc
+	-$(RM) test.swf
 	-$(RM) -r options.proto.java
 
 test: test.swf

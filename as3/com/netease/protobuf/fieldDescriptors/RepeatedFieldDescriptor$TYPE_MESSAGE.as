@@ -10,6 +10,9 @@
 package com.netease.protobuf.fieldDescriptors {
 	import com.netease.protobuf.*
 	import flash.utils.*
+	/**
+	 * @private
+	 */
 	public final class RepeatedFieldDescriptor$TYPE_MESSAGE extends
 			RepeatedFieldDescriptor {
 		public var messageType:Class

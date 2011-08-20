@@ -8,9 +8,13 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	import flash.utils.*;
+	import flash.utils.*
+	/**
+	 * @private
+	 */
 	public final class WriteUtils {
-		private static function writeVarint64(output:WritingBuffer, low:uint, high:uint):void {
+		private static function writeVarint64(output:WritingBuffer,
+			low:uint, high:uint):void {
 			if (high == 0) {
 				write$TYPE_UINT32(output, low)
 			} else {

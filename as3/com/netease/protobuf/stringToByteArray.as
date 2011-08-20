@@ -9,6 +9,9 @@
 
 package com.netease.protobuf {
 	import flash.utils.ByteArray
+	/**
+	 * @private
+	 */
 	public function stringToByteArray(s:String):ByteArray {
 		const ba:ByteArray = new ByteArray
 		ba.length = s.length

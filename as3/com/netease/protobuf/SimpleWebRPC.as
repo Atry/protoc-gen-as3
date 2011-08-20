@@ -11,6 +11,9 @@ package com.netease.protobuf {
 	import flash.net.*;
 	import flash.utils.*;
 	import flash.events.*;
+	/**
+	 * A simple sample of RPC implementation.
+	 */
 	public final class SimpleWebRPC {
 		private var urlPrefix:String
 		public function SimpleWebRPC(urlPrefix:String) {

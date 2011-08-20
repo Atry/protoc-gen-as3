@@ -10,6 +10,9 @@
 package com.netease.protobuf {
 	import flash.errors.IllegalOperationError;
 	import flash.utils.IDataInput
+	/**
+	 * @private
+	 */
 	public class FieldDescriptor extends BaseFieldDescriptor {
 		public final function read(input:IDataInput,
 				message:Message):void {

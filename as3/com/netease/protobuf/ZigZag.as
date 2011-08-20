@@ -8,6 +8,9 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
+	/**
+	 * @private
+	 */
 	public final class ZigZag {
 		public static function encode32(n:int):int {
 			return (n << 1) ^ (n >> 31)

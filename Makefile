@@ -60,6 +60,11 @@ dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/pr
 	$(COMPC) -target-player=10 \
 	-include-sources+=as3 -output=$@
 
+doc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) | dist
+	$(ASDOC) -target-player=10 \
+	-doc-sources+=as3 -output=$@
+
+
 MANIFEST.MF:
 	echo Class-Path: protobuf-java-$(PROTOBUF_VERSION).jar > $@
 
@@ -182,4 +187,4 @@ unittest.proto.as3/protobuf_unittest: \
 	test/*.proto
 	touch $@
 
-.PHONY: plugin all clean test
+.PHONY: plugin all clean test doc

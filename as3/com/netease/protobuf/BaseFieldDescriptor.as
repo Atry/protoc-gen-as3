@@ -10,6 +10,9 @@ package com.netease.protobuf {
 	import flash.errors.IllegalOperationError
 	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput
+	/**
+	 * @private
+	 */
 	public class BaseFieldDescriptor {
 		public var fullName:String
 		public var name:String

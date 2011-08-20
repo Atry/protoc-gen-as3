@@ -10,6 +10,9 @@
 package com.netease.protobuf.fieldDescriptors {
 	import com.netease.protobuf.*
 	import flash.utils.*
+	/**
+	 * @private
+	 */
 	public final class FieldDescriptor$TYPE_MESSAGE extends
 			FieldDescriptor {
 		public var messageType:Class

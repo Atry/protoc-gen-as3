@@ -9,6 +9,7 @@ PATH_SEPARATOR=:
 endif
 COMPC=compc$(EXE)
 MXMLC=mxmlc$(EXE)
+ASDOC=asdoc$(EXE)
 FDB=fdb$(EXE)
 MVN=mvn
 JAVAC=javac

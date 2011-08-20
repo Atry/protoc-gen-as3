@@ -12,6 +12,9 @@ package com.netease.protobuf {
 	import flash.errors.IOError
 	import flash.utils.IDataInput
 	import flash.utils.ByteArray
+	/**
+	 * @private
+	 */
 	public class RepeatedFieldDescriptor extends BaseFieldDescriptor {
 		public function get elementType():Class {
 			throw new IllegalOperationError("Not Implemented!")

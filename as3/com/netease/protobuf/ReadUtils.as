@@ -8,8 +8,11 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	import flash.errors.*;
-	import flash.utils.*;
+	import flash.errors.*
+	import flash.utils.*
+	/**
+	 * @private
+	 */
 	public final class ReadUtils {
 		public static function skip(input:IDataInput, wireType:uint):void {
 			switch (wireType) {

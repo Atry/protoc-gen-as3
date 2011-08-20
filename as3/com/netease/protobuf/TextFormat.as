@@ -296,8 +296,12 @@ package com.netease.protobuf {
 					}
 				}
 			}
-		}	
+		}
 		
+		/**
+		 * Outputs a textual representation of the Protocol Message supplied into
+		 * the parameter <code>output</code>.
+		 */
 		public static function printToUTFBytes(output:IDataOutput,
 				message:Message,
 				singleLineMode:Boolean = true):void {
@@ -305,6 +309,10 @@ package com.netease.protobuf {
 				singleLineMode ? SINGLELINE_MODE : MULTILINE_MODE)
 		}
 		
+		/**
+		 * Like <code>printToUTFBytes()</code>, but writes directly to a String and
+		 * returns it.
+		 */
 		public static function printToString(message:Message,
 				singleLineMode:Boolean = true):String {
 			const ba:ByteArray = new ByteArray
@@ -640,11 +648,19 @@ package com.netease.protobuf {
 			}
 		}
 		
+		/**
+		 * Parse a text-format message from <code>input</code> and merge the
+		 * contents into <code>message</code>.
+		 */
 		public static function mergeFromUTFBytes(input:IDataInput,
 				message:Message):void {
 			mergeFromSource(new WrappedSource(input), message)
 		}
 		
+		/**
+		 * Parse a text-format message from <code>text</code> and merge the
+		 * contents into <code>message</code>.
+		 */
 		public static function mergeFromString(text:String, message:Message):void {
 			const source:BufferedSource = new BufferedSource
 			source.writeUTFBytes(text)

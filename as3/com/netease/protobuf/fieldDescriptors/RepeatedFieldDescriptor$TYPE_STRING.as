@@ -10,6 +10,9 @@
 package com.netease.protobuf.fieldDescriptors {
 	import com.netease.protobuf.*
 	import flash.utils.*
+	/**
+	 * @private
+	 */
 	public final class RepeatedFieldDescriptor$TYPE_STRING extends
 			RepeatedFieldDescriptor {
 		public function RepeatedFieldDescriptor$TYPE_STRING(

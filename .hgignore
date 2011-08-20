@@ -13,3 +13,4 @@ glob:*.swf
 glob:*.swc
 glob:unittest.bin
 glob:obj/
+glob:doc/

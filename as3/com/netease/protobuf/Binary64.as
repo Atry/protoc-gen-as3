@@ -8,8 +8,11 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
-	internal class Binary64 {
+	public class Binary64 {
 		public var low:uint;
+		/**
+		 * @private
+		 */
 		internal var internalHigh:uint;
 		public function Binary64(low:uint = 0, high:uint = 0) {
 			this.low = low

@@ -16,32 +16,69 @@ package com.netease.protobuf {
 	import flash.utils.IDataOutput
 
 	public class Message {
+		/**
+		 * Parse data as a message of this type and merge it with this.
+		 */
 		public final function mergeFrom(input:IDataInput):void {
 			input.endian = flash.utils.Endian.LITTLE_ENDIAN
 			readFromSlice(input, 0)
 		}
+		/**
+     * Like mergeFrom(), but does not read until EOF. Instead, the size of the
+		 * message (encoded as a varint) is read first, then the message data. Use
+		 * writeDelimitedTo() to write messages in this format.
+		 * 
+		 * @see #mergeFrom()
+		 * @see #writeDelimitedTo()
+		 */
 		public final function mergeDelimitedFrom(input:IDataInput):void {
 			input.endian = flash.utils.Endian.LITTLE_ENDIAN
 			ReadUtils.read$TYPE_MESSAGE(input, this)
 		}
+		/**
+		 * Serializes the message and writes it to <code>output</code>.
+		 * 
+		 * <p>
+     * NOTE: Protocol Buffers are not self-delimiting. Therefore, if you write
+		 * any more data to the stream after the message, you must somehow ensure
+		 * that the parser on the receiving end does not interpret this as being
+		 * part of the protocol message. This can be done e.g. by writing the size
+		 * of the message before the data, then making sure to limit the input to
+		 * that size on the receiving end (e.g. by wrapping the InputStream in one
+		 * which limits the input). Alternatively, just use
+		 * <code>#writeDelimitedTo()</code>.
+		 * </p>
+		 * 
+		 * @see #writeDelimitedTo()
+		 */
 		public final function writeTo(output:IDataOutput):void {
 			const buffer:com.netease.protobuf.WritingBuffer = new com.netease.protobuf.WritingBuffer()
 			writeToBuffer(buffer)
 			buffer.toNormal(output)
 		}
+
+		/**
+     * Like writeTo(), but writes the size of the message as a varint before
+		 * writing the data. This allows more data to be written to the stream after
+		 * the message without the need to delimit the message data yourself. Use
+		 * mergeDelimitedFrom() to parse messages written by this method.
+		 * 
+		 * @see #writeTo()
+		 * @see #mergeDelimitedFrom()
+		 */
 		public final function writeDelimitedTo(output:IDataOutput):void {
 			const buffer:com.netease.protobuf.WritingBuffer = new com.netease.protobuf.WritingBuffer()
 			WriteUtils.write$TYPE_MESSAGE(buffer, this)
 			buffer.toNormal(output)
 		}
 		/**
-		 *  @private
+		 * @private
 		 */
 		public function readFromSlice(input:IDataInput, bytesAfterSlice:uint):void {
 			throw new IllegalOperationError("Not implemented!")
 		}
 		/**
-		 *  @private
+		 * @private
 		 */
 		public function writeToBuffer(output:WritingBuffer):void {
 			throw new IllegalOperationError("Not implemented!")
@@ -66,6 +103,10 @@ package com.netease.protobuf {
 				throw new IOError("Invalid wire type: " + (tag & 7))
 			}
 		}
+		
+		/**
+		 * @private
+		 */
 		protected final function writeUnknown(output:WritingBuffer,
 				fieldName:String):void {
 			const tag:uint = uint(fieldName)
@@ -84,6 +125,9 @@ package com.netease.protobuf {
 				writeSingleUnknown(output, tag, value)
 			}
 		}
+		/**
+		 * @private
+		 */
 		protected final function writeExtensionOrUnknown(output:WritingBuffer,
 				fieldName:String):void {
 			var fieldDescriptor:BaseFieldDescriptor
@@ -96,6 +140,9 @@ package com.netease.protobuf {
 			}
 			fieldDescriptor.write(output, this)
 		}
+		/**
+		 * @private
+		 */
 		protected final function readUnknown(input:IDataInput, tag:uint):void {
 			var value:*
 			switch (tag & 7) {
@@ -123,6 +170,9 @@ package com.netease.protobuf {
 				this[tag] = [currentValue, value]
 			}
 		}
+		/**
+		 * @private
+		 */
 		protected final function readExtensionOrUnknown(extensions:Array,
 				input:IDataInput, tag:uint):void {
 			var readFunction:Function = extensions[tag];
@@ -132,6 +182,7 @@ package com.netease.protobuf {
 				readUnknown(input, tag)
 			}
 		}
+		
 		public function toString():String {
 			return TextFormat.printToString(this)
 		}

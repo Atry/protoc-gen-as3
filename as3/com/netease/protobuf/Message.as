@@ -24,7 +24,7 @@ package com.netease.protobuf {
 			readFromSlice(input, 0)
 		}
 		/**
-     * Like mergeFrom(), but does not read until EOF. Instead, the size of the
+		 * Like mergeFrom(), but does not read until EOF. Instead, the size of the
 		 * message (encoded as a varint) is read first, then the message data. Use
 		 * writeDelimitedTo() to write messages in this format.
 		 * 
@@ -39,7 +39,7 @@ package com.netease.protobuf {
 		 * Serializes the message and writes it to <code>output</code>.
 		 * 
 		 * <p>
-     * NOTE: Protocol Buffers are not self-delimiting. Therefore, if you write
+		 * NOTE: Protocol Buffers are not self-delimiting. Therefore, if you write
 		 * any more data to the stream after the message, you must somehow ensure
 		 * that the parser on the receiving end does not interpret this as being
 		 * part of the protocol message. This can be done e.g. by writing the size
@@ -58,7 +58,7 @@ package com.netease.protobuf {
 		}
 
 		/**
-     * Like writeTo(), but writes the size of the message as a varint before
+		 * Like writeTo(), but writes the size of the message as a varint before
 		 * writing the data. This allows more data to be written to the stream after
 		 * the message without the need to delimit the message data yourself. Use
 		 * mergeDelimitedFrom() to parse messages written by this method.

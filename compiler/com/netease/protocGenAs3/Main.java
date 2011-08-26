@@ -730,15 +730,15 @@ public final class Main {
 				content.append(");\n");
 				content.append("\t\t\tcom.netease.protobuf.WriteUtils.write$");
 				content.append(fdp.getType().name());
-				content.append("(output, ");
+				content.append("(output, this.");
 				appendLowerCamelCase(content, fdp.getName());
 				content.append(");\n");
 				break;
 			case LABEL_REPEATED:
 				if (fdp.hasOptions() && fdp.getOptions().getPacked()) {
-					content.append("\t\t\tif (");
+					content.append("\t\t\tif (this.");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append(" != null && ");
+					content.append(" != null && this.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(".length > 0) {\n");
 					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.writeTag(output, com.netease.protobuf.WireType.LENGTH_DELIMITED, ");
@@ -746,20 +746,20 @@ public final class Main {
 					content.append(");\n");
 					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.writePackedRepeated(output, com.netease.protobuf.WriteUtils.write$");
 					content.append(fdp.getType().name());
-					content.append(", ");
+					content.append(", this.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(");\n");
 					content.append("\t\t\t}\n");
 				} else {
 					content.append("\t\t\tfor (var ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("Index:uint = 0; ");
+					content.append("$index:uint = 0; ");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("Index < ");
+					content.append("$index < this.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(".length; ++");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("Index) {\n");
+					content.append("$index) {\n");
 					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.writeTag(output, com.netease.protobuf.WireType.");
 					content.append(getActionScript3WireType(fdp.getType()));
 					content.append(", ");
@@ -767,11 +767,11 @@ public final class Main {
 					content.append(");\n");
 					content.append("\t\t\t\tcom.netease.protobuf.WriteUtils.write$");
 					content.append(fdp.getType().name());
-					content.append("(output, ");
+					content.append("(output, this.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append("[");
 					appendLowerCamelCase(content, fdp.getName());
-					content.append("Index]);\n");
+					content.append("$index]);\n");
 					content.append("\t\t\t}\n");
 				}
 				break;
@@ -828,16 +828,16 @@ public final class Main {
 				content.append(fdp.getName());
 				content.append("$count;\n");
 				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
-					content.append("\t\t\t\t\t");
+					content.append("\t\t\t\t\tthis.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(" = new ");
 					content.append(getActionScript3Type(scope, fdp));
 					content.append("();\n");
-					content.append("\t\t\t\t\tcom.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
+					content.append("\t\t\t\t\tcom.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, this.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(");\n");
 				} else {
-					content.append("\t\t\t\t\t");
+					content.append("\t\t\t\t\tthis.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(" = com.netease.protobuf.ReadUtils.read$");
 					content.append(fdp.getType().name());
@@ -863,14 +863,14 @@ public final class Main {
 						content.append("\t\t\t\t\tif ((tag & 7) == com.netease.protobuf.WireType.LENGTH_DELIMITED) {\n");
 						content.append("\t\t\t\t\t\tcom.netease.protobuf.ReadUtils.readPackedRepeated(input, com.netease.protobuf.ReadUtils.read$");
 						content.append(fdp.getType().name());
-						content.append(", ");
+						content.append(", this.");
 						appendLowerCamelCase(content, fdp.getName());
 						content.append(");\n");
 						content.append("\t\t\t\t\t\tbreak;\n");
 						content.append("\t\t\t\t\t}\n");
 				}
 				if (fdp.getType() == FieldDescriptorProto.Type.TYPE_MESSAGE) {
-					content.append("\t\t\t\t\t");
+					content.append("\t\t\t\t\tthis.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(".push(");
 					content.append("com.netease.protobuf.ReadUtils.read$TYPE_MESSAGE(input, ");
@@ -878,7 +878,7 @@ public final class Main {
 					content.append(getActionScript3Type(scope, fdp));
 					content.append("()));\n");
 				} else {
-					content.append("\t\t\t\t\t");
+					content.append("\t\t\t\t\tthis.");
 					appendLowerCamelCase(content, fdp.getName());
 					content.append(".push(com.netease.protobuf.ReadUtils.read$");
 					content.append(fdp.getType().name());

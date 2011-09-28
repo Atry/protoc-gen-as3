@@ -588,7 +588,7 @@ public final class Main {
 						content.append(":uint = 0;\n\n");
 					}
 					
-					content.append("\t\tpublic function remove");
+					content.append("\t\tpublic function clear");
 					appendUpperCamelCase(content, fdp.getName());
 					content.append("():void {\n");
 					content.append("\t\t\thasField$");
@@ -629,7 +629,7 @@ public final class Main {
 					content.append("$field = value;\n");
 					content.append("\t\t}\n\n");
 				} else {
-					content.append("\t\tpublic function remove");
+					content.append("\t\tpublic function clear");
 					appendUpperCamelCase(content, fdp.getName());
 					content.append("():void {\n");
 					content.append("\t\t\t");

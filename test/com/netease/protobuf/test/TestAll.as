@@ -141,9 +141,9 @@ package com.netease.protobuf.test {
 			testText(t0)
 			
 			const t1:TestPackedTypes = new TestPackedTypes
-			t1.packedDouble = [1.23424353, 2.12]
-			t1.packedEnum = [ForeignEnum.FOREIGN_BAZ, ForeignEnum.FOREIGN_FOO,
-					ForeignEnum.FOREIGN_FOO, ForeignEnum.FOREIGN_BAR]
+			t1.packedDouble.push(1.23424353, 2.12)
+			t1.packedEnum.push(ForeignEnum.FOREIGN_BAZ, ForeignEnum.FOREIGN_FOO,
+					ForeignEnum.FOREIGN_FOO, ForeignEnum.FOREIGN_BAR)
 			test(t1)
 			testText(t1)
 
@@ -171,7 +171,7 @@ package com.netease.protobuf.test {
 			test(t3)
 			testText(t3)
 			const t4:TestPackedTypes = new TestPackedTypes
-			t4.packedDouble = [1]
+			t4.packedDouble.push(1)
 			test(t4)
 			testText(t4)
 			const t5:TestAllTypes = new TestAllTypes
@@ -200,7 +200,9 @@ package com.netease.protobuf.test {
 			test(t9)
 			testText(t9)
 			const t10:AAA = new AAA
+			assertSame(t10[DDD], "dream")
 			t10.s = "xxxx"
+			t10[DDD] = "love"
 			test(t10)
 			testText(t10)
 			if (haxeTest) {

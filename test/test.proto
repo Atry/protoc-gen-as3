@@ -13,6 +13,7 @@ message AAA {
 	option (as3_amf_alias) = "myTest.MyAAA.汉字";
 	optional bytes b = 1 [ default = "\x01\x02\x80\xFF\x7F\0\x34" ];
 	optional string s = 2 [ default = "汉字测试\0\x34" ];
+	extensions 300 to max;
 }
 message BBB {
 	option (as3_bindable) = true;
@@ -25,4 +26,8 @@ message CCC {
 }
 service Foo {
 	rpc Search (BBB) returns (AAA);
+}
+
+extend AAA {
+	optional string ddd = 300 [default = "dream"];
 }

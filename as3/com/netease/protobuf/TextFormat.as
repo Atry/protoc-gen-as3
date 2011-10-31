@@ -531,6 +531,7 @@ package com.netease.protobuf {
 			}
 			const normalBuffer:ByteArray = new ByteArray
 			buffer.toNormal(normalBuffer)
+			normalBuffer.position = 0
 			message.mergeFrom(normalBuffer)
 		}
 		

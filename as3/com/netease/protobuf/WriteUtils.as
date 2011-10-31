@@ -8,11 +8,45 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
+	import flash.errors.*
 	import flash.utils.*
 	/**
 	 * @private
 	 */
 	public final class WriteUtils {
+		private static function writeSingleUnknown(output:WritingBuffer,
+				tag:uint, value:*):void {
+			WriteUtils.write$TYPE_UINT32(output, tag)
+			switch (tag & 7) {
+			case WireType.VARINT:
+				WriteUtils.write$TYPE_UINT64(output, value)
+				break
+			case WireType.FIXED_64_BIT:
+				WriteUtils.write$TYPE_FIXED64(output, value)
+				break
+			case WireType.LENGTH_DELIMITED:
+				WriteUtils.write$TYPE_BYTES(output, value)
+				break
+			case WireType.FIXED_32_BIT:
+				WriteUtils.write$TYPE_FIXED32(output, value)
+				break
+			default:
+				throw new IOError("Invalid wire type: " + (tag & 7))
+			}
+		}
+
+		public static function writeUnknownPair(output:WritingBuffer, tag:uint,
+				value:*):void {
+			const repeated:Array = value as Array
+			if (repeated) {
+				for each (var element:* in repeated) {
+					writeSingleUnknown(output, tag, element)
+				}
+			} else {
+				writeSingleUnknown(output, tag, value)
+			}
+		}
+
 		private static function writeVarint64(output:WritingBuffer,
 			low:uint, high:uint):void {
 			if (high == 0) {

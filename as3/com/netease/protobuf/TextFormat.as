@@ -138,10 +138,12 @@ package com.netease.protobuf {
 			const type:Class = Object(message).constructor
 			var messageFields:XMLList
 			if (type in allMessageFields) {
+				// Fetch in cache
 				messageFields = allMessageFields[type]
 			} else {
-				// TODO
 				const description:XML = describeType(type)
+				// Not description.constant,
+				// because haXe will replace constant to variable, WTF!
 				messageFields = description.*.
 					(0 == String(@type).search(
 						/^com.netease.protobuf.fieldDescriptors::(Repeated)?FieldDescriptor\$/) &&
@@ -151,8 +153,6 @@ package com.netease.protobuf {
 				allMessageFields[type] = messageFields
 			}
 			
-			// Not description.constant,
-			// because haXe will replace constant to variable, WTF!
 			for each (var fieldDescriptorName:String in messageFields) {
 				const fieldDescriptor:BaseFieldDescriptor =
 						type[fieldDescriptorName]
@@ -519,6 +519,21 @@ package com.netease.protobuf {
 			}
 		}
 		
+		private static function parseUnknown(message:Message):void {
+			const buffer:WritingBuffer = new WritingBuffer
+			for (var fieldName:String in message) {
+				const tag:uint = uint(fieldName)
+				if (tag == 0) {
+					continue
+				}
+				WriteUtils.writeUnknownPair(buffer, tag, message[fieldName])
+				delete message[fieldName]
+			}
+			const normalBuffer:ByteArray = new ByteArray
+			buffer.toNormal(normalBuffer)
+			message.mergeFrom(normalBuffer)
+		}
+		
 		private static function consumeFieldValue(source:ISource,
 				type:Class):* {
 			switch (type) {
@@ -578,6 +593,7 @@ package com.netease.protobuf {
 						}
 						consumeField(source, message)
 					}
+					parseUnknown(message)
 					return message
 			}
 		}
@@ -646,6 +662,7 @@ package com.netease.protobuf {
 				}
 				consumeField(source, message)
 			}
+			parseUnknown(message)
 		}
 		
 		/**

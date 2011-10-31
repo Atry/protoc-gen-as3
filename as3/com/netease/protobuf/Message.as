@@ -115,15 +115,7 @@ package com.netease.protobuf {
 						"Attemp to write an undefined string filed: " +
 						fieldName)
 			}
-			var value:* = this[fieldName]
-			const repeated:Array = value as Array
-			if (repeated) {
-				for each (var element:* in repeated) {
-					writeSingleUnknown(output, tag, element)
-				}
-			} else {
-				writeSingleUnknown(output, tag, value)
-			}
+			WriteUtils.writeUnknownPair(output, tag, this[fieldName])
 		}
 		/**
 		 * @private

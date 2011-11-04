@@ -178,9 +178,11 @@ package com.netease.protobuf {
 		public function toString():String {
 			return TextFormat.printToString(this)
 		}
-
+		/**
+		 * Get information of a field. 
+		 */
 		public static function getExtensionByName(
-				name:String):BaseFieldDescriptor {
+				name:String):IFieldDescriptor {
 			return BaseFieldDescriptor.getExtensionByName(name)
 		}
 

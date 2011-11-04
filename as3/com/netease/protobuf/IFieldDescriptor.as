@@ -9,7 +9,7 @@
 
 package com.netease.protobuf {
 	/**
-	 * Runtime infomation for a field.
+	 * Run-time infomation for a field.
 	 */
 	public interface IFieldDescriptor {
 		function get name():String

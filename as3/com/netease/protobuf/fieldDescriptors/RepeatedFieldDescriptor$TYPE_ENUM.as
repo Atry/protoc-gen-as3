@@ -19,7 +19,7 @@ package com.netease.protobuf.fieldDescriptors {
 		public function RepeatedFieldDescriptor$TYPE_ENUM(
 				fullName:String, name:String, tag:uint, enumType:Class) {
 			this.fullName = fullName
-			this.name = name
+			this._name = name
 			this.tag = tag
 			this.enumType = enumType
 		}

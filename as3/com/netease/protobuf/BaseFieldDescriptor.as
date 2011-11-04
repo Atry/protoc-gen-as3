@@ -13,10 +13,16 @@ package com.netease.protobuf {
 	/**
 	 * @private
 	 */
-	public class BaseFieldDescriptor {
+	public class BaseFieldDescriptor implements IFieldDescriptor {
 		public var fullName:String
-		public var name:String
-		public var tag:uint
+		protected var _name:String
+		public final function get name():String {
+			return _name
+		}
+		protected var tag:uint
+		public final function get tagNumber():uint {
+			return tag >>> 7
+		}
 		public function get type():Class {
 			throw new IllegalOperationError("Not Implemented!")
 		}
@@ -47,7 +53,11 @@ package com.netease.protobuf {
 			"void" : true,		"while" : true,		"with" : true
 		}
 		
-		public static function getExtensionByName(
+		public function toString():String {
+			return name
+		}
+
+		internal static function getExtensionByName(
 				name:String):BaseFieldDescriptor {
 			const fieldPosition:int = name.lastIndexOf('/')
 			if (fieldPosition == -1) {
@@ -57,11 +67,6 @@ package com.netease.protobuf {
 						name.substring(fieldPosition + 1)]
 			}
 		}
-
-		public function toString():String {
-			return name
-		}
-		
 	}
 
 }

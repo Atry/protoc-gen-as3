@@ -538,6 +538,7 @@ public final class Main {
 				continue;
 			}
 			String extendee = scope.find(efdp.getExtendee()).fullName;
+			content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
 			content.append("\t\tpublic static const ");
 			content.append(efdp.getName().toUpperCase());
 			content.append(":");
@@ -562,6 +563,7 @@ public final class Main {
 				System.err.println("Warning: Group is not supported.");
 				continue;
 			}
+			content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
 			content.append("\t\tpublic static const ");
 			content.append(fdp.getName().toUpperCase());
 			content.append(":");
@@ -1039,6 +1041,7 @@ public final class Main {
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 
 		content.append("\t// @@protoc_insertion_point(constant_metadata)\n");
+		content.append("\t/**\n\t *  @private\n\t */\n");
 		content.append("\tpublic const ");
 		content.append(scope.proto.getName().toUpperCase());
 		content.append(":");

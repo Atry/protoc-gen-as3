@@ -23,18 +23,17 @@ package com.netease.protobuf {
 		private static const REF:Dictionary = new Dictionary
 
 		public function send(qualifiedMethodName:String,
-							 input:Message,
+							 requestMessage:Message,
 							 rpcResult:Function,
-							 outputType:Class):void {
-
+							 responseClass:Class):void {
 			const loader:URLLoader = new URLLoader
 			REF[loader] = true;
 			loader.dataFormat = URLLoaderDataFormat.BINARY
 			loader.addEventListener(Event.COMPLETE, function(event:Event):void {
 				delete REF[loader]
-				const output:Message = new outputType
-				output.mergeFrom(loader.data)
-				rpcResult(output)
+				const responseMessage:Message = new responseClass
+				responseMessage.mergeFrom(loader.data)
+				rpcResult(responseMessage)
 			})
 			function errorEventHandler(event:Event):void {
 				delete REF[loader]
@@ -47,7 +46,7 @@ package com.netease.protobuf {
 				urlPrefix + qualifiedMethodName.replace(/\./g, "/").
 					replace(/^((com|org|net)\/\w+\/\w+\/)?(.*)$/, "$3"))
 			const requestContent:ByteArray = new ByteArray
-			input.writeTo(requestContent)
+			requestMessage.writeTo(requestContent)
 			if (requestContent.length != 0)
 			{
 				request.data = requestContent

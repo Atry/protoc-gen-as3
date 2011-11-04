@@ -18,7 +18,7 @@ package com.netease.protobuf.fieldDescriptors {
 		public function FieldDescriptor$TYPE_BYTES(
 				fullName:String, name:String, tag:uint) {
 			this.fullName = fullName
-			this.name = name
+			this._name = name
 			this.tag = tag
 		}
 		override public function get type():Class {

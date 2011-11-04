@@ -24,9 +24,9 @@ package com.netease.protobuf {
 			readFromSlice(input, 0)
 		}
 		/**
-		 * Like mergeFrom(), but does not read until EOF. Instead, the size of the
+		 * Like <code>mergeFrom()</code>, but does not read until EOF. Instead, the size of the
 		 * message (encoded as a varint) is read first, then the message data. Use
-		 * writeDelimitedTo() to write messages in this format.
+		 * <code>writeDelimitedTo()</code> to write messages in this format.
 		 * 
 		 * @see #mergeFrom()
 		 * @see #writeDelimitedTo()
@@ -46,7 +46,7 @@ package com.netease.protobuf {
 		 * of the message before the data, then making sure to limit the input to
 		 * that size on the receiving end (e.g. by wrapping the InputStream in one
 		 * which limits the input). Alternatively, just use
-		 * <code>#writeDelimitedTo()</code>.
+		 * <code>writeDelimitedTo()</code>.
 		 * </p>
 		 * 
 		 * @see #writeDelimitedTo()
@@ -58,10 +58,10 @@ package com.netease.protobuf {
 		}
 
 		/**
-		 * Like writeTo(), but writes the size of the message as a varint before
+		 * Like <code>writeTo()</code>, but writes the size of the message as a varint before
 		 * writing the data. This allows more data to be written to the stream after
 		 * the message without the need to delimit the message data yourself. Use
-		 * mergeDelimitedFrom() to parse messages written by this method.
+		 * <code>mergeDelimitedFrom()</code> to parse messages written by this method.
 		 * 
 		 * @see #writeTo()
 		 * @see #mergeDelimitedFrom()
@@ -178,5 +178,11 @@ package com.netease.protobuf {
 		public function toString():String {
 			return TextFormat.printToString(this)
 		}
+
+		public static function getExtensionByName(
+				name:String):BaseFieldDescriptor {
+			return BaseFieldDescriptor.getExtensionByName(name)
+		}
+
 	}
 }

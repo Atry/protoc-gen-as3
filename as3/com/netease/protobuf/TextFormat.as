@@ -615,9 +615,13 @@ package com.netease.protobuf {
 					fieldDescriptor = getDefinitionByName(scope)[
 							localName.toUpperCase()]
 				} catch (e:ReferenceError) {
-					fieldDescriptor = BaseFieldDescriptor(
-							getDefinitionByName(scope + '.' +
-							localName.toUpperCase()))
+					try {
+						fieldDescriptor = BaseFieldDescriptor(
+								getDefinitionByName(scope + '.' +
+								localName.toUpperCase()))
+					} catch (e:ReferenceError) {
+						throw new IOError("Unknown extension: " + name)
+					}
 				}
 			} else {
 				if (name.search(/[0-9]+/) == 0) {

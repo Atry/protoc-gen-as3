@@ -108,7 +108,7 @@ package com.netease.protobuf {
 		}
 		public static function write$TYPE_UINT32(output:WritingBuffer, value:uint):void {
 			for (;;) {
-				if ((value & ~0x7F) == 0) {
+				if (value < 0x80) {
 					output.writeByte(value)
 					return;
 				} else {

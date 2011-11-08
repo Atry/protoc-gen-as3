@@ -18,16 +18,29 @@ package com.netease.protobuf {
 	public class Message {
 		/**
 		 * Parse data as a message of this type and merge it with this.
+		 *
+		 * @param input The source where data are reading from. <p>After calling
+		 * this method, <code>input.endian</code> will be changed to <code>
+		 * flash.utils.Endian.LITTLE_ENDIAN</code>. If <code>input</code> is a
+		 * <code>flash.utils.ByteArray</code>, input.position will increase by
+		 * number of bytes being read.</p>
 		 */
 		public final function mergeFrom(input:IDataInput):void {
 			input.endian = flash.utils.Endian.LITTLE_ENDIAN
 			readFromSlice(input, 0)
 		}
 		/**
-		 * Like <code>mergeFrom()</code>, but does not read until EOF. Instead, the size of the
-		 * message (encoded as a varint) is read first, then the message data. Use
-		 * <code>writeDelimitedTo()</code> to write messages in this format.
-		 * 
+		 * Like <code>mergeFrom()</code>, but does not read until EOF. Instead,
+		 * the size of the message (encoded as a varint) is read first, then
+		 * the message data. Use <code>writeDelimitedTo()</code> to write
+		 * messages in this format.
+		 *
+		 * @param input The source where data are reading from. <p>After calling
+		 * this method, <code>input.endian</code> will be changed to <code>
+		 * flash.utils.Endian.LITTLE_ENDIAN</code>. If <code>input</code> is a
+		 * <code>flash.utils.ByteArray</code>, input.position will increase by
+		 * number of bytes being read.</p>
+		 *
 		 * @see #mergeFrom()
 		 * @see #writeDelimitedTo()
 		 */
@@ -39,15 +52,20 @@ package com.netease.protobuf {
 		 * Serializes the message and writes it to <code>output</code>.
 		 * 
 		 * <p>
-		 * NOTE: Protocol Buffers are not self-delimiting. Therefore, if you write
-		 * any more data to the stream after the message, you must somehow ensure
-		 * that the parser on the receiving end does not interpret this as being
-		 * part of the protocol message. This can be done e.g. by writing the size
-		 * of the message before the data, then making sure to limit the input to
-		 * that size on the receiving end (e.g. by wrapping the InputStream in one
-		 * which limits the input). Alternatively, just use
-		 * <code>writeDelimitedTo()</code>.
+		 * NOTE: Protocol Buffers are not self-delimiting. Therefore, if you
+		 * write any more data to the stream after the message, you must 
+		 * somehow ensure that the parser on the receiving end does not
+		 * interpret this as being * part of the protocol message. This can be
+		 * done e.g. by writing the size of the message before the data, then
+		 * making sure to limit the input to that size on the receiving end
+		 * (e.g. by wrapping the InputStream in one which limits the input).
+		 * Alternatively, just use <code>writeDelimitedTo()</code>.
 		 * </p>
+		 *
+		 * @param output The destination where data are writing to. <p>If <code>
+		 * output</code> is a <code>flash.utils.ByteArray</code>, <code>
+		 * output.position</code> will increase by number of bytes being
+		 * written.</p>
 		 * 
 		 * @see #writeDelimitedTo()
 		 */
@@ -58,10 +76,16 @@ package com.netease.protobuf {
 		}
 
 		/**
-		 * Like <code>writeTo()</code>, but writes the size of the message as a varint before
-		 * writing the data. This allows more data to be written to the stream after
-		 * the message without the need to delimit the message data yourself. Use
-		 * <code>mergeDelimitedFrom()</code> to parse messages written by this method.
+		 * Like <code>writeTo()</code>, but writes the size of the message as
+		 * a varint before writing the data. This allows more data to be
+		 * written to the stream after the message without the need to delimit
+		 * the message data yourself. Use <code>mergeDelimitedFrom()</code> to
+		 * parse messages written by this method.
+		 *
+		 * @param output The destination where data are writing to. <p>If <code>
+		 * output</code> is a <code>flash.utils.ByteArray</code>, <code>
+		 * output.position</code> will increase by number of bytes being
+		 * written.</p>
 		 * 
 		 * @see #writeTo()
 		 * @see #mergeDelimitedFrom()

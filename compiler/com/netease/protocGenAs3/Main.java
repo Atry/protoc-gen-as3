@@ -25,7 +25,7 @@ public final class Main {
 		"with"
 	};
 	private static final class Scope<Proto> {
-		// 如果 proto instanceOf Scope ，则这个 Scope 对另一 Scope 的引用
+		// 如果 proto instanceOf Scope ，则这个 Scope 是对另一 Scope 的引用
 		public final String fullName;
 		public final Scope<?> parent;
 		public final Proto proto;

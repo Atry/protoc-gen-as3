@@ -18,7 +18,13 @@ package com.netease.protobuf {
 		public function Int64(low:uint = 0, high:int = 0) {
 			super(low, high)
 		}
-		public function toString(radix:uint = 10):String {
+		/**
+		 * Convert to <code>Number</code>.
+		 */
+		public final function toNumber():Number {
+			return high * 0x100000000 + low
+		}
+		public final function toString(radix:uint = 10):String {
 			if (radix < 2 || radix > 36) {
 				throw new ArgumentError
 			}

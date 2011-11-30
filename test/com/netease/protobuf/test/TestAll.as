@@ -115,6 +115,35 @@ package com.netease.protobuf.test {
 			assertSame(int64_5.toString(), "0")
 			assertSame(Int64.parseInt64(int64_5.toString()), int64_5)
 
+			const int64_6:Int64 = Int64.fromNumber(-123234)
+			assertSame(int64_6.toNumber(), -123234)
+			assertSame(int64_6.toString(), "-123234")
+			assertSame(Int64.parseInt64(int64_6.toString()), int64_6)
+
+			const int64_7:Int64 = Int64.fromNumber(-184942424123234000)
+			assertSame(int64_7.toNumber(), -184942424123233984)
+			assertSame(int64_7.toString(), "-184942424123233984")
+			assertSame(Int64.parseInt64(int64_7.toString()), int64_7)
+
+			const int64_8:Int64 = Int64.fromNumber(-1494242414000)
+			assertSame(int64_8.toNumber(), -1494242414000)
+			assertSame(int64_8.toString(), "-1494242414000")
+			assertSame(Int64.parseInt64(int64_8.toString()), int64_8)
+			const uint64_9:UInt64 = UInt64.fromNumber(123234)
+			assertSame(uint64_9.toNumber(), 123234)
+			assertSame(uint64_9.toString(), "123234")
+			assertSame(UInt64.parseUInt64(uint64_9.toString()), uint64_9)
+
+			const uint64_10:UInt64 = UInt64.fromNumber(184942424123234000)
+			assertSame(uint64_10.toNumber(), 184942424123233984)
+			assertSame(uint64_10.toString(), "184942424123233984")
+			assertSame(UInt64.parseUInt64(uint64_10.toString()), uint64_10)
+
+			const uint64_11:UInt64 = UInt64.fromNumber(1494242414000)
+			assertSame(uint64_11.toNumber(), 1494242414000)
+			assertSame(uint64_11.toString(), "1494242414000")
+			assertSame(UInt64.parseUInt64(uint64_11.toString()), uint64_11)
+
 			const uint64:UInt64 = new UInt64(0x12345678, 0)
 			assertSame(uint64.toString(), "305419896")
 			assertSame(UInt64.parseUInt64(uint64.toString()), uint64)
@@ -134,6 +163,21 @@ package com.netease.protobuf.test {
 			const uint64_5:UInt64 = new UInt64(0, 0)
 			assertSame(uint64_5.toString(), "0")
 			assertSame(UInt64.parseUInt64(uint64_5.toString()), uint64_5)
+
+			const uint64_6:UInt64 = UInt64.fromNumber(123234)
+			assertSame(uint64_6.toNumber(), 123234)
+			assertSame(uint64_6.toString(), "123234")
+			assertSame(UInt64.parseUInt64(uint64_6.toString()), uint64_6)
+
+			const uint64_7:UInt64 = UInt64.fromNumber(184942424123234000)
+			assertSame(uint64_7.toNumber(), 184942424123233984)
+			assertSame(uint64_7.toString(), "184942424123233984")
+			assertSame(UInt64.parseUInt64(uint64_7.toString()), uint64_7)
+
+			const uint64_8:UInt64 = UInt64.fromNumber(1494242414000)
+			assertSame(uint64_8.toNumber(), 1494242414000)
+			assertSame(uint64_8.toString(), "1494242414000")
+			assertSame(UInt64.parseUInt64(uint64_8.toString()), uint64_8)
 
 			const t0:TestAllTypes = new TestAllTypes
 			t0[1500938] = stringToByteArray('\n')

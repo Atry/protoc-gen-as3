@@ -19,10 +19,16 @@ package com.netease.protobuf {
 			super(low, high)
 		}
 		/**
+		 * Convert from <code>Number</code>.
+		 */
+		public static function fromNumber(n: Number):UInt64 {
+			return new UInt64(n, Math.floor(n / 4294967296.0))
+		}
+		/**
 		 * Convert to <code>Number</code>.
 		 */
 		public final function toNumber():Number {
-			return high * 0x100000000 + low
+			return (high * 4294967296) + low
 		}
     	public final function toString(radix:uint = 10):String {
 			if (radix < 2 || radix > 36) {

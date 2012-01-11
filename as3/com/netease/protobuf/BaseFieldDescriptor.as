@@ -21,7 +21,7 @@ package com.netease.protobuf {
 		}
 		protected var tag:uint
 		public final function get tagNumber():uint {
-			return tag >>> 7
+			return tag >>> 3
 		}
 		public function get type():Class {
 			throw new IllegalOperationError("Not Implemented!")

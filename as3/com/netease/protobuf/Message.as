@@ -1,6 +1,7 @@
 // vim: tabstop=4 shiftwidth=4
 
 // Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2012 , Yang Bo. All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //
@@ -27,7 +28,7 @@ package com.netease.protobuf {
 		 */
 		public final function mergeFrom(input:IDataInput):void {
 			input.endian = flash.utils.Endian.LITTLE_ENDIAN
-			readFromSlice(input, 0)
+			used_by_generated_code::readFromSlice(input, 0)
 		}
 		/**
 		 * Like <code>mergeFrom()</code>, but does not read until EOF. Instead,
@@ -71,7 +72,7 @@ package com.netease.protobuf {
 		 */
 		public final function writeTo(output:IDataOutput):void {
 			const buffer:com.netease.protobuf.WritingBuffer = new com.netease.protobuf.WritingBuffer()
-			writeToBuffer(buffer)
+			used_by_generated_code::writeToBuffer(buffer)
 			buffer.toNormal(output)
 		}
 
@@ -95,18 +96,23 @@ package com.netease.protobuf {
 			WriteUtils.write$TYPE_MESSAGE(buffer, this)
 			buffer.toNormal(output)
 		}
+
 		/**
 		 * @private
 		 */
-		public function readFromSlice(input:IDataInput, bytesAfterSlice:uint):void {
+		used_by_generated_code function readFromSlice(
+				input:IDataInput, bytesAfterSlice:uint):void {
 			throw new IllegalOperationError("Not implemented!")
 		}
+
 		/**
 		 * @private
 		 */
-		public function writeToBuffer(output:WritingBuffer):void {
+		used_by_generated_code function writeToBuffer(
+				output:WritingBuffer):void {
 			throw new IllegalOperationError("Not implemented!")
 		}
+
 		private function writeSingleUnknown(output:WritingBuffer, tag:uint,
 				value:*):void {
 			WriteUtils.write$TYPE_UINT32(output, tag)

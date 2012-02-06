@@ -138,8 +138,7 @@ test.swf: test.swc test/com/netease/protobuf/test/TestAll.as \
 	descriptor.proto.as3/google unittest.bin
 	$(MXMLC) -target-player=10 \
 	-library-path+=test.swc,dist/protobuf.swc -output=$@ \
-	-source-path+=descriptor.proto.as3,test test/com/netease/protobuf/test/Test.mxml -debug \
-	-static-link-runtime-shared-libraries=true
+	-source-path+=descriptor.proto.as3,test test/com/netease/protobuf/test/Test.mxml -debug
 
 test.swc: unittest.proto.as3/protobuf_unittest dist/protobuf.swc
 	$(COMPC) -target-player=10 \

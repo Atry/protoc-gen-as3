@@ -1,6 +1,7 @@
 // vim: tabstop=4 shiftwidth=4
 
 // Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2012 , Yang Bo. All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //
@@ -137,7 +138,7 @@ package com.netease.protobuf {
 		}
 		public static function write$TYPE_MESSAGE(output:WritingBuffer, value:Message):void {
 			const i:uint = output.beginBlock()
-			value.writeToBuffer(output)
+			value.used_by_generated_code::writeToBuffer(output)
 			output.endBlock(i)
 		}
 		public static function writePackedRepeated(output:WritingBuffer,

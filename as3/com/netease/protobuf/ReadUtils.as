@@ -1,6 +1,7 @@
 // vim: tabstop=4 shiftwidth=4
 
 // Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2012 , Yang Bo. All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //
@@ -194,7 +195,7 @@ package com.netease.protobuf {
 				throw new IOError("Invalid message length: " + length)
 			}
 			const bytesAfterSlice:uint = input.bytesAvailable - length
-			message.readFromSlice(input, bytesAfterSlice)
+			message.used_by_generated_code::readFromSlice(input, bytesAfterSlice)
 			if (input.bytesAvailable != bytesAfterSlice) {
 				throw new IOError("Invalid nested message")
 			}

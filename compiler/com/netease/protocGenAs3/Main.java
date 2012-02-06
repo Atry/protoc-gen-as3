@@ -456,6 +456,7 @@ public final class Main {
 	private static void writeMessage(Scope<DescriptorProto> scope,
 			StringBuilder content, StringBuilder initializerContent) {
 		content.append("\timport com.netease.protobuf.*;\n");
+		content.append("\tuse namespace com.netease.protobuf.used_by_generated_code;\n");
 		content.append("\timport com.netease.protobuf.fieldDescriptors.*;\n");
 		content.append("\timport flash.utils.Endian;\n");
 		content.append("\timport flash.utils.IDataInput;\n");
@@ -700,7 +701,7 @@ public final class Main {
 				throw new IllegalArgumentException();
 			}
 		}
-		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\toverride public final function writeToBuffer(output:com.netease.protobuf.WritingBuffer):void {\n");
+		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\toverride used_by_generated_code final function writeToBuffer(output:com.netease.protobuf.WritingBuffer):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -788,7 +789,7 @@ public final class Main {
 		content.append("\t\t\t}\n");
 		content.append("\t\t}\n\n");
 		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
-		content.append("\t\toverride public final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
+		content.append("\t\toverride used_by_generated_code final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");

@@ -24,7 +24,7 @@ classes/com/netease/protocGenAs3/Main.class: \
 	compiler/com/netease/protocGenAs3/Main.java \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar \
 	| classes
-	$(JAVAC) -encoding UTF-8 -Xlint:all -d classes \
+	$(JAVAC) -source 1.5 -target 1.5 -encoding UTF-8 -Xlint:all -d classes \
 	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar" \
 	-sourcepath "plugin.proto.java$(PATH_SEPARATOR)compiler$(PATH_SEPARATOR)options.proto.java" \
 	compiler/com/netease/protocGenAs3/Main.java
@@ -114,7 +114,7 @@ clean:
 	-$(RM) -r options.proto.java
 
 test: test.swf
-	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<
+	(sleep 1s; echo c; sleep 3s; echo c; sleep 1s) | $(FDB) $<
 
 haxe-test: haxe-test.swf
 	(sleep 1s; echo c; sleep 1s; echo c; sleep 1s) | $(FDB) $<

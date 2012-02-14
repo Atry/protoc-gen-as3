@@ -1,9 +1,10 @@
-Usage:
+How to use?
+
 protoc --plugin=protoc-gen-as3="path/to/protoc-gen-as3[.bat]" --as3_out=output-path your.proto
 
 See http://code.google.com/p/protoc-gen-as3/ for more information.
 
-To compile from source:
+How to compile from source?
 
 1. Make sure you have installed these programs:
  * GNU Make

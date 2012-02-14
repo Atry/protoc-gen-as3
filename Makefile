@@ -12,7 +12,7 @@ else
 PROTOC_GEN_AS3=dist/protoc-gen-as3$(BAT)
 endif
 
-ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat \
+ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat dist/LICENSE\
 	dist/protobuf.swc dist/README dist/options.proto\
 	dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar
 
@@ -37,6 +37,9 @@ plugin.proto.java/google/protobuf/compiler/Plugin.java: \
 
 dist.tar.gz: $(ALL)
 	tar -acf dist.tar.gz -C dist .
+
+dist/LICENSE: LICENSE | dist
+	cp $< $@
 
 dist/README: README | dist
 	cp $< $@

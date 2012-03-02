@@ -1103,6 +1103,35 @@ public final class Main {
 		}
 		content.append("}\n");
 	}
+	
+	@SuppressWarnings("unchecked")
+	private static void writeInterfaceFile(Scope<?> scope, StringBuilder content,
+			StringBuilder initializerContent) {
+		content.append("package ");
+		content.append(scope.parent.fullName);
+		content.append(" {\n");
+		if (scope.proto instanceof DescriptorProto) {
+			writeMessage((Scope<DescriptorProto>)scope, content,
+					initializerContent);
+		} else if (scope.proto instanceof ServiceDescriptorProto) {
+			writeIService((Scope<ServiceDescriptorProto>)scope, content);
+		} else if (scope.proto instanceof EnumDescriptorProto) {
+			writeEnum((Scope<EnumDescriptorProto>)scope, content);
+		} else if (scope.proto instanceof FieldDescriptorProto) {
+			Scope<FieldDescriptorProto> fdpScope =
+					(Scope<FieldDescriptorProto>)scope;
+			if (fdpScope.proto.getType() ==
+					FieldDescriptorProto.Type.TYPE_GROUP) {
+				System.err.println("Warning: Group is not supported.");
+			} else {
+				writeExtension(fdpScope, content, initializerContent);
+			}
+		} else {
+			throw new IllegalArgumentException();
+		}
+		content.append("}\n");
+	}
+	
 	private static void writeFiles(Scope<?> root,
 			CodeGeneratorResponse.Builder responseBuilder,
 			StringBuilder initializerContent) {
@@ -1117,6 +1146,16 @@ public final class Main {
 						setContent(content.toString()).
 					build()
 				);
+				if (scope.proto instanceof ServiceDescriptorProto) {
+					StringBuilder content1 = new StringBuilder();
+					writeInterfaceFile(scope, content1, initializerContent);
+					responseBuilder.addFile(
+						CodeGeneratorResponse.File.newBuilder().
+							setName(scope.fullName.replace('.', '/') + "Interface" + ".as").
+							setContent(content1.toString()).
+						build()
+					);
+				}
 			}
 			writeFiles(scope, responseBuilder, initializerContent);
 		}
@@ -1158,13 +1197,43 @@ public final class Main {
 			content.append(scope.find(mdp.getInputType()).fullName);
 			content.append(", rpcResult:Function):void {\n");
 			content.append("\t\t\tsendFunction(\"");
-			content.append(scope.fullName);
-			content.append(".");
 			content.append(mdp.getName());
 			content.append("\", input, rpcResult, ");
 			content.append(scope.find(mdp.getOutputType()).fullName);
 			content.append(");\n");
 			content.append("\t\t}\n\n");
+		}
+		content.append("\t}\n");
+
+	}
+	
+	private static void writeIService(Scope<ServiceDescriptorProto> scope,
+			StringBuilder content) {
+		HashSet<String> importTypes = new HashSet<String>();
+		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+			importTypes.add(scope.find(mdp.getInputType()).fullName);
+			importTypes.add(scope.find(mdp.getOutputType()).fullName);
+		}
+		for (String importType : importTypes) {
+			content.append("\timport ");
+			content.append(importType);
+			content.append(";\n");
+		}
+		content.append("\t// @@protoc_insertion_point(imports)\n\n");
+		content.append("\tpublic interface ");
+		content.append(scope.proto.getName());
+		content.append("Interface");
+		content.append(" {\n");
+		content.append("\n\n");
+		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+			content.append("\t\tfunction ");
+			appendLowerCamelCase(content, mdp.getName());
+			content.append("(input:");
+			content.append(scope.find(mdp.getInputType()).fullName);
+			content.append("):");
+			content.append(scope.find(mdp.getOutputType()).fullName);
+			content.append(";\n");
+			content.append("\n\n");
 		}
 		content.append("\t}\n");
 

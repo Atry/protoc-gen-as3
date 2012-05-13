@@ -1086,7 +1086,8 @@ public final class Main {
 			writeMessage((Scope<DescriptorProto>)scope, content,
 					initializerContent);
 		} else if (scope.proto instanceof ServiceDescriptorProto) {
-			writeService((Scope<ServiceDescriptorProto>)scope, content);
+//			writeServiceStub((Scope<ServiceDescriptorProto>)scope, content);
+//			writeService((Scope<ServiceDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof EnumDescriptorProto) {
 			writeEnum((Scope<EnumDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof FieldDescriptorProto) {
@@ -1105,57 +1106,41 @@ public final class Main {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void writeInterfaceFile(Scope<?> scope, StringBuilder content,
-			StringBuilder initializerContent) {
-		content.append("package ");
-		content.append(scope.parent.fullName);
-		content.append(" {\n");
-		if (scope.proto instanceof DescriptorProto) {
-			writeMessage((Scope<DescriptorProto>)scope, content,
-					initializerContent);
-		} else if (scope.proto instanceof ServiceDescriptorProto) {
-			writeIService((Scope<ServiceDescriptorProto>)scope, content);
-		} else if (scope.proto instanceof EnumDescriptorProto) {
-			writeEnum((Scope<EnumDescriptorProto>)scope, content);
-		} else if (scope.proto instanceof FieldDescriptorProto) {
-			Scope<FieldDescriptorProto> fdpScope =
-					(Scope<FieldDescriptorProto>)scope;
-			if (fdpScope.proto.getType() ==
-					FieldDescriptorProto.Type.TYPE_GROUP) {
-				System.err.println("Warning: Group is not supported.");
-			} else {
-				writeExtension(fdpScope, content, initializerContent);
-			}
-		} else {
-			throw new IllegalArgumentException();
-		}
-		content.append("}\n");
-	}
-	
 	private static void writeFiles(Scope<?> root,
 			CodeGeneratorResponse.Builder responseBuilder,
 			StringBuilder initializerContent) {
 		for (Map.Entry<String, Scope<?>> entry : root.children.entrySet()) {
 			Scope<?> scope = entry.getValue();
 			if (scope.export) {
-				StringBuilder content = new StringBuilder();
-				writeFile(scope, content, initializerContent);
-				responseBuilder.addFile(
-					CodeGeneratorResponse.File.newBuilder().
-						setName(scope.fullName.replace('.', '/') + ".as").
-						setContent(content.toString()).
-					build()
-				);
 				if (scope.proto instanceof ServiceDescriptorProto) {
 					StringBuilder content1 = new StringBuilder();
-					writeInterfaceFile(scope, content1, initializerContent);
+        			writeServiceStub((Scope<ServiceDescriptorProto>)scope, content1);
 					responseBuilder.addFile(
 						CodeGeneratorResponse.File.newBuilder().
-							setName(scope.fullName.replace('.', '/') + "Interface" + ".as").
+							setName(scope.fullName.replace('.', '/') + "_Stub.as").
 							setContent(content1.toString()).
 						build()
 					);
+					StringBuilder content2 = new StringBuilder();
+        			writeService((Scope<ServiceDescriptorProto>)scope, content2);
+					responseBuilder.addFile(
+						CodeGeneratorResponse.File.newBuilder().
+							setName(scope.fullName.replace('.', '/') + ".as").
+							setContent(content2.toString()).
+						build()
+					);
 				}
+                else
+                {
+                    StringBuilder content = new StringBuilder();
+                    writeFile(scope, content, initializerContent);
+                    responseBuilder.addFile(
+                        CodeGeneratorResponse.File.newBuilder().
+                            setName(scope.fullName.replace('.', '/') + ".as").
+                            setContent(content.toString()).
+                        build()
+                    );
+                }
 			}
 			writeFiles(scope, responseBuilder, initializerContent);
 		}
@@ -1173,8 +1158,11 @@ public final class Main {
 			build()
 		);
 	}
-	private static void writeService(Scope<ServiceDescriptorProto> scope,
+	private static void writeServiceStub(Scope<ServiceDescriptorProto> scope,
 			StringBuilder content) {
+		content.append("package ");
+		content.append(scope.parent.fullName);
+		content.append(" {\n");
 		HashSet<String> importTypes = new HashSet<String>();
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 			importTypes.add(scope.find(mdp.getInputType()).fullName);
@@ -1188,6 +1176,7 @@ public final class Main {
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 		content.append("\tpublic final class ");
 		content.append(scope.proto.getName());
+		content.append("_Stub");
 		content.append(" {\n");
 		content.append("\t\tpublic var sendFunction:Function;\n\n");
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
@@ -1204,11 +1193,14 @@ public final class Main {
 			content.append("\t\t}\n\n");
 		}
 		content.append("\t}\n");
-
+        content.append("}\n");
 	}
 	
-	private static void writeIService(Scope<ServiceDescriptorProto> scope,
+	private static void writeService(Scope<ServiceDescriptorProto> scope,
 			StringBuilder content) {
+		content.append("package ");
+		content.append(scope.parent.fullName);
+		content.append(" {\n");
 		HashSet<String> importTypes = new HashSet<String>();
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 			importTypes.add(scope.find(mdp.getInputType()).fullName);
@@ -1220,23 +1212,44 @@ public final class Main {
 			content.append(";\n");
 		}
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
-		content.append("\tpublic interface ");
+		content.append("\tpublic class ");
 		content.append(scope.proto.getName());
-		content.append("Interface");
 		content.append(" {\n");
 		content.append("\n\n");
+        content.append("\t\tpublic var methods:Dictionary;\n\n");
+        content.append("\t\tpublic function ");
+        content.append(scope.proto.getName());
+        content.append("(){\n");
+        content.append("\t\t\tmethods = new Dictionary();\n");
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
-			content.append("\t\tfunction ");
+            content.append("\t\t\tmethods[\"");
+            content.append(mdp.getName());
+            content.append("\"] = {");
+            content.append("requestType : ");
+            content.append(scope.find(mdp.getInputType()).fullName);
+            content.append(",\n");
+            content.append("\t\t\t\tresponseType : ");
+            content.append(scope.find(mdp.getOutputType()).fullName);
+            content.append(",\n");
+            content.append("\t\t\t\trpc : ");
+			appendLowerCamelCase(content, mdp.getName());
+            content.append("\n\t\t\t};\n");
+        }
+        content.append("\t\t}\n\n");
+
+		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+			content.append("\t\tpublic function ");
 			appendLowerCamelCase(content, mdp.getName());
 			content.append("(input:");
 			content.append(scope.find(mdp.getInputType()).fullName);
-			content.append("):");
-			content.append(scope.find(mdp.getOutputType()).fullName);
-			content.append(";\n");
+            content.append(", done:Function):void{\n");
+			content.append("\t\t\tthrow new Error(\"rpc method ");
+			appendLowerCamelCase(content, mdp.getName());
+			content.append(" is not implemented.\");\n\t\t}\n");
 			content.append("\n\n");
 		}
 		content.append("\t}\n");
-
+        content.append("}\n");
 	}
 
 	public static void main(String[] args) throws IOException {

@@ -24,10 +24,26 @@ message BBB {
 message CCC {
 	required string ccc = 1;
 }
+
 service Foo {
 	rpc Search (BBB) returns (AAA);
 }
 
+service Bar {
+	rpc GoodMorning (CCC) returns (AAA);
+	option (as3_server_side_service) = true;
+}
+
+service Baz {
+	rpc HelloWorld (CCC) returns (BBB);
+	option (as3_client_side_service) = false;
+}
+
+service ServerOnly {
+	rpc HelloWorld (AAA) returns (BBB);
+	option (as3_client_side_service) = false;
+	option (as3_server_side_service) = true;
+}
 extend AAA {
 	optional string ddd = 300 [default = "dream"];
 }

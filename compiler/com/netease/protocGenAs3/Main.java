@@ -1178,30 +1178,82 @@ public final class Main {
 		HashSet<String> importTypes = new HashSet<String>();
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 			importTypes.add(scope.find(mdp.getInputType()).fullName);
-			importTypes.add(scope.find(mdp.getOutputType()).fullName);
+			if (scope.proto.getOptions().getExtension(Options.as3ClientSideService)) {
+				importTypes.add(scope.find(mdp.getOutputType()).fullName);
+			}
 		}
 		for (String importType : importTypes) {
 			content.append("\timport ");
 			content.append(importType);
 			content.append(";\n");
 		}
+		content.append("\timport com.netease.protobuf.Message;");
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 		content.append("\tpublic final class ");
 		content.append(scope.proto.getName());
+		if (scope.proto.getOptions().getExtension(Options.as3ClientSideService)) {
+			content.append(" implements ");
+			content.append(scope.parent.fullName);
+			content.append(".I");
+			content.append(scope.proto.getName());
+		}
 		content.append(" {\n");
-		content.append("\t\tpublic var sendFunction:Function;\n\n");
-		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
-			content.append("\t\tpublic function ");
-			appendLowerCamelCase(content, mdp.getName());
-			content.append("(input:");
-			content.append(scope.find(mdp.getInputType()).fullName);
-			content.append(", rpcResult:Function):void {\n");
-			content.append("\t\t\tsendFunction(\"");
-			content.append(mdp.getName());
-			content.append("\", input, rpcResult, ");
-			content.append(scope.find(mdp.getOutputType()).fullName);
-			content.append(");\n");
+
+		if (scope.proto.getOptions().getExtension(Options.as3ServerSideService)) {
+			content.append("\t\tpublic static const REQEST_CLASSES_BY_METHOD_NAME:Object = {\n");
+			boolean comma = false;
+			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+				if (comma) {
+					content.append(",\n");
+				} else {
+					comma = true;
+				}
+				content.append("\t\t\t\"");
+				content.append(mdp.getName());
+				content.append("\" : ");
+				content.append(scope.find(mdp.getInputType()).fullName);
+			}
+			content.append("\n\t\t};\n\n");
+
+
+			content.append("\t\tpublic static function dispatch(service:");
+			content.append(scope.parent.fullName);
+			content.append(".I");
+			content.append(scope.proto.getName());
+			content.append(", methodName:String, request:com.netease.protobuf.Message, responseHandler:Function):void {\n");
+			content.append("\t\t\tswitch(methodName) {\n");
+			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+				content.append("\t\t\t\tcase \"");
+				content.append(mdp.getName());
+				content.append("\":\n");
+				content.append("\t\t\t\t{\n");
+				content.append("\t\t\t\t\tservice.");
+				appendLowerCamelCase(content, mdp.getName());
+				content.append("(");
+				content.append(scope.find(mdp.getInputType()).fullName);
+				content.append("(request), responseHandler);\n");
+				content.append("\t\t\t\t\tbreak;\n");
+				content.append("\t\t\t\t\t}\n");
+			}
+			content.append("\t\t\t}\n");
 			content.append("\t\t}\n\n");
+		}
+
+		if (scope.proto.getOptions().getExtension(Options.as3ClientSideService)) {
+			content.append("\t\tpublic var sendFunction:Function;\n\n");
+			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+				content.append("\t\tpublic function ");
+				appendLowerCamelCase(content, mdp.getName());
+				content.append("(request:");
+				content.append(scope.find(mdp.getInputType()).fullName);
+				content.append(", responseHandler:Function):void {\n");
+				content.append("\t\t\tsendFunction(\"");
+				content.append(mdp.getName());
+				content.append("\", request, responseHandler, ");
+				content.append(scope.find(mdp.getOutputType()).fullName);
+				content.append(");\n");
+				content.append("\t\t}\n\n");
+			}
 		}
 		content.append("\t}\n");
         content.append("}\n");

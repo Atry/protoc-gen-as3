@@ -1085,8 +1085,6 @@ public final class Main {
 		if (scope.proto instanceof DescriptorProto) {
 			writeMessage((Scope<DescriptorProto>)scope, content,
 					initializerContent);
-		} else if (scope.proto instanceof ServiceDescriptorProto) {
-			writeService((Scope<ServiceDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof EnumDescriptorProto) {
 			writeEnum((Scope<EnumDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof FieldDescriptorProto) {
@@ -1103,20 +1101,58 @@ public final class Main {
 		}
 		content.append("}\n");
 	}
+	
+	@SuppressWarnings("unchecked")
 	private static void writeFiles(Scope<?> root,
 			CodeGeneratorResponse.Builder responseBuilder,
 			StringBuilder initializerContent) {
 		for (Map.Entry<String, Scope<?>> entry : root.children.entrySet()) {
 			Scope<?> scope = entry.getValue();
 			if (scope.export) {
-				StringBuilder content = new StringBuilder();
-				writeFile(scope, content, initializerContent);
-				responseBuilder.addFile(
-					CodeGeneratorResponse.File.newBuilder().
-						setName(scope.fullName.replace('.', '/') + ".as").
-						setContent(content.toString()).
-					build()
-				);
+				if (scope.proto instanceof ServiceDescriptorProto) {
+					ServiceDescriptorProto serviceProto = (ServiceDescriptorProto)scope.proto;
+					if (serviceProto.getOptions().getExtension(Options.as3ClientSideService) ||
+						serviceProto.getOptions().getExtension(Options.as3ServerSideService)) {
+						StringBuilder classContent = new StringBuilder();
+						writeServiceClass((Scope<ServiceDescriptorProto>)scope, classContent);
+						responseBuilder.addFile(
+							CodeGeneratorResponse.File.newBuilder().
+								setName(scope.fullName.replace('.', '/') + ".as").
+								setContent(classContent.toString()).
+							build()
+						);
+						StringBuilder interfaceContent = new StringBuilder();
+						writeServiceInterface((Scope<ServiceDescriptorProto>)scope, interfaceContent);
+						String[] servicePath = scope.fullName.split("\\.");
+						StringBuilder sb = new StringBuilder();
+						int i = 0; 
+						for (; i < servicePath.length - 1; i++) {
+							sb.append(servicePath[i]);
+							sb.append('/');
+						}
+						sb.append('I');
+						sb.append(servicePath[i]);
+						sb.append(".as");
+
+						responseBuilder.addFile(
+							CodeGeneratorResponse.File.newBuilder().
+								setName(sb.toString()).
+								setContent(interfaceContent.toString()).
+							build()
+						);
+					}
+				}
+                else
+                {
+                    StringBuilder content = new StringBuilder();
+                    writeFile(scope, content, initializerContent);
+                    responseBuilder.addFile(
+                        CodeGeneratorResponse.File.newBuilder().
+                            setName(scope.fullName.replace('.', '/') + ".as").
+                            setContent(content.toString()).
+                        build()
+                    );
+                }
 			}
 			writeFiles(scope, responseBuilder, initializerContent);
 		}
@@ -1134,12 +1170,110 @@ public final class Main {
 			build()
 		);
 	}
-	private static void writeService(Scope<ServiceDescriptorProto> scope,
+	private static void writeServiceClass(Scope<ServiceDescriptorProto> scope,
 			StringBuilder content) {
+		content.append("package ");
+		content.append(scope.parent.fullName);
+		content.append(" {\n");
 		HashSet<String> importTypes = new HashSet<String>();
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 			importTypes.add(scope.find(mdp.getInputType()).fullName);
-			importTypes.add(scope.find(mdp.getOutputType()).fullName);
+			if (scope.proto.getOptions().getExtension(Options.as3ClientSideService)) {
+				importTypes.add(scope.find(mdp.getOutputType()).fullName);
+			}
+		}
+		for (String importType : importTypes) {
+			content.append("\timport ");
+			content.append(importType);
+			content.append(";\n");
+		}
+		content.append("\timport com.netease.protobuf.Message;");
+		content.append("\t// @@protoc_insertion_point(imports)\n\n");
+		content.append("\tpublic final class ");
+		content.append(scope.proto.getName());
+		if (scope.proto.getOptions().getExtension(Options.as3ClientSideService)) {
+			content.append(" implements ");
+			content.append(scope.parent.fullName);
+			content.append(".I");
+			content.append(scope.proto.getName());
+		}
+		content.append(" {\n");
+
+		if (scope.proto.getOptions().getExtension(Options.as3ServerSideService)) {
+			content.append("\t\tpublic static const REQEST_CLASSES_BY_METHOD_NAME:Object = {\n");
+			boolean comma = false;
+			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+				if (comma) {
+					content.append(",\n");
+				} else {
+					comma = true;
+				}
+				content.append("\t\t\t\"");
+				content.append(scope.fullName);
+				content.append(".");
+				content.append(mdp.getName());
+				content.append("\" : ");
+				content.append(scope.find(mdp.getInputType()).fullName);
+			}
+			content.append("\n\t\t};\n\n");
+
+
+			content.append("\t\tpublic static function dispatch(service:");
+			content.append(scope.parent.fullName);
+			content.append(".I");
+			content.append(scope.proto.getName());
+			content.append(", methodName:String, request:com.netease.protobuf.Message, responseHandler:Function):void {\n");
+			content.append("\t\t\tswitch(methodName) {\n");
+			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+				content.append("\t\t\t\tcase \"");
+				content.append(scope.fullName);
+				content.append(".");
+				content.append(mdp.getName());
+				content.append("\":\n");
+				content.append("\t\t\t\t{\n");
+				content.append("\t\t\t\t\tservice.");
+				appendLowerCamelCase(content, mdp.getName());
+				content.append("(");
+				content.append(scope.find(mdp.getInputType()).fullName);
+				content.append("(request), responseHandler);\n");
+				content.append("\t\t\t\t\tbreak;\n");
+				content.append("\t\t\t\t\t}\n");
+			}
+			content.append("\t\t\t}\n");
+			content.append("\t\t}\n\n");
+		}
+
+		if (scope.proto.getOptions().getExtension(Options.as3ClientSideService)) {
+			content.append("\t\tpublic var sendFunction:Function;\n\n");
+			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+				content.append("\t\tpublic function ");
+				appendLowerCamelCase(content, mdp.getName());
+				content.append("(request:");
+				content.append(scope.find(mdp.getInputType()).fullName);
+				content.append(", responseHandler:Function):void {\n");
+				content.append("\t\t\tsendFunction(\"");
+				content.append(scope.fullName);
+				content.append(".");
+				content.append(mdp.getName());
+				content.append("\", request, responseHandler, ");
+				content.append(scope.find(mdp.getOutputType()).fullName);
+				content.append(");\n");
+				content.append("\t\t}\n\n");
+			}
+		}
+		content.append("\t}\n");
+        content.append("}\n");
+	}
+	
+	private static void writeServiceInterface(
+			Scope<ServiceDescriptorProto> scope,
+			StringBuilder content) {
+		content.append("package ");
+		content.append(scope.parent.fullName);
+		content.append(" {\n");
+		HashSet<String> importTypes = new HashSet<String>();
+		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+			importTypes.add(scope.find(mdp.getInputType()).fullName);
 		}
 		for (String importType : importTypes) {
 			content.append("\timport ");
@@ -1147,27 +1281,19 @@ public final class Main {
 			content.append(";\n");
 		}
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
-		content.append("\tpublic final class ");
+		content.append("\tpublic interface I");
 		content.append(scope.proto.getName());
 		content.append(" {\n");
-		content.append("\t\tpublic var sendFunction:Function;\n\n");
+		content.append("\n\n");
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
-			content.append("\t\tpublic function ");
+			content.append("\t\tfunction ");
 			appendLowerCamelCase(content, mdp.getName());
 			content.append("(input:");
 			content.append(scope.find(mdp.getInputType()).fullName);
-			content.append(", rpcResult:Function):void {\n");
-			content.append("\t\t\tsendFunction(\"");
-			content.append(scope.fullName);
-			content.append(".");
-			content.append(mdp.getName());
-			content.append("\", input, rpcResult, ");
-			content.append(scope.find(mdp.getOutputType()).fullName);
-			content.append(");\n");
-			content.append("\t\t}\n\n");
+            content.append(", done:Function):void;\n\n");
 		}
 		content.append("\t}\n");
-
+        content.append("}\n");
 	}
 
 	public static void main(String[] args) throws IOException {

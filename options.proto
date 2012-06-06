@@ -1,4 +1,5 @@
 // Copyright (c) 2010 , NetEase.com,Inc. All rights reserved.
+// Copyright (c) 2012 , Yang Bo & NetEase.com,Inc. All rights reserved.
 //
 // Author: Yang Bo (pop.atry@gmail.com)
 //
@@ -10,5 +11,9 @@ extend google.protobuf.MessageOptions {
   optional bool as3_bindable = 9393[default = false];
   optional string as3_amf_alias = 9394;
   optional bool as3_amf_auto_alias = 9395[default = false];
+}
+extend google.protobuf.ServiceOptions {
+  optional bool as3_client_side_service = 9396[default = true];
+  optional bool as3_server_side_service = 9397[default = false];
 }
 

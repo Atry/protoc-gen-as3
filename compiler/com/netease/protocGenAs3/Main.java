@@ -1085,9 +1085,6 @@ public final class Main {
 		if (scope.proto instanceof DescriptorProto) {
 			writeMessage((Scope<DescriptorProto>)scope, content,
 					initializerContent);
-		} else if (scope.proto instanceof ServiceDescriptorProto) {
-//			writeServiceStub((Scope<ServiceDescriptorProto>)scope, content);
-//			writeService((Scope<ServiceDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof EnumDescriptorProto) {
 			writeEnum((Scope<EnumDescriptorProto>)scope, content);
 		} else if (scope.proto instanceof FieldDescriptorProto) {
@@ -1113,22 +1110,37 @@ public final class Main {
 			Scope<?> scope = entry.getValue();
 			if (scope.export) {
 				if (scope.proto instanceof ServiceDescriptorProto) {
-					StringBuilder content1 = new StringBuilder();
-        			writeServiceStub((Scope<ServiceDescriptorProto>)scope, content1);
-					responseBuilder.addFile(
-						CodeGeneratorResponse.File.newBuilder().
-							setName(scope.fullName.replace('.', '/') + "_Stub.as").
-							setContent(content1.toString()).
-						build()
-					);
-					StringBuilder content2 = new StringBuilder();
-        			writeService((Scope<ServiceDescriptorProto>)scope, content2);
-					responseBuilder.addFile(
-						CodeGeneratorResponse.File.newBuilder().
-							setName(scope.fullName.replace('.', '/') + ".as").
-							setContent(content2.toString()).
-						build()
-					);
+					ServiceDescriptorProto serviceProto = (ServiceDescriptorProto)scope.proto;
+					if (serviceProto.getOptions().getExtension(Options.as3ClientSideService) ||
+						serviceProto.getOptions().getExtension(Options.as3ServerSideService)) {
+						StringBuilder classContent = new StringBuilder();
+						writeServiceClass((Scope<ServiceDescriptorProto>)scope, classContent);
+						responseBuilder.addFile(
+							CodeGeneratorResponse.File.newBuilder().
+								setName(scope.fullName.replace('.', '/') + ".as").
+								setContent(classContent.toString()).
+							build()
+						);
+						StringBuilder interfaceContent = new StringBuilder();
+						writeServiceInterface((Scope<ServiceDescriptorProto>)scope, interfaceContent);
+						String[] servicePath = scope.fullName.split("\\.");
+						StringBuilder sb = new StringBuilder();
+						int i = 0; 
+						for (; i < servicePath.length - 1; i++) {
+							sb.append(servicePath[i]);
+							sb.append('/');
+						}
+						sb.append('I');
+						sb.append(servicePath[i]);
+						sb.append(".as");
+
+						responseBuilder.addFile(
+							CodeGeneratorResponse.File.newBuilder().
+								setName(sb.toString()).
+								setContent(interfaceContent.toString()).
+							build()
+						);
+					}
 				}
                 else
                 {
@@ -1158,7 +1170,7 @@ public final class Main {
 			build()
 		);
 	}
-	private static void writeServiceStub(Scope<ServiceDescriptorProto> scope,
+	private static void writeServiceClass(Scope<ServiceDescriptorProto> scope,
 			StringBuilder content) {
 		content.append("package ");
 		content.append(scope.parent.fullName);
@@ -1176,7 +1188,6 @@ public final class Main {
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 		content.append("\tpublic final class ");
 		content.append(scope.proto.getName());
-		content.append("_Stub");
 		content.append(" {\n");
 		content.append("\t\tpublic var sendFunction:Function;\n\n");
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
@@ -1196,7 +1207,8 @@ public final class Main {
         content.append("}\n");
 	}
 	
-	private static void writeService(Scope<ServiceDescriptorProto> scope,
+	private static void writeServiceInterface(
+			Scope<ServiceDescriptorProto> scope,
 			StringBuilder content) {
 		content.append("package ");
 		content.append(scope.parent.fullName);
@@ -1204,7 +1216,6 @@ public final class Main {
 		HashSet<String> importTypes = new HashSet<String>();
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 			importTypes.add(scope.find(mdp.getInputType()).fullName);
-			importTypes.add(scope.find(mdp.getOutputType()).fullName);
 		}
 		for (String importType : importTypes) {
 			content.append("\timport ");
@@ -1212,41 +1223,16 @@ public final class Main {
 			content.append(";\n");
 		}
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
-		content.append("\tpublic class ");
+		content.append("\tpublic interface I");
 		content.append(scope.proto.getName());
 		content.append(" {\n");
 		content.append("\n\n");
-        content.append("\t\tpublic var methods:Dictionary;\n\n");
-        content.append("\t\tpublic function ");
-        content.append(scope.proto.getName());
-        content.append("(){\n");
-        content.append("\t\t\tmethods = new Dictionary();\n");
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
-            content.append("\t\t\tmethods[\"");
-            content.append(mdp.getName());
-            content.append("\"] = {");
-            content.append("requestType : ");
-            content.append(scope.find(mdp.getInputType()).fullName);
-            content.append(",\n");
-            content.append("\t\t\t\tresponseType : ");
-            content.append(scope.find(mdp.getOutputType()).fullName);
-            content.append(",\n");
-            content.append("\t\t\t\trpc : ");
-			appendLowerCamelCase(content, mdp.getName());
-            content.append("\n\t\t\t};\n");
-        }
-        content.append("\t\t}\n\n");
-
-		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
-			content.append("\t\tpublic function ");
+			content.append("\t\tfunction ");
 			appendLowerCamelCase(content, mdp.getName());
 			content.append("(input:");
 			content.append(scope.find(mdp.getInputType()).fullName);
-            content.append(", done:Function):void{\n");
-			content.append("\t\t\tthrow new Error(\"rpc method ");
-			appendLowerCamelCase(content, mdp.getName());
-			content.append(" is not implemented.\");\n\t\t}\n");
-			content.append("\n\n");
+            content.append(", done:Function):void;\n\n");
 		}
 		content.append("\t}\n");
         content.append("}\n");

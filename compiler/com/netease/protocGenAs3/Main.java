@@ -1209,6 +1209,8 @@ public final class Main {
 					comma = true;
 				}
 				content.append("\t\t\t\"");
+				content.append(scope.fullName);
+				content.append(".");
 				content.append(mdp.getName());
 				content.append("\" : ");
 				content.append(scope.find(mdp.getInputType()).fullName);
@@ -1224,6 +1226,8 @@ public final class Main {
 			content.append("\t\t\tswitch(methodName) {\n");
 			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 				content.append("\t\t\t\tcase \"");
+				content.append(scope.fullName);
+				content.append(".");
 				content.append(mdp.getName());
 				content.append("\":\n");
 				content.append("\t\t\t\t{\n");
@@ -1248,6 +1252,8 @@ public final class Main {
 				content.append(scope.find(mdp.getInputType()).fullName);
 				content.append(", responseHandler:Function):void {\n");
 				content.append("\t\t\tsendFunction(\"");
+				content.append(scope.fullName);
+				content.append(".");
 				content.append(mdp.getName());
 				content.append("\", request, responseHandler, ");
 				content.append(scope.find(mdp.getOutputType()).fullName);

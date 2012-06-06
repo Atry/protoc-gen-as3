@@ -26,19 +26,20 @@ package com.netease.protobuf {
 			const modHigh:uint = internalHigh % n
 			const mod:uint = (low % n + modHigh * 6) % n
 			internalHigh /= n
-			const newLow:Number = (modHigh * Number(0x100000000) + low) / n
-			internalHigh += newLow / 0x100000000
+			const newLow:Number = (modHigh * 4294967296.0 + low) / n
+			internalHigh += uint(newLow / 4294967296.0)
 			low = newLow
 			return mod
 		}
 		internal final function mul(n:uint):void {
 			const newLow:Number = Number(low) * n
-			internalHigh = newLow / 0x100000000 + Number(internalHigh) * n
-			low = newLow
+			internalHigh *= n
+			internalHigh += uint(newLow / 4294967296.0)
+			low *= n
 		}
 		internal final function add(n:uint):void {
 			const newLow:Number = Number(low) + n
-			internalHigh = newLow / 0x100000000 + internalHigh
+			internalHigh += uint(newLow / 4294967296.0)
 			low = newLow
 		}
 		internal final function bitwiseNot():void {

@@ -129,6 +129,29 @@ package com.netease.protobuf.test {
 			assertSame(int64_8.toNumber(), -1494242414000)
 			assertSame(int64_8.toString(), "-1494242414000")
 			assertSame(Int64.parseInt64(int64_8.toString()), int64_8)
+
+			const int64_10:Int64 = Int64.fromNumber(-1024)
+			assertSame(int64_10.toNumber(), -1024)
+			assertSame(int64_10.toString(), "-1024")
+			assertSame(Int64.parseInt64(int64_10.toString()), int64_10)
+			assertSame(Int64.parseInt64("-0x400"), int64_10)
+
+			const int64_11:Int64 = Int64.fromNumber(0)
+			assertSame(int64_11.toNumber(), 0)
+			assertSame(int64_11.toString(), "0")
+			assertSame(Int64.parseInt64(int64_11.toString()), int64_11)
+			assertSame(Int64.parseInt64("0"), int64_11)
+			assertSame(Int64.parseInt64("0x0"), int64_11)
+			assertSame(Int64.parseInt64("-0"), int64_11)
+			assertSame(Int64.parseInt64("-0x0"), int64_11)
+
+			const int64_9:Int64 = Int64.fromNumber(-1)
+			assertSame(int64_9.toNumber(), -1)
+			assertSame(int64_9.toString(), "-1")
+			assertSame(Int64.parseInt64(int64_9.toString()), int64_9)
+			assertSame(Int64.parseInt64("-0x1"), int64_9)
+			assertSame(Int64.parseInt64("-01"), int64_9)
+
 			const uint64_9:UInt64 = UInt64.fromNumber(123234)
 			assertSame(uint64_9.toNumber(), 123234)
 			assertSame(uint64_9.toString(), "123234")
@@ -289,3 +312,4 @@ package com.netease.protobuf.test {
 	}
 
 }
+// vim: ts=4 sw=4

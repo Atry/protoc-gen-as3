@@ -1200,7 +1200,7 @@ public final class Main {
 		content.append(" {\n");
 
 		if (scope.proto.getOptions().getExtension(Options.as3ServerSideService)) {
-			content.append("\t\tpublic static const REQEST_CLASSES_BY_METHOD_NAME:Object = {\n");
+			content.append("\t\tpublic static const REQUEST_CLASSES_BY_METHOD_NAME:Object = {\n");
 			boolean comma = false;
 			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 				if (comma) {

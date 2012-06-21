@@ -329,7 +329,7 @@ public final class Main {
 		sb.append('\"');
 		for (int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
-			switch(c) {
+			switch (c) {
 			case '\"':
 			case '\\':
 				sb.append('\\');
@@ -1223,7 +1223,7 @@ public final class Main {
 			content.append(".I");
 			content.append(scope.proto.getName());
 			content.append(", methodName:String, request:com.netease.protobuf.Message, responseHandler:Function):void {\n");
-			content.append("\t\t\tswitch(methodName) {\n");
+			content.append("\t\t\tswitch (methodName) {\n");
 			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 				content.append("\t\t\t\tcase \"");
 				content.append(scope.fullName);
@@ -1237,7 +1237,7 @@ public final class Main {
 				content.append(scope.find(mdp.getInputType()).fullName);
 				content.append("(request), responseHandler);\n");
 				content.append("\t\t\t\t\tbreak;\n");
-				content.append("\t\t\t\t\t}\n");
+				content.append("\t\t\t\t}\n");
 			}
 			content.append("\t\t\t}\n");
 			content.append("\t\t}\n\n");

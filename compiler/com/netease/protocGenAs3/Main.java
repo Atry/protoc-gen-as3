@@ -1187,7 +1187,7 @@ public final class Main {
 			content.append(importType);
 			content.append(";\n");
 		}
-		content.append("\timport com.netease.protobuf.Message;");
+		content.append("\timport com.netease.protobuf.Message;\n");
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 		content.append("\tpublic final class ");
 		content.append(scope.proto.getName());
@@ -1218,7 +1218,7 @@ public final class Main {
 			content.append("\n\t\t};\n\n");
 
 
-			content.append("\t\tpublic static function dispatch(service:");
+			content.append("\t\tpublic static function callMethod(service:");
 			content.append(scope.parent.fullName);
 			content.append(".I");
 			content.append(scope.proto.getName());

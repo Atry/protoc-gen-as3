@@ -303,21 +303,28 @@ package com.netease.protobuf {
 		 * Outputs a textual representation of the Protocol Message supplied into
 		 * the parameter <code>output</code>.
 		 */
-		public static function printToUTFBytes(output:IDataOutput,
+		public static function printToUTFBytes(
+				output:IDataOutput,
 				message:Message,
-				singleLineMode:Boolean = true):void {
-			printMessageFields(output, message,
-				singleLineMode ? SINGLELINE_MODE : MULTILINE_MODE)
+				singleLineMode:Boolean = true,
+				currentIndent:String = ""):void {
+			printMessageFields(
+				output,
+				message,
+				singleLineMode ? SINGLELINE_MODE : MULTILINE_MODE,
+				currentIndent)
 		}
 		
 		/**
 		 * Like <code>printToUTFBytes()</code>, but writes directly to a String and
 		 * returns it.
 		 */
-		public static function printToString(message:Message,
-				singleLineMode:Boolean = true):String {
+		public static function printToString(
+				message:Message,
+				singleLineMode:Boolean = true,
+				currentIndent:String = ""):String {
 			const ba:ByteArray = new ByteArray
-			printToUTFBytes(ba, message, singleLineMode)
+			printToUTFBytes(ba, message, singleLineMode, currentIndent)
 			ba.position = 0
 			return ba.readUTFBytes(ba.length)
 		}

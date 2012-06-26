@@ -145,10 +145,11 @@ package com.netease.protobuf {
 				// Not description.constant,
 				// because haXe will replace constant to variable, WTF!
 				messageFields = description.*.
-					(0 == String(@type).search(
-						/^com.netease.protobuf.fieldDescriptors::(Repeated)?FieldDescriptor\$/) &&
-						BaseFieldDescriptor(type[@name]).name.
-								search(/^\./) == -1// Not extension
+					(
+						0 == String(@type).search(
+							/^com.netease.protobuf.fieldDescriptors::(Repeated)?FieldDescriptor\$/) &&
+						// Not extension
+						BaseFieldDescriptor(type[@name]).name.search(/\//) == -1
 					).@name
 				allMessageFields[type] = messageFields
 			}

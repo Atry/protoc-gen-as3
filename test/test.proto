@@ -23,6 +23,9 @@ message BBB {
 }
 message CCC {
 	required string ccc = 1;
+	extend AAA {
+		optional string viny = 301 [default = "viny"];
+	}
 }
 
 service Foo {

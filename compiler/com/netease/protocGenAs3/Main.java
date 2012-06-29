@@ -701,7 +701,7 @@ public final class Main {
 				throw new IllegalArgumentException();
 			}
 		}
-		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\toverride used_by_generated_code final function writeToBuffer(output:com.netease.protobuf.WritingBuffer):void {\n");
+		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n\t\toverride com.netease.protobuf.used_by_generated_code final function writeToBuffer(output:com.netease.protobuf.WritingBuffer):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -789,7 +789,7 @@ public final class Main {
 		content.append("\t\t\t}\n");
 		content.append("\t\t}\n\n");
 		content.append("\t\t/**\n\t\t *  @private\n\t\t */\n");
-		content.append("\t\toverride used_by_generated_code final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
+		content.append("\t\toverride com.netease.protobuf.used_by_generated_code final function readFromSlice(input:flash.utils.IDataInput, bytesAfterSlice:uint):void {\n");
 		for (FieldDescriptorProto fdp : scope.proto.getFieldList()) {
 			if (fdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
 				System.err.println("Warning: Group is not supported.");
@@ -1187,7 +1187,9 @@ public final class Main {
 			content.append(importType);
 			content.append(";\n");
 		}
-		content.append("\timport com.netease.protobuf.Message;\n");
+		content.append("\timport google.protobuf.*;\n");
+		content.append("\timport flash.utils.*;\n");
+		content.append("\timport com.netease.protobuf.*;\n");
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 		content.append("\tpublic final class ");
 		content.append(scope.proto.getName());
@@ -1199,8 +1201,64 @@ public final class Main {
 		}
 		content.append(" {\n");
 
+		if (scope.proto.hasOptions()) {
+			content.append("\t\tpublic static const OPTIONS_BYTES:flash.utils.ByteArray = com.netease.protobuf.stringToByteArray(\"");
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			try {
+				scope.proto.getOptions().writeTo(buffer);
+			} catch (IOException e) {
+				throw new AssertionError("ByteArrayOutputStream should not throw IOException!", e);
+			}
+			for (byte b : buffer.toByteArray()) {
+				content.append("\\x");
+				content.append(Character.forDigit((b & 0xF0) >>> 4, 16));
+				content.append(Character.forDigit(b & 0x0F, 16));
+			}
+			content.append("\");\n\n");
+			content.append("\t\tpublic static function getOptions():google.protobuf.ServiceOptions\n");
+			content.append("\t\t{\n");
+			content.append("\t\t\tconst options:google.protobuf.ServiceOptions = new google.protobuf.ServiceOptions();\n");
+			content.append("\t\t\toptions.mergeFrom(OPTIONS_BYTES);\n\n");
+			content.append("\t\t\treturn options;\n");
+			content.append("\t\t}\n\n");
+		}
+		
+		boolean hasMethodOptions = false;
+		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
+			if (mdp.hasOptions()) {
+				if (!hasMethodOptions) {
+					hasMethodOptions = true;
+					content.append("\t\tpublic static const OPTIONS_BYTES_BY_METHOD_NAME:Object =\n");
+					content.append("\t\t{\n");
+				} else {
+					content.append(",\n");
+				}
+				content.append("\t\t\t\"");
+				content.append(scope.fullName);
+				content.append(".");
+				content.append(mdp.getName());
+				content.append("\" : stringToByteArray(\"");
+				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+				try {
+					mdp.getOptions().writeTo(buffer);
+				} catch (IOException e) {
+					throw new AssertionError("ByteArrayOutputStream should not throw IOException!", e);
+				}
+				for (byte b : buffer.toByteArray()) {
+					content.append("\\x");
+					content.append(Character.forDigit((b & 0xF0) >>> 4, 16));
+					content.append(Character.forDigit(b & 0x0F, 16));
+				}
+				content.append("\")");
+			}
+		}
+		if (hasMethodOptions) {
+				content.append("\n\t\t};\n\n");
+		}
+
 		if (scope.proto.getOptions().getExtension(Options.as3ServerSideService)) {
-			content.append("\t\tpublic static const REQUEST_CLASSES_BY_METHOD_NAME:Object = {\n");
+			content.append("\t\tpublic static const REQUEST_CLASSES_BY_METHOD_NAME:Object =\n");
+			content.append("\t\t{\n");
 			boolean comma = false;
 			for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 				if (comma) {

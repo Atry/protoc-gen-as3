@@ -24,7 +24,7 @@ classes/com/netease/protocGenAs3/Main.class: \
 	compiler/com/netease/protocGenAs3/Main.java \
 	$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar \
 	| classes
-	$(JAVAC) -source 1.5 -target 1.5 -encoding UTF-8 -Xlint:all -d classes \
+	$(JAVAC) -source 1.5 -target 1.5 -encoding UTF-8 -d classes \
 	-classpath "$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar" \
 	-sourcepath "plugin.proto.java$(PATH_SEPARATOR)compiler$(PATH_SEPARATOR)options.proto.java" \
 	compiler/com/netease/protocGenAs3/Main.java
@@ -59,9 +59,24 @@ dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_V
 	echo '@java -jar protoc-gen-as3.jar') > $@
 	chmod +x $@
 
-dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) | dist
+COMMA=,
+
+# 如果直接生成dist/protobuf.swc，compc会报错。
+# Workaround: 先生成中间文件
+tiny-protobuf.swc: $(filter-out as3/com/netease/protobuf/CustomOption.as,$(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as))
 	$(COMPC) -target-player=10 \
-	-include-sources+=as3 -output=$@
+	-output=$@ \
+	-source-path+=as3 \
+	-include-sources+='$(subst $(EMPTY) ,'$(COMMA)',$^)'
+
+dist/protobuf.swc: as3/com/netease/protobuf/CustomOption.as descriptor.proto.as3/google tiny-protobuf.swc | dist
+	$(COMPC) -target-player=10 \
+	-source-path+=as3,descriptor.proto.as3 \
+	-output=$@ \
+	-include-libraries+=tiny-protobuf.swc \
+	google.protobuf.MethodOptions \
+	google.protobuf.ServiceOptions \
+	com.netease.protobuf.CustomOption
 
 doc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) | dist
 	$(ASDOC) -target-player=10 \

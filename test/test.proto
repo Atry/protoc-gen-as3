@@ -8,6 +8,10 @@
 package test;
 import "options.proto";
 import "issue12.proto";
+import "google/protobuf/descriptor.proto";
+extend google.protobuf.MethodOptions {
+	optional string my_option = 3333;
+}
 message AAA {
 	option (as3_bindable) = true;
 	option (as3_amf_alias) = "myTest.MyAAA.汉字";
@@ -29,7 +33,9 @@ message CCC {
 }
 
 service Foo {
-	rpc Search (BBB) returns (AAA);
+	rpc Search (BBB) returns (AAA) {
+		option (my_option) = "protoc-gen-as3";
+	}
 }
 
 service Bar {

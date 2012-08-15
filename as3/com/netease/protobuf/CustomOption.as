@@ -20,16 +20,21 @@ package com.netease.protobuf {
 			if (m == null) {
 				return null
 			}
-			const serviceClass:Class = Class(getDefinitionByName(m[1]));
-			var optionsBytesByMethodName:Object
+			const serviceClass:Class = Class(getDefinitionByName(m[1]))
+			var optionsBytes:ByteArray
 			try {
-				optionsBytesByMethodName = serviceClass.OPTIONS_BYTES_BY_METHOD_NAME
+				optionsBytes =
+					serviceClass.OPTIONS_BYTES_BY_METHOD_NAME[methodFullName]
 			} catch (e:ReferenceError) {
 				return null
 			}
-			const result:MethodOptions = new MethodOptions
-			result.mergeFrom(optionsBytesByMethodName[methodFullName])
-			return result
+			if (optionsBytes) {
+				const result:MethodOptions = new MethodOptions
+				result.mergeFrom(optionsBytes)
+				return result
+			} else {
+				return null
+			}
 		}
 
 		public static function getServiceOptions(serviceClass:Class):ServiceOptions {

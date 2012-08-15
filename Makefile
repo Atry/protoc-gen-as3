@@ -78,9 +78,15 @@ dist/protobuf.swc: as3/com/netease/protobuf/CustomOption.as descriptor.proto.as3
 	google.protobuf.ServiceOptions \
 	com.netease.protobuf.CustomOption
 
-doc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) | dist
+doc: \
+$(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) \
+descriptor.proto.as3/google \
+| dist
 	$(ASDOC) -target-player=10 \
-	-doc-sources+=as3 -output=$@
+	--doc-sources+=as3 \
+	--source-path+=descriptor.proto.as3 \
+	-output=$@ \
+	-exclude-sources+=as3/com/netease/protobuf/CustomOption.as
 
 doc.tar.gz: doc
 	tar -acf $@ $<

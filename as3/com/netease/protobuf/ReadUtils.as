@@ -18,7 +18,7 @@ package com.netease.protobuf {
 		public static function skip(input:IDataInput, wireType:uint):void {
 			switch (wireType) {
 			case WireType.VARINT:
-				while (input.readUnsignedByte() > 0x80) {}
+				while (input.readUnsignedByte() >= 0x80) {}
 				break
 			case WireType.FIXED_64_BIT:
 				input.readInt()

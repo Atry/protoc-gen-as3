@@ -282,6 +282,7 @@ package com.netease.protobuf.test {
 			const t11:BBB = new BBB
 			t11.aaa = new AAA
 			t11.aaa.s = "1234xxx"
+			t11.aaa.bbb = [ new BBB ]
 			t11.i = 1234
 			test(t11)
 			testText(t11)

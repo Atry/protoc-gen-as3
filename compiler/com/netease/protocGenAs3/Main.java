@@ -966,6 +966,15 @@ public final class Main {
 		}
 		switch (fdp.getType()) {
 		case TYPE_MESSAGE:
+			if (scope.proto instanceof DescriptorProto) {
+				content.append(", function():Class { return ");
+				content.append(getActionScript3LogicType(scope, fdp));
+				content.append("; }");
+			} else {
+				content.append(", ");
+				content.append(getActionScript3LogicType(scope, fdp));
+			}
+			break;
 		case TYPE_ENUM:
 			content.append(", ");
 			content.append(getActionScript3LogicType(scope, fdp));

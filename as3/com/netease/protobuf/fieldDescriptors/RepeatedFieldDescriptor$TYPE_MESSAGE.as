@@ -15,13 +15,13 @@ package com.netease.protobuf.fieldDescriptors {
 	 */
 	public final class RepeatedFieldDescriptor$TYPE_MESSAGE extends
 			RepeatedFieldDescriptor {
-		public var messageType:Class
+		public var messageUnion:Object
 		public function RepeatedFieldDescriptor$TYPE_MESSAGE(
-				fullName:String, name:String, tag:uint, messageType:Class) {
+				fullName:String, name:String, tag:uint, messageUnion:Object) {
 			this.fullName = fullName
 			this._name = name
 			this.tag = tag
-			this.messageType = messageType
+			this.messageUnion = messageUnion
 		}
 		override public function get nonPackedWireType():int {
 			return WireType.LENGTH_DELIMITED
@@ -30,10 +30,10 @@ package com.netease.protobuf.fieldDescriptors {
 			return Array
 		}
 		override public function get elementType():Class {
-			return messageType
+			return (messageUnion as Class) || Class(messageUnion = messageUnion())
 		}
 		override public function readSingleField(input:IDataInput):* {
-			return ReadUtils.read$TYPE_MESSAGE(input, new messageType)
+			return ReadUtils.read$TYPE_MESSAGE(input, new elementType)
 		}
 		override public function writeSingleField(output:WritingBuffer,
 				value:*):void {

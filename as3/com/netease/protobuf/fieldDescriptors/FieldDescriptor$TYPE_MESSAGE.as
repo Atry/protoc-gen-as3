@@ -15,19 +15,19 @@ package com.netease.protobuf.fieldDescriptors {
 	 */
 	public final class FieldDescriptor$TYPE_MESSAGE extends
 			FieldDescriptor {
-		public var messageType:Class
+		public var messageUnion:Object
 		public function FieldDescriptor$TYPE_MESSAGE(
-				fullName:String, name:String, tag:uint, messageType:Class) {
+				fullName:String, name:String, tag:uint, messageUnion:Object) {
 			this.fullName = fullName
 			this._name = name
 			this.tag = tag
-			this.messageType = messageType
+			this.messageUnion = messageUnion
 		}
 		override public function get type():Class {
-			return messageType
+			return (messageUnion as Class) || Class(messageUnion = messageUnion())
 		}
 		override public function readSingleField(input:IDataInput):* {
-			return ReadUtils.read$TYPE_MESSAGE(input, new messageType)
+			return ReadUtils.read$TYPE_MESSAGE(input, new type)
 		}
 		override public function writeSingleField(output:WritingBuffer,
 				value:*):void {

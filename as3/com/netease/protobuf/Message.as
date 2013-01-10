@@ -11,10 +11,11 @@
 package com.netease.protobuf {
 	import flash.errors.IllegalOperationError
 	import flash.errors.IOError
-	import flash.utils.Dictionary;
-	import flash.utils.getDefinitionByName;
+	import flash.utils.Dictionary
+	import flash.utils.getDefinitionByName
 	import flash.utils.IDataInput
 	import flash.utils.IDataOutput
+	use namespace com.netease.protobuf.used_by_generated_code
 
 	public class Message {
 		/**
@@ -205,7 +206,7 @@ package com.netease.protobuf {
 			}
 		}
 		
-		public function toString():String {
+		public final function toString():String {
 			return TextFormat.printToString(this)
 		}
 		/**

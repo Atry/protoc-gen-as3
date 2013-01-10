@@ -47,9 +47,12 @@ public final class Main {
 			}
 			return result;
 		}
+		public boolean isRoot() {
+			return parent == null;
+		}
 		private Scope<?> getRoot() {
 			Scope<?> scope = this;
-			while (scope.parent != null) {
+			while (!scope.isRoot()) {
 				scope = scope.parent;
 			}
 			return scope;
@@ -96,8 +99,7 @@ public final class Main {
 			this.parent = parent;
 			this.proto = proto;
 			this.export = export;
-			if (parent == null || parent.fullName == null ||
-					parent.fullName.equals("")) {
+			if (isRoot() || parent.isRoot()) {
 				fullName = name; 
 			} else {
 				fullName = parent.fullName + '.' + name;
@@ -115,7 +117,7 @@ public final class Main {
 			children.put(name, child);
 			return child;
 		}
-		public static Scope<Object> root() {
+		public static Scope<Object> newRoot() {
 			return new Scope<Object>(null, null, false, "");
 		}
 	}
@@ -150,7 +152,7 @@ public final class Main {
 		}
 	}
 	private static Scope<Object> buildScopeTree(CodeGeneratorRequest request) {
-		Scope<Object> root = Scope.root();
+		Scope<Object> root = Scope.newRoot();
 		List<String> filesToGenerate = request.getFileToGenerateList();
 		for (FileDescriptorProto fdp : request.getProtoFileList()) {
 			Scope<?> packageScope = fdp.hasPackage() ?
@@ -1204,8 +1206,12 @@ public final class Main {
 		content.append(scope.proto.getName());
 		if (scope.proto.getOptions().getExtension(Options.as3ClientSideService)) {
 			content.append(" implements ");
-			content.append(scope.parent.fullName);
-			content.append(".I");
+			if (scope.parent.isRoot()) {
+				content.append("I");
+			} else {
+				content.append(scope.parent.fullName);
+				content.append(".I");
+			}
 			content.append(scope.proto.getName());
 		}
 		content.append(" {\n");
@@ -1226,6 +1232,7 @@ public final class Main {
 			content.append("\");\n\n");
 			content.append("\t\tpublic static function getOptions():google.protobuf.ServiceOptions\n");
 			content.append("\t\t{\n");
+			content.append("\t\t\tOPTIONS_BYTES.position = 0;\n");
 			content.append("\t\t\tconst options:google.protobuf.ServiceOptions = new google.protobuf.ServiceOptions();\n");
 			content.append("\t\t\toptions.mergeFrom(OPTIONS_BYTES);\n\n");
 			content.append("\t\t\treturn options;\n");
@@ -1286,8 +1293,12 @@ public final class Main {
 
 
 			content.append("\t\tpublic static function callMethod(service:");
-			content.append(scope.parent.fullName);
-			content.append(".I");
+			if (scope.parent.isRoot()) {
+				content.append("I");
+			} else {
+				content.append(scope.parent.fullName);
+				content.append(".I");
+			}
 			content.append(scope.proto.getName());
 			content.append(", methodName:String, request:com.netease.protobuf.Message, responseHandler:Function):void {\n");
 			content.append("\t\t\tswitch (methodName) {\n");
@@ -1350,8 +1361,7 @@ public final class Main {
 		content.append("\t// @@protoc_insertion_point(imports)\n\n");
 		content.append("\tpublic interface I");
 		content.append(scope.proto.getName());
-		content.append(" {\n");
-		content.append("\n\n");
+		content.append(" {\n\n");
 		for (MethodDescriptorProto mdp : scope.proto.getMethodList()) {
 			content.append("\t\tfunction ");
 			appendLowerCamelCase(content, mdp.getName());

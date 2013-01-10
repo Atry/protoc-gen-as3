@@ -152,6 +152,12 @@ package com.netease.protobuf.test {
 			assertSame(Int64.parseInt64("-0x1"), int64_9)
 			assertSame(Int64.parseInt64("-01"), int64_9)
 
+			const int64_12:Int64 = new Int64(0, -1)
+			assertSame(int64_12.toNumber(), -4294967296)
+			assertSame(int64_12.toString(), "-4294967296")
+			assertSame(Int64.parseInt64(int64_12.toString()), int64_12)
+			assertSame(Int64.parseInt64("-0xFFFFFFFF00000000"), int64_12)
+
 			const uint64_9:UInt64 = UInt64.fromNumber(123234)
 			assertSame(uint64_9.toNumber(), 123234)
 			assertSame(uint64_9.toString(), "123234")

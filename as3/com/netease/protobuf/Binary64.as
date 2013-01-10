@@ -9,6 +9,22 @@
 
 package com.netease.protobuf {
 	public class Binary64 {
+		/**
+		 * @private
+		 */
+		internal static const CHAR_CODE_0:uint = '0'.charCodeAt();
+		/**
+		 * @private
+		 */
+		internal static const CHAR_CODE_9:uint = '9'.charCodeAt();
+		/**
+		 * @private
+		 */
+		internal static const CHAR_CODE_A:uint = 'a'.charCodeAt();
+		/**
+		 * @private
+		 */
+		internal static const CHAR_CODE_Z:uint = 'z'.charCodeAt();
 		public var low:uint;
 		/**
 		 * @private

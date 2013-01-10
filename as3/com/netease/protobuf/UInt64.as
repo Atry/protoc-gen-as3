@@ -30,7 +30,7 @@ package com.netease.protobuf {
 		public final function toNumber():Number {
 			return (high * 4294967296) + low
 		}
-    	public final function toString(radix:uint = 10):String {
+			public final function toString(radix:uint = 10):String {
 			if (radix < 2 || radix > 36) {
 				throw new ArgumentError
 			}
@@ -41,7 +41,11 @@ package com.netease.protobuf {
 			const copyOfThis:UInt64 = new UInt64(low, high);
 			do {
 				const digit:uint = copyOfThis.div(radix);
-				digitChars.push((digit < 10 ? '0' : 'a').charCodeAt() + digit)
+				if (digit < 10) {
+					digitChars.push(digit + CHAR_CODE_0);
+				} else {
+					digitChars.push(digit - 10 + CHAR_CODE_A);
+				}
 			} while (copyOfThis.high != 0)
 			return copyOfThis.low.toString(radix) +
 					String.fromCharCode.apply(
@@ -64,10 +68,11 @@ package com.netease.protobuf {
 			const result:UInt64 = new UInt64
 			for (; i < str.length; i++) {
 				var digit:uint = str.charCodeAt(i)
-				if (digit >= '0'.charCodeAt() && digit <= '9'.charCodeAt()) {
-					digit -= '0'.charCodeAt()
-				} else if (digit >= 'a'.charCodeAt() && digit <= 'z'.charCodeAt()) {
-					digit -= 'a'.charCodeAt()
+				if (digit >= CHAR_CODE_0 && digit <= CHAR_CODE_9) {
+					digit -= CHAR_CODE_0
+				} else if (digit >= CHAR_CODE_A && digit <= CHAR_CODE_Z) {
+					digit -= CHAR_CODE_A
+					digit += 10
 				} else {
 					throw new ArgumentError
 				}

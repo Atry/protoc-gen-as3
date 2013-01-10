@@ -42,7 +42,14 @@ package com.netease.protobuf {
 
 				case -1:
 				{
-					return int(low).toString(radix)
+					if ((low & 0x80000000) == 0)
+					{
+						return (int(low | 0x80000000) - 2147483648.0).toString(radix)
+					}
+					else
+					{
+						return int(low).toString(radix)
+					}
 				}
 
 				default:
@@ -61,7 +68,11 @@ package com.netease.protobuf {
 			}
 			do {
 				const digit:uint = copyOfThis.div(radix);
-				digitChars.push((digit < 10 ? '0' : 'a').charCodeAt() + digit)
+				if (digit < 10) {
+					digitChars.push(digit + CHAR_CODE_0);
+				} else {
+					digitChars.push(digit - 10 + CHAR_CODE_A);
+				}
 			} while (copyOfThis.high != 0)
 			if (high < 0) {
 				return '-' + copyOfThis.low.toString(radix) +
@@ -91,10 +102,11 @@ package com.netease.protobuf {
 			const result:Int64 = new Int64
 			for (; i < str.length; i++) {
 				var digit:uint = str.charCodeAt(i)
-				if (digit >= '0'.charCodeAt() && digit <= '9'.charCodeAt()) {
-					digit -= '0'.charCodeAt()
-				} else if (digit >= 'a'.charCodeAt() && digit <= 'z'.charCodeAt()) {
-					digit -= 'a'.charCodeAt()
+				if (digit >= CHAR_CODE_0 && digit <= CHAR_CODE_9) {
+					digit -= CHAR_CODE_0
+				} else if (digit >= CHAR_CODE_A && digit <= CHAR_CODE_Z) {
+					digit -= CHAR_CODE_A
+					digit += 10
 				} else {
 					throw new ArgumentError
 				}

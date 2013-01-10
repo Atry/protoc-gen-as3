@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin\protocgenas3test.swf" />
+    <movie path="test.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />

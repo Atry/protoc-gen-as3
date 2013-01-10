@@ -8,5 +8,8 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protobuf {
+	/**
+	 * @private
+	 */
 	public namespace used_by_generated_code
 }

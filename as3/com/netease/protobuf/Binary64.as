@@ -21,6 +21,7 @@ package com.netease.protobuf {
 		/**
 		 * Division by n.
 		 * @return The remainder after division.
+		 * @private
 		 */
 		internal final function div(n:uint):uint {
 			const modHigh:uint = internalHigh % n
@@ -31,17 +32,26 @@ package com.netease.protobuf {
 			low = newLow
 			return mod
 		}
+		/**
+		 * @private
+		 */
 		internal final function mul(n:uint):void {
 			const newLow:Number = Number(low) * n
 			internalHigh *= n
 			internalHigh += uint(newLow / 4294967296.0)
 			low *= n
 		}
+		/**
+		 * @private
+		 */
 		internal final function add(n:uint):void {
 			const newLow:Number = Number(low) + n
 			internalHigh += uint(newLow / 4294967296.0)
 			low = newLow
 		}
+		/**
+		 * @private
+		 */
 		internal final function bitwiseNot():void {
 			low = ~low
 			internalHigh = ~internalHigh

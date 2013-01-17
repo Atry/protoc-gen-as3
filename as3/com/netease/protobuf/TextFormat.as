@@ -1,4 +1,4 @@
-// vim: tabstop=4 shiftwidth=4
+﻿// vim: tabstop=4 shiftwidth=4
 
 // Copyright (c) 2011 , Yang Bo All rights reserved.
 //
@@ -291,6 +291,11 @@ package com.netease.protobuf {
 						if (enumRepeatedFieldDescriptor) {
 							printEnum(output, int(value),
 									enumRepeatedFieldDescriptor.enumType)
+						} else if (
+								fieldDescriptor is FieldDescriptor$TYPE_BYTES ||
+								fieldDescriptor is
+										RepeatedFieldDescriptor$TYPE_BYTES) {
+							printBytes(output, ByteArray(value))
 						} else {
 							output.writeUTFBytes(value.toString())
 						}
@@ -639,6 +644,9 @@ package com.netease.protobuf {
 				} else {
 					fieldDescriptor = Object(message).constructor[
 							name.toUpperCase()]
+					if (!fieldDescriptor) {
+						throw new IOError("Unknown field: " + name);
+					}
 				}
 			}
 			const repeatedFieldDescriptor:RepeatedFieldDescriptor =

@@ -152,10 +152,30 @@ package com.netease.protobuf.test {
 			assertSame(Int64.parseInt64("-0x1"), int64_9)
 			assertSame(Int64.parseInt64("-01"), int64_9)
 
+			const int64_12:Int64 = new Int64(0, -1)
+			assertSame(int64_12.toNumber(), -4294967296.0)
+			assertSame(int64_12.toString(), "-4294967296")
+			assertSame(Int64.parseInt64(int64_12.toString()), int64_12)
+			assertSame(Int64.parseInt64("-0x100000000"), int64_12)
+			assertSame(Int64.parseInt64("0xFFFFFFFF00000000"), int64_12)
+
+			const int64_13:Int64 = Int64.parseInt64("0xFFFFFFF000000000")
+			assertSame(int64_13.toNumber(), -68719476736.0)
+			assertSame(int64_13.toString(), "-68719476736")
+			assertSame(Int64.parseInt64(int64_13.toString()), int64_13)
+			assertSame(Int64.parseInt64("-68719476736"), int64_13)
+			
+			const int64_14:Int64 = Int64.parseInt64("0xFFFFFFFFF0000000")
+			assertSame(int64_14.toNumber(), -268435456.0)
+			assertSame(int64_14.toString(), "-268435456")
+			assertSame(Int64.parseInt64(int64_14.toString()), int64_14)
+			assertSame(Int64.parseInt64("-268435456"), int64_14)
+
 			const uint64_9:UInt64 = UInt64.fromNumber(123234)
 			assertSame(uint64_9.toNumber(), 123234)
 			assertSame(uint64_9.toString(), "123234")
 			assertSame(UInt64.parseUInt64(uint64_9.toString()), uint64_9)
+			assertSame(UInt64.parseUInt64("0x" + uint64_9.toString(16)), uint64_9)
 
 			const uint64_10:UInt64 = UInt64.fromNumber(184942424123234000)
 			assertSame(uint64_10.toNumber(), 184942424123233984)

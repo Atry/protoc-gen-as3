@@ -61,7 +61,7 @@ dist/protoc-gen-as3.bat: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_V
 
 COMMA=,
 
-dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) descriptor.proto.as3/google tiny-protobuf.swc | dist
+dist/protobuf.swc: $(wildcard as3/com/netease/protobuf/*/*.as as3/com/netease/protobuf/*.as) descriptor.proto.as3/google | dist
 	$(COMPC) -target-player=10 \
 	-source-path+=as3,descriptor.proto.as3 \
 	-include-sources+=as3 \

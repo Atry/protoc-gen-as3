@@ -1222,7 +1222,7 @@ public final class Main {
 			try {
 				scope.proto.getOptions().writeTo(buffer);
 			} catch (IOException e) {
-				throw new AssertionError("ByteArrayOutputStream should not throw IOException!", e);
+				throw new IllegalStateException("ByteArrayOutputStream should not throw IOException!", e);
 			}
 			for (byte b : buffer.toByteArray()) {
 				content.append("\\x");
@@ -1258,7 +1258,7 @@ public final class Main {
 				try {
 					mdp.getOptions().writeTo(buffer);
 				} catch (IOException e) {
-					throw new AssertionError("ByteArrayOutputStream should not throw IOException!", e);
+					throw new IllegalStateException("ByteArrayOutputStream should not throw IOException!", e);
 				}
 				for (byte b : buffer.toByteArray()) {
 					content.append("\\x");

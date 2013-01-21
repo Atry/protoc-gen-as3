@@ -531,9 +531,9 @@ public final class Main {
 			initializerContent.append("import ");
 			initializerContent.append(scope.fullName);
 			initializerContent.append(";\n");
-			initializerContent.append("void(");
+			initializerContent.append("if(!");
 			initializerContent.append(scope.fullName);
-			initializerContent.append(");\n");
+			initializerContent.append(") throw new Error();\n");
 		}
 		for (FieldDescriptorProto efdp : scope.proto.getExtensionList()) {
 			if (efdp.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
@@ -1035,9 +1035,9 @@ public final class Main {
 		initializerContent.append("import ");
 		initializerContent.append(scope.fullName);
 		initializerContent.append(";\n");
-		initializerContent.append("void(");
+		initializerContent.append("if(!");
 		initializerContent.append(scope.fullName);
-		initializerContent.append(");\n");
+		initializerContent.append(") throw new Error;\n");
 		content.append("\timport com.netease.protobuf.*;\n");
 		content.append("\timport com.netease.protobuf.fieldDescriptors.*;\n");
 		String importType = getImportType(scope.parent, scope.proto);

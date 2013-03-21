@@ -275,7 +275,7 @@ package com.netease.protobuf {
 			} else {
 				output.writeUTFBytes(printSetting.simpleFieldSeperator)
 				const stringValue:String = value as String
-				if (stringValue) {
+				if (stringValue !== null) {
 					printString(output, stringValue)
 				} else {
 					const enumFieldDescriptor:FieldDescriptor$TYPE_ENUM =

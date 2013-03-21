@@ -12,11 +12,18 @@ else
 PROTOC_GEN_AS3=dist/protoc-gen-as3$(BAT)
 endif
 
-ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat dist/LICENSE\
-	dist/protobuf.swc dist/README dist/options.proto\
-	dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar
+ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat dist/LICENSE \
+	dist/protobuf.swc dist/README dist/options.proto \
+	dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar \
+	dist/run.n dist/haxelib.xml
 
 all: $(ALL)
+
+dist/haxelib.xml: haxelib.xml
+	install --mode=644 $< $@
+
+dist/run.n: hx/com/dongxiguo/protobuf/Run.hx
+	haxe -cp hx -lib haxelib-run -main com.dongxiguo.protobuf.Run -neko $@
 
 classes/com/netease/protocGenAs3/Main.class: \
 	plugin.proto.java/google/protobuf/compiler/Plugin.java \
@@ -38,14 +45,18 @@ plugin.proto.java/google/protobuf/compiler/Plugin.java: \
 dist.tar.gz: $(ALL)
 	tar -acf dist.tar.gz -C dist .
 
+release.zip: $(ALL)
+	 zip --junk-paths --filesync $@ $^
+	
+
 dist/LICENSE: LICENSE | dist
-	cp $< $@
+	install --mode=644 $< $@
 
 dist/README: README | dist
-	cp $< $@
+	install --mode=644 $< $@
 
 dist/options.proto: options.proto | dist
-	cp $< $@
+	install --mode=644 $< $@
 
 dist/protoc-gen-as3: dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar \
 	| dist
@@ -114,17 +125,7 @@ $(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
 endif
 
 clean:
-	-$(RM) -r doc
-	-$(RM) doc.tar.gz
-	-$(RM) -r dist
-	-$(RM) dist.tar.gz
-	-$(RM) -r classes
-	-$(RM) -r unittest.proto.as3
-	-$(RM) -r descriptor.proto.as3
-	-$(RM) -r plugin.proto.java
-	-$(RM) test.swc
-	-$(RM) test.swf
-	-$(RM) -r options.proto.java
+	$(RM) -r release.zip doc doc.tar.gz dist dist.tar.gz classes unittest.proto.as3 descriptor.proto.as3 plugin.proto.java test.swc test.swf options.proto.java
 
 test: test.swf
 	(sleep 1s; echo c; sleep 3s; echo c; sleep 1s) | $(FDB) $<
@@ -203,4 +204,7 @@ unittest.proto.as3/protobuf_unittest: \
 	test/*.proto
 	touch $@
 
-.PHONY: plugin all clean test doc
+install: release.zip
+	haxelib test $<
+
+.PHONY: plugin all clean test doc install

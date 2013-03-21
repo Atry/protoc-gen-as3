@@ -11,8 +11,6 @@
 package com.netease.protobuf {
 	import flash.errors.IllegalOperationError
 	import flash.errors.IOError
-	import flash.utils.Dictionary
-	import flash.utils.getDefinitionByName
 	import flash.utils.IDataInput
 	import flash.utils.IDataOutput
 	use namespace com.netease.protobuf.used_by_generated_code

@@ -14,3 +14,6 @@ glob:*.swc
 glob:unittest.bin
 glob:obj/
 glob:doc/
+syntax: glob
+release.zip
+hxclasses/

@@ -15,15 +15,25 @@ endif
 ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat dist/LICENSE \
 	dist/protobuf.swc dist/README dist/options.proto \
 	dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar \
-	dist/run.n dist/haxelib.xml
+	dist/run.n dist/haxelib.xml dist/com dist/google
 
 all: $(ALL)
+
+hxclasses: dist/protobuf.swc
+	-$(RM) -r $@
+	$(HAXE) --gen-hx-classes -swf-lib dist/protobuf.swc -swf dummy.swf --no-output
+
+dist/com: hxclasses
+	cp -r hxclasses/com $@
+
+dist/google: hxclasses
+	cp -r hxclasses/google $@
 
 dist/haxelib.xml: haxelib.xml
 	install --mode=644 $< $@
 
 dist/run.n: hx/com/dongxiguo/protobuf/Run.hx
-	haxe -cp hx -lib haxelib-run -main com.dongxiguo.protobuf.Run -neko $@
+	$(HAXE) -cp hx -lib haxelib-run -main com.dongxiguo.protobuf.Run -neko $@
 
 classes/com/netease/protocGenAs3/Main.class: \
 	plugin.proto.java/google/protobuf/compiler/Plugin.java \
@@ -46,8 +56,7 @@ dist.tar.gz: $(ALL)
 	tar -acf dist.tar.gz -C dist .
 
 release.zip: $(ALL)
-	 zip --junk-paths --filesync $@ $^
-	
+	cd dist && zip --recurse-paths --filesync ../$@ $(patsubst dist/%,%,$^)
 
 dist/LICENSE: LICENSE | dist
 	install --mode=644 $< $@

@@ -7,10 +7,10 @@ PATH_SEPARATOR=;
 else
 PATH_SEPARATOR=:
 endif
-COMPC=compc$(EXE)
-MXMLC=mxmlc$(EXE)
-ASDOC=asdoc$(EXE)
-FDB=fdb$(EXE)
+COMPC=compc$(BAT)
+MXMLC=mxmlc$(BAT)
+ASDOC=asdoc$(BAT)
+FDB=fdb$(BAT)
 MVN=mvn
 JAVAC=javac
 JAR=jar

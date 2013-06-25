@@ -1,0 +1,16 @@
+glob:*.class
+glob:.*
+glob:dist/
+glob:*.tar.gz
+glob:descriptor.proto.as3/
+glob:unittest.proto.as3/
+glob:plugin.proto.java/
+glob:options.proto.java/
+glob:config.mk
+glob:MANIFEST.MF
+glob:*~
+glob:*.swf
+glob:*.swc
+glob:unittest.bin
+glob:obj/
+glob:doc/

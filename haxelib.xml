@@ -1,0 +1,13 @@
+<project name="protoc-gen-as3" url="https://code.google.com/p/protoc-gen-as3/" license="BSD">
+  <user name="Atry"/>
+  <tag v="protocol-buffers"/>
+  <tag v="protobuf"/>
+  <tag v="flash"/>
+  <tag v="protoc"/>
+  <tag v="serialization"/>
+  <description>Protocol Buffers plugin for Flash platform</description>
+  <version name="1.1.3">
+    Fix bugs.
+  </version>
+  <!-- vim: set et sw=2 sts=2: -->
+</project>

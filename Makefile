@@ -20,13 +20,15 @@ ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat dist/LICENSE \
 all: $(ALL)
 
 hxclasses: dist/protobuf.swc
-	-$(RM) -r $@
+	$(RM) -r $@
 	$(HAXE) --gen-hx-classes -swf-lib dist/protobuf.swc -swf dummy.swf --no-output
 
 dist/com: hxclasses
+	$(RM) -r $@
 	cp -r hxclasses/com $@
 
 dist/google: hxclasses
+	$(RM) -r $@
 	cp -r hxclasses/google $@
 
 dist/haxelib.xml: haxelib.xml

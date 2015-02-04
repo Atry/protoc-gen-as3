@@ -347,10 +347,12 @@ package com.netease.protobuf {
 				case 0x0d:/* \r */
 					continue
 				case 0x23:/* # */
-					for (;;) {
-            const eol:int = source.read()
-            if (eol == 0x0a /* \n */ || eol == 0x0d /* \r */) {
-							break 
+					comment: for (;;) {
+						switch (source.read())
+						{
+						case 0x0a:/* \n */
+						case 0x0d:/* \n */
+							break comment
 						}
 					}
 					break

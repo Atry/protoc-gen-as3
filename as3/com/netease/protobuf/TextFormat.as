@@ -1,4 +1,4 @@
-﻿// vim: tabstop=4 shiftwidth=4
+ // vim: tabstop=4 shiftwidth=4
 
 // Copyright (c) 2011 , Yang Bo All rights reserved.
 //
@@ -348,9 +348,8 @@ package com.netease.protobuf {
 					continue
 				case 0x23:/* # */
 					for (;;) {
-						switch (source.read()) {
-						case 0x0a:/* \n */
-						case 0x0d:/* \r */
+            const eol:int = source.read()
+            if (eol == 0x0a /* \n */ || eol == 0x0d /* \r */) {
 							break 
 						}
 					}

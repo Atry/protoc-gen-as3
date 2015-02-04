@@ -28,9 +28,9 @@ package com.netease.protobuf {
 		 * Convert to <code>Number</code>.
 		 */
 		public final function toNumber():Number {
-			return (high * 4294967296) + low
+			return (high * 4294967296.0) + low
 		}
-			public final function toString(radix:uint = 10):String {
+		public final function toString(radix:uint = 10):String {
 			if (radix < 2 || radix > 36) {
 				throw new ArgumentError
 			}

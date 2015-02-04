@@ -6,7 +6,7 @@
   <tag v="protoc"/>
   <tag v="serialization"/>
   <description>Protocol Buffers plugin for Flash platform</description>
-  <version name="1.1.3">
+  <version name="1.1.4">
     Fix bugs.
   </version>
   <!-- vim: set et sw=2 sts=2: -->

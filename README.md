@@ -14,12 +14,12 @@ I have implemented almost all protobuf features (more than any other protobuf's 
   * Nested messages
   * Enumerations
   * Packed and non-packed repeated fields
-  * [Extensions](AdvancedUsage#Extension.md)
+  * [Extensions](https://github.com/Atry/protoc-gen-as3/wiki/AdvancedUsage#Extension.md)
   * RPC services
     * Custom options for services and methods
   * ActionScript metadata tag generation:
-    * [Bindable](AdvancedUsage#Bindable.md)
-    * [RemoteClass](AdvancedUsage#AMF_Wrapper.md)
+    * [Bindable](https://github.com/Atry/protoc-gen-as3/wiki/AdvancedUsage#Bindable.md)
+    * [RemoteClass](https://github.com/Atry/protoc-gen-as3/wiki/AdvancedUsage#AMF_Wrapper.md)
   * [Text format](http://code.google.com/p/protoc-gen-as3/source/browse/as3/com/netease/protobuf/TextFormat.as)
   * Unknown fields
 

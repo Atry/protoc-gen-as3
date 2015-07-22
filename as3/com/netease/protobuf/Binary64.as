@@ -41,7 +41,7 @@ package com.netease.protobuf {
 		 */
 		internal final function div(n:uint):uint {
 			const modHigh:uint = internalHigh % n
-			const mod:uint = (low % n + modHigh * 6) % n
+			const mod:uint = uint((modHigh * 4294967296.0 + low) % n)
 			internalHigh /= n
 			const newLow:Number = (modHigh * 4294967296.0 + low) / n
 			internalHigh += uint(newLow / 4294967296.0)

@@ -3,10 +3,6 @@
 
 This project aims to support Protocol Buffers in ActionScript 3 with minimum API and best performance. protoc-gen-as3's serialize/deserialize performance is near native AMF's writeObject/readObject, although protoc-gen-as3 runs in AVM2 while writeObject/readObject runs natively.
 
-# How to contribute? #
-
-Your contribution is welcome. I highly recommend that you  [clone](https://code.google.com/p/protoc-gen-as3/source/createClone), hack, and [tell me what you've done](https://code.google.com/p/protoc-gen-as3/issues/entry?template=Review%20request).
-
 # Features #
 
 I have implemented almost all protobuf features (more than any other protobuf's AS3 implementation) in protoc-gen-as3:

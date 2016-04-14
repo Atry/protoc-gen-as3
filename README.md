@@ -26,12 +26,21 @@ These features are supported by Google's C++/Java/Python implementation, but not
   * Custom options for messages, enums and files
 
 # How to use it? #
+
+## Download
+
+Dowload and extract this [tarball](https://github.com/Atry/protoc-gen-as3/raw/master/protoc-gen-as3-1.1.4-bin.tar.gz).
+
+## Generate code
+
 Unlike other protobuf's as3 compilers, protoc-gen-as3 does not require you to modify original protobuf's source code. You can just use protoc binary (version 2.3+) with this plugin to generate ActionScript 3 source code:
 
 `protoc --plugin=protoc-gen-as3=`_`path/to/protoc-gen-as3[.bat]`_` --as3_out=`_`output-path your.proto`_
+
+## Write your own code
 
 Then, you can use the generated files to serialize and deserialize in protobuf format by invoking `mergeFrom()` and `writeTo()` method.
 
 Before compiling, don't forget to let your ActionScript 3 compiler include protobuf.swc and the generated source files.
 
-See AdvancedUsage and [ASDoc](https://code.google.com/p/protoc-gen-as3/downloads/detail?name=protoc-gen-as3-1.0.0-rc6-asdoc.tar.gz) for more information.
+See [AdvancedUsage](https://github.com/Atry/protoc-gen-as3/wiki/AdvancedUsage) and [ASDoc](https://github.com/Atry/protoc-gen-as3/raw/master/protoc-gen-as3-1.1.4-asdoc.tar.gz) for more information.

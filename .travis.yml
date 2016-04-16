@@ -1,5 +1,9 @@
 language: haxe
 
+cache:
+  directories:
+    - $HOME/.m2
+
 addons:
   apt:
     packages:

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Atry/protoc-gen-as3.svg?branch=master)](https://travis-ci.org/Atry/protoc-gen-as3)
+
 # What is it? #
 **protoc-gen-as3** is a [Protocol Buffers](http://code.google.com/p/protobuf/) plugin for ActionScript 3.
 

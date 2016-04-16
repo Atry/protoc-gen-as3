@@ -20,7 +20,6 @@ install:
     echo '
     PROTOBUF_VERSION=2.4.1
     PROTOBUF_DIR=protobuf
-    PROTOC=protoc
     ifeq ($(OS), Windows_NT)
     BAT=.bat
     EXE=.exe
@@ -37,6 +36,7 @@ install:
     JAR=jar
     HAXE=haxe
     ' > config.mk
+  - make protobuf/src/protoc
 
 script:
   - make

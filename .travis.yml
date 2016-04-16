@@ -14,6 +14,7 @@ before_install:
   - unzip -d flex_sdk flex_sdk_3.6.zip
 
 install:
+  - haxelib install haxelib-run
   - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
   - |
     echo '

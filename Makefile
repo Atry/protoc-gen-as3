@@ -17,6 +17,8 @@ ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat dist/LICENSE \
 	dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar \
 	dist/run.n dist/haxelib.xml dist/com dist/google
 
+all: $(ALL)
+
 ifndef PROTOC
 PROTOC=$(PROTOBUF_DIR)/src/protoc$(EXE)
 PROTOCDEPS=$(PROTOC)
@@ -34,8 +36,6 @@ $(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
 	$(PROTOC)
 	cd $(PROTOBUF_DIR)/java && $(MVN) package
 endif
-
-all: $(ALL)
 
 hxclasses: dist/protobuf.swc
 	$(RM) -r $@

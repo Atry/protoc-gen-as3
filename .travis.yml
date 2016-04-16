@@ -6,9 +6,6 @@ before_install:
 
 install:
   - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
-  - make protobuf/src/protoc
-
-before_script:
   - |
     echo '
     PROTOBUF_VERSION=2.4.1
@@ -29,6 +26,7 @@ before_script:
     JAR=jar
     HAXE=haxe
     ' > config.mk
+  - make protobuf/src/protoc
 
 script:
   - make

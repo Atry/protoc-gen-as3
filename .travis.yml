@@ -7,7 +7,6 @@ cache:
 addons:
   apt:
     packages:
-    - maven
     - protobuf-compiler
 
 before_install:

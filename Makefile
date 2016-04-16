@@ -68,7 +68,7 @@ classes/com/netease/protocGenAs3/Main.class: \
 
 plugin.proto.java/google/protobuf/compiler/Plugin.java: \
 	$(PROTOC) | plugin.proto.java
-	$(PROTOC) \
+	$(PROTOCDEPS) \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=plugin.proto.java \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
 

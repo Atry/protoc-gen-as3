@@ -1,7 +1,12 @@
 language: haxe
 
+before_install:
+  - wget http://download.macromedia.com/pub/flex/sdk/flex_sdk_4.6.zip
+  - unzip flex_sdk_4.6.zip
+
 install:
   - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
+  - make protobuf/src/protoc
 
 before_script:
   - |
@@ -15,10 +20,10 @@ before_script:
     else
     PATH_SEPARATOR=:
     endif
-    COMPC=compc$(BAT)
-    MXMLC=mxmlc$(BAT)
-    ASDOC=asdoc$(BAT)
-    FDB=fdb$(BAT)
+    COMPC=flex_sdk_4.6/bin/compc$(BAT)
+    MXMLC=flex_sdk_4.6/bin/mxmlc$(BAT)
+    ASDOC=flex_sdk_4.6/bin/asdoc$(BAT)
+    FDB=flex_sdk_4.6/bin/fdb$(BAT)
     MVN=mvn
     JAVAC=javac
     JAR=jar

@@ -11,7 +11,7 @@ addons:
 
 before_install:
   - wget http://download.macromedia.com/pub/flex/sdk/flex_sdk_4.6.zip
-  - unzip flex_sdk_4.6.zip
+  - unzip -d flex_sdk flex_sdk_4.6.zip
 
 install:
   - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
@@ -26,10 +26,10 @@ install:
     else
     PATH_SEPARATOR=:
     endif
-    COMPC=flex_sdk_4.6/bin/compc$(BAT)
-    MXMLC=flex_sdk_4.6/bin/mxmlc$(BAT)
-    ASDOC=flex_sdk_4.6/bin/asdoc$(BAT)
-    FDB=flex_sdk_4.6/bin/fdb$(BAT)
+    COMPC=flex_sdk/bin/compc$(BAT)
+    MXMLC=flex_sdk/bin/mxmlc$(BAT)
+    ASDOC=flex_sdk/bin/asdoc$(BAT)
+    FDB=flex_sdk/bin/fdb$(BAT)
     MVN=mvn
     JAVAC=javac
     JAR=jar

@@ -1,0 +1,29 @@
+language: haxe
+
+install:
+  - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
+
+before_script:
+  - |
+    echo '
+    PROTOBUF_VERSION=2.4.1
+    PROTOBUF_DIR=protobuf
+    ifeq ($(OS), Windows_NT)
+    BAT=.bat
+    EXE=.exe
+    PATH_SEPARATOR=;
+    else
+    PATH_SEPARATOR=:
+    endif
+    COMPC=compc$(BAT)
+    MXMLC=mxmlc$(BAT)
+    ASDOC=asdoc$(BAT)
+    FDB=fdb$(BAT)
+    MVN=mvn
+    JAVAC=javac
+    JAR=jar
+    HAXE=haxe
+    ' > config.mk
+
+script:
+  - make

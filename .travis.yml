@@ -1,5 +1,10 @@
 language: haxe
 
+addons:
+  apt:
+    packages:
+    - maven
+
 before_install:
   - wget http://download.macromedia.com/pub/flex/sdk/flex_sdk_4.6.zip
   - unzip flex_sdk_4.6.zip

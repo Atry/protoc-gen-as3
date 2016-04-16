@@ -17,6 +17,24 @@ ALL=dist/protoc-gen-as3 dist/protoc-gen-as3.bat dist/LICENSE \
 	dist/protoc-gen-as3.jar dist/protobuf-java-$(PROTOBUF_VERSION).jar \
 	dist/run.n dist/haxelib.xml dist/com dist/google
 
+ifndef PROTOC
+PROTOC=$(PROTOBUF_DIR)/src/protoc$(EXE)
+PROTOCDEPS=$(PROTOC)
+$(PROTOC): $(PROTOBUF_DIR)/Makefile 
+	cd $(PROTOBUF_DIR) && $(MAKE)
+
+$(PROTOBUF_DIR)/Makefile: $(PROTOBUF_DIR)/configure
+	cd $(PROTOBUF_DIR) && ./configure
+
+$(PROTOBUF_DIR)/configure:
+	cd $(PROTOBUF_DIR) && ./autogen.sh
+
+$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
+	$(PROTOBUF_DIR)/src \
+	$(PROTOC)
+	cd $(PROTOBUF_DIR)/java && $(MVN) package
+endif
+
 all: $(ALL)
 
 hxclasses: dist/protobuf.swc
@@ -49,7 +67,7 @@ classes/com/netease/protocGenAs3/Main.class: \
 	compiler/com/netease/protocGenAs3/Main.java
 
 plugin.proto.java/google/protobuf/compiler/Plugin.java: \
-	$(PROTOCDEPS) | plugin.proto.java
+	$(PROTOC) | plugin.proto.java
 	$(PROTOC) \
 	"--proto_path=$(PROTOBUF_DIR)/src" --java_out=plugin.proto.java \
 	"$(PROTOBUF_DIR)/src/google/protobuf/compiler/plugin.proto"
@@ -116,24 +134,6 @@ dist/protobuf-java-$(PROTOBUF_VERSION).jar: \
 
 options.proto.java descriptor.proto.as3 classes plugin.proto.java unittest.proto.as3 dist:
 	mkdir $@
-
-ifndef PROTOC
-PROTOC=$(PROTOBUF_DIR)/src/protoc$(EXE)
-PROTOCDEPS=$(PROTOC)
-$(PROTOC): $(PROTOBUF_DIR)/Makefile 
-	cd $(PROTOBUF_DIR) && $(MAKE)
-
-$(PROTOBUF_DIR)/Makefile: $(PROTOBUF_DIR)/configure
-	cd $(PROTOBUF_DIR) && ./configure
-
-$(PROTOBUF_DIR)/configure:
-	cd $(PROTOBUF_DIR) && ./autogen.sh
-
-$(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
-	$(PROTOBUF_DIR)/src \
-	$(PROTOC)
-	cd $(PROTOBUF_DIR)/java && $(MVN) package
-endif
 
 clean:
 	$(RM) -r release.zip doc doc.tar.gz dist dist.tar.gz classes unittest.proto.as3 descriptor.proto.as3 plugin.proto.java test.swc test.swf options.proto.java

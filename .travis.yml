@@ -10,8 +10,8 @@ addons:
     - maven
 
 before_install:
-  - wget http://download.macromedia.com/pub/flex/sdk/flex_sdk_4.6.zip
-  - unzip -d flex_sdk flex_sdk_4.6.zip
+  - wget http://download.macromedia.com/pub/flex/sdk/flex_sdk_3.6.zip
+  - unzip -d flex_sdk flex_sdk_3.6.zip
 
 install:
   - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git

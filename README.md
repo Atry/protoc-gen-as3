@@ -31,7 +31,7 @@ These features are supported by Google's C++/Java/Python implementation, but not
 
 ## Download
 
-Dowload and extract this [tarball](https://github.com/Atry/protoc-gen-as3/raw/master/protoc-gen-as3-1.1.4-bin.tar.gz).
+Dowload and extract this [tarball](https://github.com/Atry/protoc-gen-as3/releases/download/1.1.4/protoc-gen-as3-1.1.4-bin.tar.gz).
 
 ## Generate code
 
@@ -45,4 +45,4 @@ Then, you can use the generated files to serialize and deserialize in protobuf f
 
 Before compiling, don't forget to let your ActionScript 3 compiler include protobuf.swc and the generated source files.
 
-See [AdvancedUsage](https://github.com/Atry/protoc-gen-as3/wiki/AdvancedUsage) and [ASDoc](https://github.com/Atry/protoc-gen-as3/raw/master/protoc-gen-as3-1.1.4-asdoc.tar.gz) for more information.
+See [AdvancedUsage](https://github.com/Atry/protoc-gen-as3/wiki/AdvancedUsage) and [ASDoc](https://github.com/Atry/protoc-gen-as3/releases/download/1.1.4/protoc-gen-as3-1.1.4-asdoc.tar.gz) for more information.

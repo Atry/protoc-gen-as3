@@ -15,10 +15,10 @@ before_install:
 
 install:
   - haxelib install haxelib-run
-  - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
+  - git clone --branch v2.7.0 --depth 1 https://github.com/google/protobuf.git
   - |
     echo '
-    PROTOBUF_VERSION=2.4.1
+    PROTOBUF_VERSION=2.7.0
     PROTOBUF_DIR=protobuf
     ifeq ($(OS), Windows_NT)
     BAT=.bat

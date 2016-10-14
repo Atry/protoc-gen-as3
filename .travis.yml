@@ -3,6 +3,7 @@ language: haxe
 cache:
   directories:
     - $HOME/.m2
+    - $HOME/flex_sdk
 
 addons:
   apt:
@@ -11,7 +12,7 @@ addons:
 
 before_install:
   - wget http://download.macromedia.com/pub/flex/sdk/flex_sdk_3.6.zip
-  - unzip -d flex_sdk flex_sdk_3.6.zip
+  - unzip -d $HOME/flex_sdk flex_sdk_3.6.zip
 
 install:
   - haxelib install haxelib-run
@@ -27,10 +28,10 @@ install:
     else
     PATH_SEPARATOR=:
     endif
-    COMPC=flex_sdk/bin/compc$(BAT)
-    MXMLC=flex_sdk/bin/mxmlc$(BAT)
-    ASDOC=flex_sdk/bin/asdoc$(BAT)
-    FDB=flex_sdk/bin/fdb$(BAT)
+    COMPC=$HOME/flex_sdk/bin/compc$(BAT)
+    MXMLC=$HOME/flex_sdk/bin/mxmlc$(BAT)
+    ASDOC=$HOME/flex_sdk/bin/asdoc$(BAT)
+    FDB=$HOME/flex_sdk/bin/fdb$(BAT)
     MVN=mvn
     JAVAC=javac
     JAR=jar

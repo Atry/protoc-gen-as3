@@ -34,7 +34,7 @@ $(PROTOBUF_DIR)/configure:
 $(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
 	$(PROTOBUF_DIR)/src \
 	$(PROTOC)
-	cd $(PROTOBUF_DIR)/java && $(MVN) package
+	cd $(PROTOBUF_DIR)/java && $(MVN) package -Dmaven.test.skip=true
 endif
 
 hxclasses: dist/protobuf.swc

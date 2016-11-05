@@ -37,6 +37,7 @@ install:
     JAR=jar
     HAXE=haxe
     ' > config.mk
+  - wget http://central.maven.org/maven2/com/google/protobuf/protobuf-java/2.6.1/protobuf-java-2.6.1.jar --output-file=protobuf/java/target/protobuf-java-2.6.1.jar
 
 script:
   - make

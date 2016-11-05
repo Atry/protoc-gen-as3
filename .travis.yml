@@ -9,6 +9,7 @@ addons:
   apt:
     packages:
     - protobuf-compiler
+    - gtest
 
 before_install:
   - wget http://download.macromedia.com/pub/flex/sdk/flex_sdk_3.6.zip

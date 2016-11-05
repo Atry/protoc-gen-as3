@@ -8,7 +8,7 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protocGenAs3;
-import static google.protobuf.compiler.Plugin.*;
+import static com.google.protobuf.compiler.PluginProtos.*;
 import static com.google.protobuf.DescriptorProtos.*;
 import com.google.protobuf.*;
 import java.io.*;

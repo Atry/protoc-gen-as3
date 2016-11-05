@@ -28,10 +28,10 @@ install:
     else
     PATH_SEPARATOR=:
     endif
-    COMPC=$HOME/flex_sdk/bin/compc$(BAT)
-    MXMLC=$HOME/flex_sdk/bin/mxmlc$(BAT)
-    ASDOC=$HOME/flex_sdk/bin/asdoc$(BAT)
-    FDB=$HOME/flex_sdk/bin/fdb$(BAT)
+    COMPC=$(HOME)/flex_sdk/bin/compc$(BAT)
+    MXMLC=$(HOME)/flex_sdk/bin/mxmlc$(BAT)
+    ASDOC=$(HOME)/flex_sdk/bin/asdoc$(BAT)
+    FDB=$(HOME)/flex_sdk/bin/fdb$(BAT)
     MVN=mvn
     JAVAC=javac
     JAR=jar

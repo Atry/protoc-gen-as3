@@ -3,7 +3,6 @@ language: haxe
 cache:
   directories:
     - $HOME/.m2
-    - $HOME/flex_sdk
 
 addons:
   apt:

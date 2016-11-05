@@ -15,11 +15,12 @@ before_install:
 
 install:
   - haxelib install haxelib-run
-  - git clone --branch v2.6.1 --depth 1 https://github.com/google/protobuf.git
+  - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
   - |
     echo '
-    PROTOBUF_VERSION=2.6.1
+    PROTOBUF_VERSION=2.4.1
     PROTOBUF_DIR=protobuf
+    PROTOC=protoc
     ifeq ($(OS), Windows_NT)
     BAT=.bat
     EXE=.exe
@@ -27,16 +28,17 @@ install:
     else
     PATH_SEPARATOR=:
     endif
-    COMPC=$HOME/flex_sdk/bin/compc$(BAT)
-    MXMLC=$HOME/flex_sdk/bin/mxmlc$(BAT)
-    ASDOC=$HOME/flex_sdk/bin/asdoc$(BAT)
-    FDB=$HOME/flex_sdk/bin/fdb$(BAT)
+    COMPC=$(HOME)/flex_sdk/bin/compc$(BAT)
+    MXMLC=$(HOME)/flex_sdk/bin/mxmlc$(BAT)
+    ASDOC=$(HOME)/flex_sdk/bin/asdoc$(BAT)
+    FDB=$(HOME)/flex_sdk/bin/fdb$(BAT)
     MVN=mvn
     JAVAC=javac
     JAR=jar
     HAXE=haxe
     ' > config.mk
-  - make protobuf/src/protoc
+  - mkdir -p protobuf/java/target
+  - wget --output-document=protobuf/java/target/protobuf-java-2.4.1.jar http://central.maven.org/maven2/com/google/protobuf/protobuf-java/2.4.1/protobuf-java-2.4.1.jar
 
 script:
   - make

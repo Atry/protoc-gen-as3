@@ -30,12 +30,12 @@ $(PROTOBUF_DIR)/Makefile: $(PROTOBUF_DIR)/configure
 
 $(PROTOBUF_DIR)/configure:
 	cd $(PROTOBUF_DIR) && ./autogen.sh
+endif
 
 $(PROTOBUF_DIR)/java/target/protobuf-java-$(PROTOBUF_VERSION).jar: \
 	$(PROTOBUF_DIR)/src \
-	$(PROTOC)
+	$(PROTOCDEPS)
 	cd $(PROTOBUF_DIR)/java && $(MVN) package -Dmaven.test.skip=true
-endif
 
 hxclasses: dist/protobuf.swc
 	$(RM) -r $@

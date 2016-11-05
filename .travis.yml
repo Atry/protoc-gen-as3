@@ -38,7 +38,6 @@ install:
     JAR=jar
     HAXE=haxe
     ' > config.mk
-  - make protobuf/src/protoc
 
 script:
   - make

@@ -15,10 +15,10 @@ before_install:
 
 install:
   - haxelib install haxelib-run
-  - git clone --branch v2.6.1 --depth 1 https://github.com/google/protobuf.git
+  - git clone --branch v2.4.1 --depth 1 https://github.com/google/protobuf.git
   - |
     echo '
-    PROTOBUF_VERSION=2.6.1
+    PROTOBUF_VERSION=2.4.1
     PROTOBUF_DIR=protobuf
     PROTOC=protoc
     ifeq ($(OS), Windows_NT)
@@ -38,7 +38,7 @@ install:
     HAXE=haxe
     ' > config.mk
   - mkdir -p protobuf/java/target
-  - wget --output-document=protobuf/java/target/protobuf-java-2.6.1.jar http://central.maven.org/maven2/com/google/protobuf/protobuf-java/2.6.1/protobuf-java-2.6.1.jar
+  - wget --output-document=protobuf/java/target/protobuf-java-2.4.1.jar http://central.maven.org/maven2/com/google/protobuf/protobuf-java/2.4.1/protobuf-java-2.4.1.jar
 
 script:
   - make
